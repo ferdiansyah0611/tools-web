@@ -1,6 +1,8 @@
-var Shell = require('./shell')
+const Shell = require('./shell')
 
-new Shell({}, {
+const sh = new Shell({
 	mode: 'development',
-	root: 'myapp'
+	root: 'myapp',
+	engine: 'ejs'
 })
+sh.start()
