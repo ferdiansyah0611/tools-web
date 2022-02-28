@@ -2,9 +2,9 @@
 title: Usage
 ---
 # Usage
-Here are some uses of the cli on web-tools.
+Here are some uses of the cli on tools-web.
 ::: tip
-Did you know that web-tools can integrate other tools made by developers?
+Did you know that tools-web can integrate other tools made by developers?
 :::
 ## React
 - **Start command**
@@ -35,7 +35,15 @@ Did you know that web-tools can integrate other tools made by developers?
 	```bash
 	node index.js react --route-crud-store
 	```
-
+::: warning
+don't be remove on this line at app.js
+```javascript{1}
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+```
+:::
 ## Vue
 - **Start command**
 	```bash
@@ -78,4 +86,8 @@ Did you know that web-tools can integrate other tools made by developers?
 - **Create new model**
 	```bash
 	node index.js express --model=User.js;mongoose
+	```
+- **Generate google-cloud-storage & storage route API**
+	```bash
+	node index.js express --google-cloud-storage
 	```
