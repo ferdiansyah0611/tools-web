@@ -1,6 +1,38 @@
 const fs = require('fs')
 const prompt = require("prompt-sync")({ sigint: true });
 
+class SystemFile{
+	constructor(app){
+		this.app = app
+		this.createDirRecursive = this.createDirRecursive.bind(this)
+		this.append = this.append.bind(this)
+		this.copy = this.copy.bind(this)
+		this.write = this.write.bind(this)
+		this.read = this.read.bind(this)
+	}
+	createDirRecursive(dir){
+		if (!fs.existsSync(dir)){
+				this.app.log('create directory', dir)
+		    return fs.mkdirSync(dir, { recursive: true });
+		}
+	}
+	append(filepath, first, end = null){
+		var text = fs.readFileSync(filepath, 'utf8').toString()
+		fs.writeFileSync(filepath, first + text + (end || ''))
+	}
+	copy(copy, dir, callback = Function){
+		fs.copyFile(copy, dir, callback)
+		return this.app.log('writing', dir)
+	}
+	write(dir, val){
+		fs.writeFileSync(dir, val)
+		return this.app.log('writing', dir)
+	}
+	read(dir){
+		return fs.readFileSync(dir, 'utf8')
+	}
+}
+
 class Shell{
 	constructor(env = {mode: 'production', root: 'myapp', engine: 'ejs'}){
 		this.config = {
@@ -12,6 +44,7 @@ class Shell{
 				style: env.root + '/src/style',
 				service: env.root + '/src/service',
 				model: env.root + '/model',
+				api: env.root + '/api',
 			}
 		}
 		this.framework = null
@@ -29,10 +62,9 @@ class Shell{
 		}
 		this.plugin = []
 		this.core = this.core.bind(this)
-		this.createDirRecursive = this.createDirRecursive.bind(this)
-		this.append = this.append.bind(this)
 		this.use = this.use.bind(this)
 		this.start = this.start.bind(this)
+		this.SystemFile = new SystemFile(this)
 	}
 	use(Class){
 		var plugin = new Class(this)
@@ -41,6 +73,7 @@ class Shell{
 	}
 	start(){
 		this.arg = process.argv.slice(2)
+		const consoles = Shell.CONSOLE_HELP()
 		console.log('')
 		if(this.LIST.indexOf(this.arg[0]) !== -1){
 			this.framework = this.arg[0]
@@ -68,15 +101,7 @@ class Shell{
 			switch(this.framework){
 				case "react":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.__console__(() => {
-							console.log('\t', '--component=name', ':= Generate component')
-							console.log('\t', '--store=name', ':= Generate store')
-							console.log('\t', '--route=name', ':= Generate route pages')
-							console.log('\t', '--tailwindcss', ':= Installation & configuration for tailwindcss')
-							console.log('\t', '--firebase-storage', ':= Generate service firebase-storage for upload & remove (v8)')
-							console.log('\t', '--route-crud-store', ':= Generate route crud for store')
-							console.log('\t', '--project', ':= Create new project using vite')
-						})
+						this.consoleHelper(consoles.react)
 						process.exit()
 					}else{
 						app.react()
@@ -84,14 +109,7 @@ class Shell{
 					break
 				case "vue":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.__console__(() => {
-							console.log('\t', '--component=name', ':= Generate component')
-							console.log('\t', '--store=name', ':= Generate store')
-							console.log('\t', '--route=name', ':= Generate route pages')
-							console.log('\t', '--tailwindcss', ':= Installation & configuration for tailwindcss')
-							console.log('\t', '--firebase-storage', ':= Generate service firebase-storage for upload & remove (v8)')
-							console.log('\t', '--project', ':= Create new project using vite')
-						})
+						this.consoleHelper(consoles.vue)
 						process.exit()
 					}else{
 						app.vue()
@@ -99,12 +117,7 @@ class Shell{
 					break
 				case "express":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.__console__(() => {
-							console.log('\t', '--component=name', ':= Generate component')
-							console.log('\t', '--model=name;sequelize|mongoose', ':= Generate model')
-							console.log('\t', '--route=name', ':= Generate route pages')
-							console.log('\t', '--project', ':= Create new project using vite')
-						})
+						this.consoleHelper(consoles.express)
 						process.exit()
 					}else{
 						app.express()
@@ -114,7 +127,7 @@ class Shell{
 					var plugin = this.plugin.find(v => v.name == this.framework)
 					if(plugin){
 						if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-							this.__console__(plugin.help)
+							this.consoleHelper(plugin.help)
 							process.exit()
 						}else{
 							var action = plugin.action.find(v => this.options.choose.match(new RegExp(v)))
@@ -128,17 +141,12 @@ class Shell{
 			}
 		}
 		if(['-h', '--help'].indexOf(this.arg[0]) !== -1){
-			this.__console__(() => {
+			this.consoleHelper(() => {
 				console.log('\t', '-h --help', 'Show help command')
 			})
 		}
 	}
-	async append(filepath, first, end = null){
-		var txt = await fs.readFileSync(filepath, 'utf8')
-		txt = txt.toString()
-		fs.writeFileSync(filepath, first + txt + (end || ''))
-	}
-	__console__(options = Function){
+	consoleHelper(options = Function){
 		console.log('Help Commands: ')
 		console.log('\t', `node index.js [${this.LIST.join(', ')}] folder? [options]`)
 		console.log('\t', `node index.js [${this.LIST.join(', ')}] [options]`)
@@ -157,22 +165,6 @@ class Shell{
 		  action.close(stdout)
 		})
 	}
-	createDirRecursive(root, fixName){
-		var dir = this.options.dir
-		if(dir){
-			dir = `${root}/${dir}/`
-			if (!fs.existsSync(dir)){
-			    fs.mkdirSync(dir, { recursive: true });
-			}
-			this.input.name = dir + (fixName || '')
-		}else{
-			dir = root
-			if (!fs.existsSync(dir)){
-			    fs.mkdirSync(dir, { recursive: true });
-			}
-			this.input.name = `${root}/` + (fixName || '')
-		}
-	}
 	generateStyle(caseName, typeSelect){
 		console.log('')
 		var type = prompt(this.time() + ` generate (css|scss|sass) or empty : `);
@@ -187,21 +179,12 @@ class Shell{
 					caseName += '.' + value
 				}
 			})
-			this.write(this.env.root + `/src/style/${typeSelect}/${caseName}`, `/*${caseName}*/`)
+			this.SystemFile.write(this.env.root + `/src/style/${typeSelect}/${caseName}`, `/*${caseName}*/`)
 			return caseName
 		}
 	}
 	log(...log){
 		console.log(this.time(), ...log)
-	}
-	copy(old, newDir, callback = () => {}){
-		return fs.copyFile(old, newDir, callback)
-	}
-	write(dir, value){
-		return fs.writeFileSync(dir, value)
-	}
-	read(dir){
-		return fs.readFileSync(dir, 'utf8')
 	}
 	exit(skip = false){
 		if(skip){
@@ -215,59 +198,51 @@ class Shell{
 		return `[${date.getHours()}:${date.getMinutes()}]`
 	}
 	core(){
+		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		return{
-			writing: (isMsg = true) => {
-				if(this.input.code){
-					this.log('writing', this.input.name)
-					this.write(this.input.name, this.input.code)
-				}
-				if(isMsg){
-					this.log('create successfuly!\n')
-				}
-			},
 			createProject: (name, end = Function) => {
 				this.log('create new project...')
 				this.subprocess('npm create vite@latest ' + this.arg[1] + ' -- --template ' + name, {
 					close: () => {
-						var txt = this.read(this.config.rootShell + 'vite.config.js')
-						var code = txt.toString()
-						this.input.name = this.env.root + '/vite.config.js'
-						this.input.code = String(code)
-						this.core().writing(false)
+						var code = read(this.config.rootShell + 'vite.config.js').toString(), core = this.core()
+						write(this.env.root + '/vite.config.js', code)
 						end()
-						this.log('successfuly create project!')
+						core.success()
 					}
 				})
 			},
 			createTailwind: (type) => {
-				var install_tailwind = 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p'
+				var install_tailwind = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
 				this.log(install_tailwind)
 				this.subprocess(install_tailwind, {
 					close: () => {
-						this.copy(this.config.rootShell + 'tailwind.sass', this.env.root + '/src/tailwind.sass')
-						this.copy(this.config.rootShell + 'tailwind.config.js', this.env.root + '/tailwind.config.js')
+						copy(this.config.rootShell + 'tailwind.sass', this.env.root + '/src/tailwind.sass')
+						copy(this.config.rootShell + 'tailwind.config.js', this.env.root + '/tailwind.config.js')
 						var dir = this.env.root + (type == 'react' ? '/src/main.jsx': '/src/main.js')
-						var txt = this.read(dir)
-						var code = txt.toString()
-						this.write(dir, "import './tailwind.sass'\n" + code)
+						var code = read(dir).toString()
+						write(dir, "import './tailwind.sass'\n" + code)
 						this.log('successfuly setup & install tailwindcss!')
 					}
 				})
 			},
 			createFirebaseStorage: (fixName) => {
-				this.createDirRecursive(this.config.directory.service, fixName)
-				var txt = this.read(this.config.rootShell + 'firebase/storage.js')
+				createDirRecursive(this.config.directory.service, fixName)
+				var txt = read(this.config.rootShell + 'firebase/storage.js')
 				var code = txt.toString()
 				this.input.name = this.config.directory.service + '/firebase-storage.js'
 				this.input.code = code
 				this.log('copy if you want to import!')
 				this.log(`import {storage, upload, remove} from '@service/firebase-storage.js'`)
 				this.core().writing()
+			},
+			success: () => {
+				this.log('create successfuly!\n')
 			}
 		}
 	}
 	application(){
-		const {input, createDirRecursive} = this
+		const { input } = this
+		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		const core = this.core()
 		const writing = core.writing
 
@@ -282,10 +257,10 @@ class Shell{
 					return
 				}
 				if(Number(choose) in [3,4,5,6]){
-					const name = this.options.name
+					const name = String(this.options.name)
 					input.name = name
-					fixName = String(name)[0].toUpperCase() + name.slice(1)
-					caseName = String(name)[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+					fixName = name[0].toUpperCase() + name.slice(1)
+					caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
 					skip = true
 				}
 
@@ -295,15 +270,13 @@ class Shell{
 						id: 0,
 						action: async() => {
 							createDirRecursive(this.config.directory.component, fixName)
-							var txt = this.read(this.config.rootShellApp + 'component.jsx')
+							var code = read(this.config.rootShellApp + 'component.jsx').toString().replaceAll('caseName', caseName)
 							var style = this.generateStyle(caseName, 'component')
-							var code = txt.toString()
 							if(style){
 								code = `import '@style/component/${style}'\n` + code
 							}
-							code = code.replaceAll('caseName', caseName)
-							input.code = String(code)
-							writing()
+							write(this.config.directory.component + '/' + fixName, code)
+							core.success()
 						}
 					},
 					// route
@@ -311,15 +284,13 @@ class Shell{
 						id: 1,
 						action: async() => {
 							createDirRecursive(this.config.directory.route, fixName)
-							var txt = this.read(this.config.rootShellApp + 'route.jsx')
+							var code = read(this.config.rootShellApp + 'route.jsx').toString().replaceAll('caseName', caseName)
 							var style = this.generateStyle(caseName, 'component')
-							var code = txt.toString()
 							if(style){
 								code = `import '@style/component/${style}'\n` + code
 							}
-							code = code.replaceAll('caseName', caseName)
-							input.code = String(code)
-							writing()
+							write(this.config.directory.route + '/' + fixName, code)
+							core.success()
 						}
 					},
 					// CRUD reducer
@@ -330,30 +301,31 @@ class Shell{
 							caseName = caseName.toLowerCase()
 							createDirRecursive(this.config.directory.store, fixName)
 							var crud = prompt(this.time() + ` type y to create CRUD using createAsyncThunk = `);
+							var code
 							if(String(crud).toLowerCase() == 'y'){
 								var url = prompt(this.time() + ` base url (http://localhost:8000/api/user) = `);
 								url = url || 'http://localhost:8000/api/user'
-								this.input.code = ``
-								var txt = this.read(this.config.rootShellApp + 'store-crud.js')
-								var code = txt.toString().replaceAll('caseName', caseName).replaceAll('BASEURL', url)
-								this.input.code = String(code)
+								code = read(this.config.rootShellApp + 'store-crud.js')
+									.toString()
+									.replaceAll('caseName', caseName)
+									.replaceAll('BASEURL', url)
 							}else{
 								var isCrudReducer = prompt(this.time() + ' type y to create CRUD reducer = ')
 								if(String(isCrudReducer).toLowerCase() == 'y'){
-									var txt = this.read(this.config.rootShellApp + 'store-crud-reducer.js')
+									var txt = read(this.config.rootShellApp + 'store-crud-reducer.js')
 									var firstCase = caseName[0].toUpperCase() + caseName.slice(1)
-									var code = txt.toString().replaceAll('app', caseName)
-									.replaceAll('namestore', input.name)
-									.replaceAll('NameExport', firstCase)
-									.replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @s/${input.name}`)
-									input.code = String(code)
+									code = txt.toString().replaceAll('app', caseName)
+										.replaceAll('namestore', input.name)
+										.replaceAll('NameExport', firstCase)
+										.replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @s/${input.name}`)
 								}else{
-									var txt = this.read(this.config.rootShellApp + 'store.js')
-									var code = txt.toString().replaceAll('appSlice', caseName + 'Slice').replaceAll('namestore', input.name)
-									input.code = String(code)
+									var code = read(this.config.rootShellApp + 'store.js').toString()
+										.replaceAll('appSlice', caseName + 'Slice')
+										.replaceAll('namestore', input.name)
 								}
 							}
-							writing()
+							write(this.config.directory.store + '/' + fixName, code)
+							core.success()
 						}
 					},
 					// tailwind
@@ -378,31 +350,34 @@ class Shell{
 							var store = prompt(this.time() + ' type store name (user) = ')
 							createDirRecursive(this.config.directory.route + '/' + store, fixName)
 							var upperName = String(store)[0].toUpperCase() + store.slice(1),
-							fullDir = this.config.directory.route + '/' + store + '/',
-							fullDirName = fullDir + upperName
+							fullDir = this.config.directory.route + '/' + store + '/' + upperName
 							if(store){
 								var generateCreateoredit = () => {
-									var txt = this.read(this.config.rootShellApp + 'crud/createoredit.jsx')
-									var code = txt.toString().replaceAll('storename', store)
-									this.write(fullDirName + 'createoredit.jsx', code)
+									var code = read(this.config.rootShellApp + 'crud/createoredit.jsx')
+										.toString()
+										.replaceAll('storename', store)
+									write(fullDir + 'createoredit.jsx', code)
 								}
 								var generateShow = () => {
-									var txt = this.read(this.config.rootShellApp + 'crud/show.jsx')
-									var code = txt.toString().replaceAll('storename', store)
-									this.write(fullDirName + 'show.jsx', code)
+									var code = read(this.config.rootShellApp + 'crud/show.jsx')
+										.toString()
+										.replaceAll('storename', store)
+									write(fullDir + 'show.jsx', code)
 								}
 								var generateTable = () => {
-									var txt = this.read(this.config.rootShellApp + 'crud/table.jsx')
-									var code = txt.toString().replaceAll('storename', store)
-									this.write(fullDirName + 'table.jsx', code)
+									var code = read(this.config.rootShellApp + 'crud/table.jsx')
+										.toString()
+										.replaceAll('storename', store)
+										.replaceAll('nameTable', upperName + 'table')
+									write(fullDir + 'table.jsx', code)
 								}
 								generateCreateoredit()
 								generateShow()
 								generateTable()
 							}
 							var dirImport = '@r/' + store + '/' + upperName
-							this.append(this.config.directory.route + '/index.jsx', `import ${upperName}createoredit from '${dirImport}createoredit'\nimport ${upperName}show from '${dirImport}show'\nimport ${upperName}table from '${dirImport}table'\n`)
-							writing()
+							append(this.config.directory.route + '/index.jsx', `import ${upperName}createoredit from '${dirImport}createoredit'\nimport ${upperName}show from '${dirImport}show'\nimport ${upperName}table from '${dirImport}table'\n`)
+							core.success()
 						}
 					},
 					// project
@@ -410,24 +385,21 @@ class Shell{
 						id: 6,
 						action: () => {
 							this.core().createProject('react', () => {
-								 fs.mkdirSync(this.config.directory.service, { recursive: true });
-								 fs.mkdirSync(this.config.directory.style, { recursive: true });
-								 fs.mkdirSync(this.config.directory.component, { recursive: true });
-								 fs.mkdirSync(this.config.directory.store, { recursive: true });
-								 fs.mkdirSync(this.config.directory.route, { recursive: true });
-								 var copied = (copy, dir) => {
-									this.copy(copy, dir, () => {})
-									this.log('writing', dir)
-								 }, rootapp = this.config.rootShellApp
-								 copied(rootapp + 'route/index.jsx', this.config.directory.route + '/index.jsx')
-								 copied(rootapp + 'route/Home.jsx', this.config.directory.route + '/Home.jsx')
-								 copied(rootapp + 'route/About.jsx', this.config.directory.route + '/About.jsx')
-								 copied(rootapp + 'service/auth.js', this.config.directory.service + '/auth.js')
-								 copied(rootapp + 'service/http.js', this.config.directory.service + '/http.js')
-								 copied(rootapp + 'store/index.js', this.config.directory.store + '/index.js')
-								 copied(rootapp + 'store/app.js', this.config.directory.store + '/app.js')
-								 copied(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
-								 copied(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
+								 var rootapp = this.config.rootShellApp
+								 createDirRecursive(this.config.directory.service);
+								 createDirRecursive(this.config.directory.style);
+								 createDirRecursive(this.config.directory.component);
+								 createDirRecursive(this.config.directory.store);
+								 createDirRecursive(this.config.directory.route);
+								 copy(rootapp + 'route/index.jsx', this.config.directory.route + '/index.jsx')
+								 copy(rootapp + 'route/Home.jsx', this.config.directory.route + '/Home.jsx')
+								 copy(rootapp + 'route/About.jsx', this.config.directory.route + '/About.jsx')
+								 copy(rootapp + 'service/auth.js', this.config.directory.service + '/auth.js')
+								 copy(rootapp + 'service/http.js', this.config.directory.service + '/http.js')
+								 copy(rootapp + 'store/index.js', this.config.directory.store + '/index.js')
+								 copy(rootapp + 'store/app.js', this.config.directory.store + '/app.js')
+								 copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
+								 copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
 								 this.log('cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios')
 							})
 						}
@@ -468,10 +440,9 @@ class Shell{
 						id: 0,
 						action: async() => {
 							createDirRecursive(this.config.directory.component + 's', fixName)
-							var txt = this.read(this.config.rootShellApp + 'component.vue')
-							var code = txt.toString().replaceAll('caseName', caseName)
-							this.input.code = String(code)
-							writing()
+							var code = read(this.config.rootShellApp + 'component.vue').toString().replaceAll('caseName', caseName)
+							write(this.config.directory.component + 's' + '/' + fixName, code)
+							core.success()
 						}
 					},
 					// route
@@ -479,10 +450,9 @@ class Shell{
 						id: 1,
 						action: async() => {
 							createDirRecursive(this.config.directory.route, fixName)
-							var txt = this.read(this.config.rootShellApp + 'component.vue')
-							var code = txt.toString().replaceAll('caseName', caseName)
-							input.code = String(code)
-							writing()
+							var code = read(this.config.rootShellApp + 'component.vue').toString().replaceAll('caseName', caseName)
+							write(this.config.directory.route + '/' + fixName, code)
+							core.success()
 						}
 					},
 					// store
@@ -492,10 +462,9 @@ class Shell{
 							fixName = fixName.toLowerCase()
 							caseName = caseName.toLowerCase()
 							createDirRecursive(this.config.directory.store, fixName)
-							var txt = this.read(this.config.rootShellApp + 'store.js')
-							var code = txt.toString().replaceAll('caseName', caseName)
-							input.code = String(code)
-							writing()
+							var code = read(this.config.rootShellApp + 'store.js').toString().replaceAll('caseName', caseName)
+							write(this.config.directory.store + '/' + fixName, code)
+							core.success()
 						}
 					},
 					// tailwind
@@ -534,14 +503,12 @@ class Shell{
 			},
 			express: () => {
 				this.config.rootShellApp = this.config.rootShell + 'express/'
-				var listcli = ['component', 'model', 'project'];
+				var listcli = ['model', 'api', 'project'], skip = false, fixName, caseName;
 				const choose = listcli.indexOf(this.options.choose)
-				var skip = false
-				var fixName, caseName
 				if(!choose && choose !== 0){
 					return
 				}
-				if(Number(choose) in [1,2]){
+				if(Number(choose) in [0, 1]){
 					const name = this.options.name
 					input.name = name
 					fixName = String(name)[0].toUpperCase() + name.slice(1)
@@ -550,31 +517,32 @@ class Shell{
 				}
 
 				const list = [
-					// component
-					{
-						id: 0,
-						action: async() => {
-							createDirRecursive(this.config.directory.component + 's', fixName)
-							var txt = this.read(this.config.rootShellApp + 'component.vue')
-							var code = txt.toString().replaceAll('caseName', caseName)
-							this.input.code = String(code)
-							writing()
-						}
-					},
 					// model
 					{
-						id: 1,
+						id: 0,
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							if(['mongoose', 'sequelize'].find(v => v == this.options.lib)){
 								createDirRecursive(this.config.directory.model, fixName)
-								var txt = this.read(this.config.rootShellApp + this.options.lib +  '.js')
-								var code = txt.toString()
+								var code = read(this.config.rootShellApp + this.options.lib +  '.js').toString()
 									.replaceAll('caseName', caseName)
 									.replaceAll('modelName', caseName.toLowerCase());
-								this.input.code = String(code)
-								writing()
+								write(this.config.directory.model + '/' + fixName, code)
+								core.success()
 							}
+						}
+					},
+					// api
+					{
+						id: 1,
+						action : () => {
+							fixName = fixName.toLowerCase()
+							copy(this.config.rootShellApp + 'api.js', this.config.directory.api + '/' + fixName)
+							var code = read(this.env.root + '/app.js').toString()
+							code = `const ${caseName}Router = require('./api/${fixName}');\n` + code
+							code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/${caseName.toLowerCase()}', ${caseName}Router)` )
+							write(this.env.root + '/app.js', code)
+							core.success()
 						}
 					},
 					// project
@@ -582,21 +550,27 @@ class Shell{
 						id: 2,
 						action: () => {
 							var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
-							if(['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig'].find(v => v == this.env.engine)){
-								var exec = 'npx express-generator ' + this.arg[1] + ' --' + this.env.engine + ' && npm i && npm i cors express-session'
+							if(engine.find(v => v == this.env.engine)){
+								var exec = 'npx express-generator ' + this.arg[1] + ' --' + this.env.engine + (
+									this.env.mode === 'production' ?
+										' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid'
+										: ''
+									)
 								this.log(exec)
 								this.subprocess(exec, {
 									close: () => {
-										this.createDirRecursive(this.config.directory.service, fixName)
-										var txt = this.read(this.config.rootShellApp + 'app.js')
-										var code = txt.toString()
-										this.input.name = this.env.root + '/app.js'
-										this.input.code = code
-										writing(false)
-										this.log('successfuly create project!')
+										var rootapp = this.config.rootShellApp
+										var code = read(rootapp + 'app.js').toString()
+										createDirRecursive(this.env.root + '/service');
+										createDirRecursive(this.env.root + '/api');
+										createDirRecursive(this.config.directory.model);
+										copy(rootapp + 'jwt.js', this.env.root + '/service' + '/auth.js')
+										write(this.env.root + '/app.js', code)
+										core.success()
 									}
 								})
 							}else{
+								this.log(this.env.engine, 'is not engine.')
 								process.exit()
 							}
 						}
@@ -613,6 +587,31 @@ class Shell{
 				}
 				this.exit = this.exit.bind(this)
 				this.exit()
+			}
+		}
+	}
+	static CONSOLE_HELP(){
+		return{
+			react(){
+				console.log('\t', '--component=name', ':= Generate component')
+				console.log('\t', '--store=name', ':= Generate store')
+				console.log('\t', '--route=name', ':= Generate route pages')
+				console.log('\t', '--tailwindcss', ':= Installation & configuration for tailwindcss')
+				console.log('\t', '--firebase-storage', ':= Generate service firebase-storage for upload & remove (v8)')
+				console.log('\t', '--route-crud-store', ':= Generate route crud for store')
+				console.log('\t', '--project', ':= Create new project using vite')
+			},
+			vue(){
+				console.log('\t', '--component=name', ':= Generate component')
+				console.log('\t', '--store=name', ':= Generate store')
+				console.log('\t', '--route=name', ':= Generate route pages')
+				console.log('\t', '--tailwindcss', ':= Installation & configuration for tailwindcss')
+				console.log('\t', '--firebase-storage', ':= Generate service firebase-storage for upload & remove (v8)')
+				console.log('\t', '--project', ':= Create new project using vite')
+			},
+			express(){
+				console.log('\t', '--model=name;sequelize|mongoose', ':= Generate model')
+				console.log('\t', '--project', ':= Create new project using vite')
 			}
 		}
 	}
