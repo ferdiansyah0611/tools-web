@@ -45,42 +45,57 @@ logger the tools-web.
 ```javascript
 sh.log('running')
 ```
-## copy(oldfile, newfile, onsuccess)
+## SystemFile: class SystemFile
+prototype to manage file.
+```javascript
+const file = sh.SystemFile
+```
+### copy(oldfile, newfile, success)
 copy specified file.
 ```javascript
-sh.copy('myapp/src/app.sass', 'myapp/src/tailwind.sass', () => sh.log('success'))
+file.copy('myapp/src/app.sass', 'myapp/src/tailwind.sass', () => sh.log('success'))
 ```
-## write(filepath, value)
+### app: class Shell
+current class Shell
+```javascript
+sh.log(file.app)
+```
+### write(filepath, value)
 write specified file.
 ```javascript
-sh.write('myapp/src/app.sass', '#app{}')
+file.write('myapp/src/app.sass', '#app{}')
 ```
-## read(filepath)
+### read(filepath)
 read specified file.
 ```javascript
-sh.read('myapp/src/app.sass') // return value file utf8
+file.read('myapp/src/app.sass') // return value file utf8
+```
+### append(filepath, first, end = null)
+function to append file.
+```javascript
+file.append('myapp/index.js', 'import time\n')
+```
+### createDirRecursive(root, name)
+function to create directory recursive.
+```javascript
+sh.createDirRecursive('myapp', 'test')
 ```
 ## time()
 return datetime [hours:minutes].
 ```javascript
 sh.time()
 ```
-## __console__(func)
+## consoleHelper(func)
 show help command with options customize.
 ```javascript
-sh.__console__(() => {
-	console.log('\t', '--test', ':= test code')
+sh.consoleHelper((log) => {
+	log('--test', ':= test code')
 })
 ```
 ## generateStyle(name, type)
 function to generate style.
 ```javascript
 sh.generateStyle('myapp.scss', 'component')
-```
-## createDirRecursive(root, fixName)
-function to create directory recursive.
-```javascript
-sh.createDirRecursive('myapp', 'test')
 ```
 ## subprocess(run, action)
 function to run subprocess cli.
@@ -89,20 +104,10 @@ sh.subprocess('npm --help', {
 	close: () => sh.log('closed')
 })
 ```
-## append(filepath, first, end = null)
-function to append file.
-```javascript
-sh.append('myapp/index.js', 'import time\n')
-```
 ## core()
 return function core.
 ```javascript
 const core = sh.core()
-```
-### writing(isMsg = true)
-write file with file at sh.input
-```javascript
-core.writing()
 ```
 ### createProject(type)
 create project frontend vite.

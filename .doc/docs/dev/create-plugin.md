@@ -26,7 +26,7 @@ Step by step to create the plugin to integrate tools-web.
 	```javascript
 	sh.use(App)
 	```
-- **Step 3** run command
+- **Step 3:** run command
 	```bash
 	node index.js app -h
 	node index.js app --test

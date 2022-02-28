@@ -2,7 +2,7 @@
 title: Getting Started
 ---
 # Getting Started
-This section will help you use web-tools from scratch.
+This section will help you use tools-web from scratch.
 - **Step 1:** Cloning tools-web
 	```bash
 	git clone https://github.com/ferdiansyah0611/tools-web.git

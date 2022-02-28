@@ -71,9 +71,9 @@ Did you know that web-tools can integrate other tools made by developers?
 	```bash
 	node index.js express myapp --project
 	```
-- **Create new component**
+- **Create new api**
 	```bash
-	node index.js express --component=NameComponent.jsx
+	node index.js express --api=user.js
 	```
 - **Create new model**
 	```bash

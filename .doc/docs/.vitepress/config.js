@@ -3,7 +3,7 @@ function getGuideSidebar() {
     {
       text: 'Introduction',
       children: [
-        { text: 'What is tools-web?', link: '/' },
+        { text: 'What is tools-web', link: '/' },
         { text: 'Getting Started', link: '/guide/getting-started' },
         { text: 'Usage', link: '/guide/usage' },
       ]
