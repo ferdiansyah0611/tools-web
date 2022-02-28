@@ -65,6 +65,7 @@ class Shell{
 		this.use = this.use.bind(this)
 		this.start = this.start.bind(this)
 		this.SystemFile = new SystemFile(this)
+		this.quest = prompt
 	}
 	use(Class){
 		var plugin = new Class(this)
@@ -503,7 +504,7 @@ class Shell{
 			},
 			express: () => {
 				this.config.rootShellApp = this.config.rootShell + 'express/'
-				var listcli = ['model', 'api', 'project'], skip = false, fixName, caseName;
+				var listcli = ['model', 'api', 'project', 'google-cloud-storage'], skip = false, fixName, caseName;
 				const choose = listcli.indexOf(this.options.choose)
 				if(!choose && choose !== 0){
 					return
@@ -563,8 +564,15 @@ class Shell{
 										var code = read(rootapp + 'app.js').toString()
 										createDirRecursive(this.env.root + '/service');
 										createDirRecursive(this.env.root + '/api');
+										createDirRecursive(this.env.root + '/test');
 										createDirRecursive(this.config.directory.model);
 										copy(rootapp + 'jwt.js', this.env.root + '/service' + '/auth.js')
+										copy(rootapp + 'api/authenticate.js', this.env.root + '/api' + '/authenticate.js')
+										copy(rootapp + 'model/Token.js', this.env.root + '/model' + '/Token.js')
+										copy(rootapp + 'model/User.js', this.env.root + '/model' + '/User.js')
+										copy(rootapp + 'test/api.js', this.env.root + '/test' + '/api.js')
+										code = `const authenticate = require('./api/authenticate');\n` + code
+										code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)` )
 										write(this.env.root + '/app.js', code)
 										core.success()
 									}
@@ -573,6 +581,15 @@ class Shell{
 								this.log(this.env.engine, 'is not engine.')
 								process.exit()
 							}
+						}
+					},
+					// google-cloud-storage
+					{
+						id: 3,
+						action: () => {
+							copy(this.config.rootShell + 'firebase/storage-be.js', this.env.root + '/service' + '/storage-cloud.js')
+							copy(this.config.rootShellApp + 'api/storage.js', this.env.root + '/api' + '/storage.js')
+							core.success()
 						}
 					}
 				]
@@ -611,7 +628,9 @@ class Shell{
 			},
 			express(){
 				console.log('\t', '--model=name;sequelize|mongoose', ':= Generate model')
+				console.log('\t', '--api=name.js', ':= Generate api')
 				console.log('\t', '--project', ':= Create new project using vite')
+				console.log('\t', '--google-cloud-storage', ':= Generate @google-cloud/storage & api route')
 			}
 		}
 	}
