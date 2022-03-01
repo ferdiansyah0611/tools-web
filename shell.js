@@ -83,15 +83,19 @@ class Shell{
 		this.startcli = true
 		const arg = this.quest('')
 		this.arg = arg.split(' ')
+		this.start()
 	}
 	start(){
 		if(!this.startcli){
 			this.arg = process.argv.slice(2)
 		}
+		const firstArg = this.arg[0]
 		const consoles = Shell.CONSOLE_HELP()
-		console.log('')
-		if(this.LIST.indexOf(this.arg[0]) !== -1){
-			this.framework = this.arg[0]
+		var isFound = false
+		// console.log('')
+		if(this.LIST.indexOf(firstArg) !== -1){
+			this.framework = firstArg
+			isFound = true
 			if(this.arg.length >= 3){
 				var options = this.arg[2].split('=')
 				this.options = {
@@ -155,25 +159,51 @@ class Shell{
 					}
 			}
 		}
-		if(['-h', '--help'].indexOf(this.arg[0]) !== -1){
+		if(['-h', '--help'].indexOf(firstArg) !== -1){
+			isFound = true
 			this.consoleHelper(() => {
 				console.log('\t', '-h --help', 'Show help command')
 			})
 			this.exit()
 		}
-		if(this.arg[0] == 'exit'){
-			this.log('Good Bye!')
-			process.exit()
-		}
-		else{
-			this.subprocess(this.arg.join(' '), {
-				close: (res) => {
-					this.exit()
+		var handle = () => {
+			if(this.startcli && !isFound){
+				const checkIndex = (text, arg1, arg2) => {
+					return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
 				}
-			})
+				if(firstArg == 'exit' || firstArg == ''){
+					this.log('Good Bye!')
+					process.exit()
+				}
+				if(checkIndex(firstArg, 'app', '=')){
+					var name = firstArg.split('=')[1]
+					this.env.root = name
+					this.log('change default app to', name)
+					this.cli()
+				}
+				if(checkIndex(firstArg, 'mode', '=')){
+					var name = firstArg.split('=')[1]
+					if(['production', 'development'].find(v => v == name)){
+						this.env.mode = name
+						this.log('change mode to', name, this)
+						this.cli()
+					}
+				}
+				else{
+					if(this.arg.length > 0){
+						this.subprocess(this.arg.join(' '), {
+							close: (res) => {
+								this.exit()
+							}
+						})
+					}
+				}
+			}
 		}
+		handle()
 	}
 	consoleHelper(options = Function){
+		console.log('')
 		console.log('Help Commands: ')
 		console.log('\t', `node index.js [${this.LIST.join(', ')}] folder? [options]`)
 		console.log('\t', `node index.js [${this.LIST.join(', ')}] [options]`)
@@ -221,7 +251,6 @@ class Shell{
 		}
 		if(this.startcli){
 			this.cli()
-			this.start()
 		}else{
 			if(skip){
 				process.exit()
@@ -585,36 +614,42 @@ class Shell{
 					{
 						id: 2,
 						action: () => {
-							var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
-							if(engine.find(v => v == this.env.engine)){
-								var exec = 'npx express-generator ' + this.arg[1] + ' --' + this.env.engine + (
-									this.isProduction ?
-										' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid'
-										: ''
-									)
-								this.log(exec)
-								this.subprocess(exec, {
-									close: () => {
-										var rootapp = this.config.rootShellApp
-										var code = read(rootapp + 'app.js').toString()
-										createDirRecursive(this.env.root + '/service');
-										createDirRecursive(this.env.root + '/api');
-										createDirRecursive(this.env.root + '/test');
-										createDirRecursive(this.config.directory.model);
-										copy(rootapp + 'jwt.js', this.env.root + '/service' + '/auth.js')
-										copy(rootapp + 'api/authenticate.js', this.env.root + '/api' + '/authenticate.js')
-										copy(rootapp + 'model/Token.js', this.env.root + '/model' + '/Token.js')
-										copy(rootapp + 'model/User.js', this.env.root + '/model' + '/User.js')
-										copy(rootapp + 'test/api.js', this.env.root + '/test' + '/api.js')
-										code = `const authenticate = require('./api/authenticate');\n` + code
-										code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)` )
-										write(this.env.root + '/app.js', code)
-										core.success()
-									}
-								})
+							if(this.arg.length === 3){
+								var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
+								if(engine.find(v => v == this.env.engine)){
+									var folder = this.arg[1]
+									var exec = 'npx express-generator ' + folder + ' --' + this.env.engine + (
+										this.isProduction ?
+											' && cd ' + folder +	' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose'
+											: ''
+										)
+									this.log(exec)
+									this.subprocess(exec, {
+										close: () => {
+											var rootapp = this.config.rootShellApp
+											var code = read(rootapp + 'app.js').toString()
+											createDirRecursive(this.env.root + '/service');
+											createDirRecursive(this.env.root + '/api');
+											createDirRecursive(this.env.root + '/test');
+											createDirRecursive(this.config.directory.model);
+											copy(rootapp + 'jwt.js', this.env.root + '/service' + '/auth.js')
+											copy(rootapp + 'api/authenticate.js', this.env.root + '/api' + '/authenticate.js')
+											copy(rootapp + 'model/Token.js', this.env.root + '/model' + '/Token.js')
+											copy(rootapp + 'model/User.js', this.env.root + '/model' + '/User.js')
+											copy(rootapp + 'test/api.js', this.env.root + '/test' + '/api.js')
+											code = `const authenticate = require('./api/authenticate');\n` + code
+											code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)` )
+												.replace("'view engine', 'jade'", `'view engine', '${this.env.engine}'`)
+											write(this.env.root + '/app.js', code)
+											core.success()
+										}
+									})
+								}else{
+									this.log(this.env.engine, 'is not engine.')
+									process.exit()
+								}
 							}else{
-								this.log(this.env.engine, 'is not engine.')
-								process.exit()
+								this.log('please write your project folder')
 							}
 						}
 					},

@@ -1,8 +1,8 @@
 var router = require('express').Router()
 var { body, validationResult } = require('express-validator')
-var {signin, signup, verify, generateAccessToken, validate} = require('../../services/auth')
-var Token = require('../../models/Token')
-var User = require('../../models/User')
+var {signin, signup, verify, generateAccessToken, validate} = require('../service/auth')
+var Token = require('../model/Token')
+var User = require('../model/User')
 
 const valid = {
 	email: body('email').isEmail().withMessage('email must be valid email').normalizeEmail(),

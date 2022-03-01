@@ -15,7 +15,7 @@ const app = express();
 const isProduction = app.get('env') === 'production'
 const allowed = []
 const corsOptionsDelegate = async function (req, callback) {
-  const corsOptions = { origin: false }, isCors
+  var corsOptions = { origin: false }, isCors
   if(!isProduction){
     isCors = true
   }
