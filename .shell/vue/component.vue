@@ -4,6 +4,8 @@
 	</div>
 </template>
 <script>
+import { mapActions, mapMutations } from 'vuex'
+
 export default{
 	name: 'caseName',
 	props: [],
@@ -18,7 +20,10 @@ export default{
 	unmounted(){
 
 	},
-	methods: {},
+	methods: {
+		...mapActions([]),
+		...mapMutations([]),
+	},
 	computed: {},
 	watch: {},
 

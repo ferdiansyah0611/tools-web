@@ -60,6 +60,7 @@ class Shell{
 			choose: '',
 			name: ''
 		}
+		this.isProduction = env.mode === 'production'
 		this.startcli = false
 		this.exit = this.exit.bind(this)
 		this.plugin = []
@@ -214,7 +215,7 @@ class Shell{
 	}
 	exit(skip = false){
 		const autoremove = () => {
-			if(this.env.mode === 'development'){
+			if(!this.isProduction){
 				fs.rmSync(this.env.root, { recursive: true, force: true })
 			}
 		}
@@ -418,7 +419,8 @@ class Shell{
 						id: 6,
 						action: () => {
 							this.core().createProject('react', () => {
-								 var rootapp = this.config.rootShellApp
+								 var rootapp = this.config.rootShellApp,
+								 exec = 'cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios'
 								 createDirRecursive(this.config.directory.service);
 								 createDirRecursive(this.config.directory.style);
 								 createDirRecursive(this.config.directory.component);
@@ -433,7 +435,12 @@ class Shell{
 								 copy(rootapp + 'store/app.js', this.config.directory.store + '/app.js')
 								 copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
 								 copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
-								 this.log('cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios')
+								 if(this.isProduction){
+								 	this.log(exec)
+								 	this.subprocess(exec, {
+								 		close: () => {}
+								 	})
+								 }
 							})
 						}
 					}
@@ -581,7 +588,7 @@ class Shell{
 							var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
 							if(engine.find(v => v == this.env.engine)){
 								var exec = 'npx express-generator ' + this.arg[1] + ' --' + this.env.engine + (
-									this.env.mode === 'production' ?
+									this.isProduction ?
 										' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid'
 										: ''
 									)

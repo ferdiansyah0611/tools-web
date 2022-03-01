@@ -22,7 +22,7 @@ export const appSlice = createSlice({
 			state.data.push(action.payload)
 		},
 		findOneNameExport(state, action){
-			state.find = state.find((e) => e[ID] === action.payload) || {}
+			state.find = state.data.find((e) => e[ID] === action.payload) || {}
 		},
 		updateNameExport(state, action){
 			state.data = state.data.map(e => {
