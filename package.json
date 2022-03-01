@@ -8,10 +8,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "prompt-sync": "^4.2.0"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express-session": "^1.17.2"
+    "prompt-sync": "^4.1.6"
   }
 }
