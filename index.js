@@ -1,7 +1,7 @@
 const Shell = require('./shell')
 
 const sh = new Shell({
-	mode: 'development',
+	mode: 'production',
 	root: 'myapp',
 	engine: 'ejs'
 })

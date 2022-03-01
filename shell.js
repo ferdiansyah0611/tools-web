@@ -60,20 +60,33 @@ class Shell{
 			choose: '',
 			name: ''
 		}
+		this.startcli = false
+		this.exit = this.exit.bind(this)
 		this.plugin = []
 		this.core = this.core.bind(this)
 		this.use = this.use.bind(this)
 		this.start = this.start.bind(this)
 		this.SystemFile = new SystemFile(this)
-		this.quest = prompt
+		this.quest = this.quest.bind(this)
+		this.cli = this.cli.bind(this)
+	}
+	quest(msg){
+		return prompt(this.time() + ' ' + msg)
 	}
 	use(Class){
 		var plugin = new Class(this)
 		this.LIST.push(Class.name.toLowerCase())
 		this.plugin.push(plugin)
 	}
+	cli(){
+		this.startcli = true
+		const arg = this.quest('')
+		this.arg = arg.split(' ')
+	}
 	start(){
-		this.arg = process.argv.slice(2)
+		if(!this.startcli){
+			this.arg = process.argv.slice(2)
+		}
 		const consoles = Shell.CONSOLE_HELP()
 		console.log('')
 		if(this.LIST.indexOf(this.arg[0]) !== -1){
@@ -103,7 +116,7 @@ class Shell{
 				case "react":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
 						this.consoleHelper(consoles.react)
-						process.exit()
+						this.exit()
 					}else{
 						app.react()
 					}
@@ -111,7 +124,7 @@ class Shell{
 				case "vue":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
 						this.consoleHelper(consoles.vue)
-						process.exit()
+						this.exit()
 					}else{
 						app.vue()
 					}
@@ -119,7 +132,7 @@ class Shell{
 				case "express":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
 						this.consoleHelper(consoles.express)
-						process.exit()
+						this.exit()
 					}else{
 						app.express()
 					}
@@ -129,21 +142,33 @@ class Shell{
 					if(plugin){
 						if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
 							this.consoleHelper(plugin.help)
-							process.exit()
+							this.exit()
 						}else{
-							var action = plugin.action.find(v => this.options.choose.match(new RegExp(v)))
+							var action = plugin.action.find(v => v.name === this.options.choose)
 							if(action){
 								action.action()
 							}
 						}
 					}else{
-						process.exit()
+						this.exit()
 					}
 			}
 		}
 		if(['-h', '--help'].indexOf(this.arg[0]) !== -1){
 			this.consoleHelper(() => {
 				console.log('\t', '-h --help', 'Show help command')
+			})
+			this.exit()
+		}
+		if(this.arg[0] == 'exit'){
+			this.log('Good Bye!')
+			process.exit()
+		}
+		else{
+			this.subprocess(this.arg.join(' '), {
+				close: (res) => {
+					this.exit()
+				}
 			})
 		}
 	}
@@ -153,16 +178,16 @@ class Shell{
 		console.log('\t', `node index.js [${this.LIST.join(', ')}] [options]`)
 		console.log('options: ')
 		options((...arg) => console.log('\t', ...arg))
-		process.exit()
 	}
 	subprocess(run, action = {close: Function}){
 		const { exec } = require('child_process');
 		exec(run, (err, stdout, stderr) => {
 		  if (err) {
-		    console.log(`error: ${err.message}`);
-		    process.exit()
+		    this.log(stderr)
+		    action.close(stderr)
 		    return;
 		  }
+		  console.log(stdout)
 		  action.close(stdout)
 		})
 	}
@@ -188,11 +213,20 @@ class Shell{
 		console.log(this.time(), ...log)
 	}
 	exit(skip = false){
-		if(skip){
+		const autoremove = () => {
 			if(this.env.mode === 'development'){
 				fs.rmSync(this.env.root, { recursive: true, force: true })
 			}
 		}
+		if(this.startcli){
+			this.cli()
+			this.start()
+		}else{
+			if(skip){
+				process.exit()
+			}
+		}
+		autoremove()
 	}
 	time(){
 		var date = new Date()
@@ -228,21 +262,19 @@ class Shell{
 			},
 			createFirebaseStorage: (fixName) => {
 				createDirRecursive(this.config.directory.service, fixName)
-				var txt = read(this.config.rootShell + 'firebase/storage.js')
-				var code = txt.toString()
-				this.input.name = this.config.directory.service + '/firebase-storage.js'
-				this.input.code = code
+				var code = read(this.config.rootShell + 'firebase/storage.js').toString()
 				this.log('copy if you want to import!')
 				this.log(`import {storage, upload, remove} from '@service/firebase-storage.js'`)
-				this.core().writing()
+				write(this.config.directory.service + '/firebase-storage.js', code)
 			},
 			success: () => {
 				this.log('create successfuly!\n')
+				this.exit()
 			}
 		}
 	}
 	application(){
-		const { input } = this
+		const { input, quest } = this
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		const core = this.core()
 		const writing = core.writing
@@ -301,17 +333,17 @@ class Shell{
 							fixName = fixName.toLowerCase()
 							caseName = caseName.toLowerCase()
 							createDirRecursive(this.config.directory.store, fixName)
-							var crud = prompt(this.time() + ` type y to create CRUD using createAsyncThunk = `);
+							var crud = quest(`type y to create CRUD using createAsyncThunk : `);
 							var code
 							if(String(crud).toLowerCase() == 'y'){
-								var url = prompt(this.time() + ` base url (http://localhost:8000/api/user) = `);
+								var url = quest(`base url (http://localhost:8000/api/user) : `);
 								url = url || 'http://localhost:8000/api/user'
 								code = read(this.config.rootShellApp + 'store-crud.js')
 									.toString()
 									.replaceAll('caseName', caseName)
 									.replaceAll('BASEURL', url)
 							}else{
-								var isCrudReducer = prompt(this.time() + ' type y to create CRUD reducer = ')
+								var isCrudReducer = quest('type y to create CRUD reducer : ')
 								if(String(isCrudReducer).toLowerCase() == 'y'){
 									var txt = read(this.config.rootShellApp + 'store-crud-reducer.js')
 									var firstCase = caseName[0].toUpperCase() + caseName.slice(1)
@@ -348,7 +380,7 @@ class Shell{
 						id: 5,
 						action: async() => {
 							input.name = null
-							var store = prompt(this.time() + ' type store name (user) = ')
+							var store = quest('type store name (user) : ')
 							createDirRecursive(this.config.directory.route + '/' + store, fixName)
 							var upperName = String(store)[0].toUpperCase() + store.slice(1),
 							fullDir = this.config.directory.route + '/' + store + '/' + upperName
@@ -415,8 +447,6 @@ class Shell{
 				if(!find){
 					return
 				}
-				this.exit = this.exit.bind(this)
-				this.exit()
 			},
 			vue: () => {
 				this.config.rootShellApp = this.config.rootShell + 'vue/'
@@ -499,8 +529,6 @@ class Shell{
 				if(!find){
 					return
 				}
-				this.exit = this.exit.bind(this)
-				this.exit()
 			},
 			express: () => {
 				this.config.rootShellApp = this.config.rootShell + 'express/'
@@ -602,8 +630,6 @@ class Shell{
 				if(!find){
 					return
 				}
-				this.exit = this.exit.bind(this)
-				this.exit()
 			}
 		}
 	}
