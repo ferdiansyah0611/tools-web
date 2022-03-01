@@ -2,4 +2,4 @@
 /myapp
 /.doc/node_modules
 /.doc/docs/.vitepress/dist
-/test.sh
+/test.*
