@@ -11,7 +11,7 @@ const sh = new Shell({
 })
 sh.use(App)
 sh.cli()
-sh.start()
+// sh.start()
 ```
 Run in one time
 ```bash
@@ -28,4 +28,12 @@ exit
 You can run more command on system. Example
 ```bash
 dir .shell
+```
+Change default root app.
+```bash
+app=myapp
+```
+Change mode env.
+```bash
+mode=production
 ```
