@@ -12,7 +12,15 @@ Step by step to create the plugin to integrate tools-web.
 			{
 				name: 'test',
 				action: () => {
-					console.log('done.')
+					sh.log('test done.')
+				}
+			},
+			{
+				name: 'create',
+				action: () => {
+					sh.log('exec create')
+					// if you want get arg value "App.jsx" at --create=App.jsx
+					sh.log('argument value:', sh.options.name)
 				}
 			}
 		]

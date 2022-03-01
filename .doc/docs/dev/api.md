@@ -30,6 +30,11 @@ function to integrate plugins.
 ```javascript
 sh.use(Plugin)
 ```
+## quest(string)
+function to question cli using prompt.
+```javascript
+const v = sh.quest('whats your name?')
+```
 ## start()
 run the tools-web.
 ```javascript

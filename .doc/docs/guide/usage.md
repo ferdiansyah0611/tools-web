@@ -35,15 +35,6 @@ Did you know that tools-web can integrate other tools made by developers?
 	```bash
 	node index.js react --route-crud-store
 	```
-::: warning
-don't be remove on this line at app.js
-```javascript{1}
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-```
-:::
 ## Vue
 - **Start command**
 	```bash
@@ -91,3 +82,12 @@ app.use(function(req, res, next) {
 	```bash
 	node index.js express --google-cloud-storage
 	```
+::: warning
+don't be remove on this line at app.js
+```javascript {1}
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+```
+:::
