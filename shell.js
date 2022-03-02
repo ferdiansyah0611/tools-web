@@ -60,7 +60,7 @@ class Shell{
 			choose: '',
 			name: ''
 		}
-		this.isProduction = env.mode === 'production'
+		this.isProduction = this.env.mode === 'production'
 		this.startcli = false
 		this.exit = this.exit.bind(this)
 		this.plugin = []
@@ -185,7 +185,7 @@ class Shell{
 					var name = firstArg.split('=')[1]
 					if(['production', 'development'].find(v => v == name)){
 						this.env.mode = name
-						this.log('change mode to', name, this)
+						this.log('change mode to', name)
 						this.cli()
 					}
 				}
@@ -193,7 +193,7 @@ class Shell{
 					if(this.arg.length > 0){
 						this.subprocess(this.arg.join(' '), {
 							close: (res) => {
-								this.exit()
+								this.cli()
 							}
 						})
 					}
@@ -270,6 +270,7 @@ class Shell{
 				this.subprocess('npm create vite@latest ' + this.arg[1] + ' -- --template ' + name, {
 					close: () => {
 						var code = read(this.config.rootShell + 'vite.config.js').toString(), core = this.core()
+						code = code.replace("plugin-react", "plugin-" + name)
 						write(this.env.root + '/vite.config.js', code)
 						end()
 						core.success()
@@ -462,6 +463,7 @@ class Shell{
 								 copy(rootapp + 'service/http.js', this.config.directory.service + '/http.js')
 								 copy(rootapp + 'store/index.js', this.config.directory.store + '/index.js')
 								 copy(rootapp + 'store/app.js', this.config.directory.store + '/app.js')
+								 copy(rootapp + 'component/template.jsx', this.config.directory.component + '/template.jsx')
 								 copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
 								 copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
 								 if(this.isProduction){
