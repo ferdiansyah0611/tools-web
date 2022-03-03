@@ -51,6 +51,7 @@ class Shell{
 		this.LIST = ['react', 'vue', 'express']
 		this.env = env
 		this.arg = []
+		this.history = []
 		this.input = {
 			name: '',
 			code: ''
@@ -69,6 +70,7 @@ class Shell{
 		this.start = this.start.bind(this)
 		this.SystemFile = new SystemFile(this)
 		this.quest = this.quest.bind(this)
+		this.coreFeatureDefault = this.coreFeatureDefault.bind(this)
 		this.cli = this.cli.bind(this)
 	}
 	quest(msg){
@@ -89,10 +91,11 @@ class Shell{
 		if(!this.startcli){
 			this.arg = process.argv.slice(2)
 		}
-		const firstArg = this.arg[0]
-		const consoles = Shell.CONSOLE_HELP()
+		this.history.push(this.arg)
+		
+		var firstArg = this.arg[0]
 		var isFound = false
-		// console.log('')
+
 		if(this.LIST.indexOf(firstArg) !== -1){
 			this.framework = firstArg
 			isFound = true
@@ -113,6 +116,11 @@ class Shell{
 					lib: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/\S+;/), ''): null
 				}
 			}
+			const showHelper = (arr) => {
+				arr.forEach(v => {
+					console.log('\t', v.console.name, '\t'.repeat(v.console.tab), v.console.description)
+				})
+			}
 			// init app
 			this.application = this.application.bind(this)
 			const app = this.application()
@@ -120,7 +128,7 @@ class Shell{
 			switch(this.framework){
 				case "react":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(consoles.react)
+						this.consoleHelper(() => showHelper(app.react(true)))
 						this.exit()
 					}else{
 						app.react()
@@ -128,7 +136,7 @@ class Shell{
 					break
 				case "vue":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(consoles.vue)
+						this.consoleHelper(() => showHelper(app.vue(true)))
 						this.exit()
 					}else{
 						app.vue()
@@ -136,7 +144,7 @@ class Shell{
 					break
 				case "express":
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(consoles.express)
+						this.consoleHelper(() => showHelper(app.express(true)))
 						this.exit()
 					}else{
 						app.express()
@@ -186,6 +194,15 @@ class Shell{
 					if(['production', 'development'].find(v => v == name)){
 						this.env.mode = name
 						this.log('change mode to', name)
+						this.cli()
+					}
+				}
+				if(parseInt(firstArg) === -1){
+					var arg = this.history[this.history.length - 2]
+					if(arg){
+						this.arg = arg
+						this.start()
+					}else{
 						this.cli()
 					}
 				}
@@ -323,19 +340,77 @@ class Shell{
 			}
 		}
 	}
+	coreFeatureDefault(core, options){
+		return[
+			{
+				name: 'tailwindcss',
+				console: {
+					name: '--tailwindcss',
+					description: 'Installation & configuration for tailwindcss',
+					tab: 3
+				},
+				action: async() => {
+					core.createTailwind(options.framework)
+				}
+			},
+			{
+				name: 'firebase-storage',
+				console: {
+					name: '--firebase-storage',
+					description: 'Generate service firebase-storage for upload & remove (v8)',
+					tab: 2
+				},
+				action: async() => {
+					core.createFirebaseStorage(options.fixName)
+				}
+			},
+			{
+				name: 'init-firebase',
+				console: {
+					name: '--init-firebase',
+					description: 'Generate config firebase (v9)',
+					tab: 2
+				},
+				action: () => {
+					core.initializeFirebase()
+				}
+			},
+			{
+				name: 'model-firestore',
+				console: {
+					name: '--model-firestore=name.js',
+					description: 'Generate model firestore (v9)',
+					tab: 1
+				},
+				action: () => {
+					core.createModelFirestore(options.caseName)
+				}
+			},
+		]
+	}
 	application(){
 		const { input, quest } = this
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		const core = this.core()
 
 		return{
-			react: () => {
+			react: (showList = false) => {
 				this.config.rootShellApp = this.config.rootShell + 'react/'
 				var fixName, caseName, skip
 
 				const list = [
+					...this.coreFeatureDefault(core, {
+						framework: 'react',
+						fixName: fixName,
+						caseName: caseName
+					}),
 					{
 						name: 'component',
+						console: {
+							name: '--component=name.js',
+							description: 'Generate component',
+							tab: 2
+						},
 						action: async() => {
 							createDirRecursive(this.config.directory.component, fixName)
 							var code = read(this.config.rootShellApp + 'component.jsx').toString().replaceAll('caseName', caseName)
@@ -349,6 +424,11 @@ class Shell{
 					},
 					{
 						name: 'route',
+						console: {
+							name: '--route=name.js',
+							description: 'Generate route pages',
+							tab: 2
+						},
 						action: async() => {
 							createDirRecursive(this.config.directory.route, fixName)
 							var code = read(this.config.rootShellApp + 'route.jsx').toString().replaceAll('caseName', caseName)
@@ -362,6 +442,11 @@ class Shell{
 					},
 					{
 						name: 'store',
+						console: {
+							name: '--store=name.js',
+							description: 'Generate store',
+							tab: 2
+						},
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							caseName = caseName.toLowerCase()
@@ -395,22 +480,15 @@ class Shell{
 						}
 					},
 					{
-						name: 'tailwindcss',
-						action: async() => {
-							core.createTailwind('react')
-						}
-					},
-					{
-						name: 'firebase-storage',
-						action: async() => {
-							core.createFirebaseStorage(fixName)
-						}
-					},
-					{
 						name: 'route-crud-store',
+						console: {
+							name: '--route-crud-store',
+							description: 'Generate route crud for store',
+							tab: 2
+						},
 						action: async() => {
 							input.name = null
-							var store = quest('type store name (user) : ')
+							var store = quest('name : ')
 							createDirRecursive(this.config.directory.route + '/' + store, fixName)
 							var upperName = String(store)[0].toUpperCase() + store.slice(1),
 							fullDir = this.config.directory.route + '/' + store + '/' + upperName
@@ -444,20 +522,12 @@ class Shell{
 						}
 					},
 					{
-						name: 'init-firebase',
-						action: () => {
-							core.initializeFirebase()
-						}
-					},
-					{
-						name: 'model-firestore',
-						action: () => {
-							core.createModelFirestore(caseName)
-							
-						}
-					},
-					{
 						name: 'project',
+						console: {
+							name: '--project',
+							description: 'Create new project using vite',
+							tab: 3
+						},
 						action: () => {
 							this.core().createProject('react', () => {
 								 var rootapp = this.config.rootShellApp,
@@ -487,7 +557,9 @@ class Shell{
 						}
 					}
 				]
-
+				if(showList){
+					return list
+				}
 				var find = list.find((check, index) => {
 					if(check.name === this.options.choose){
 						const name = String(this.options.name)
@@ -505,13 +577,23 @@ class Shell{
 					return
 				}
 			},
-			vue: () => {
+			vue: (showList = false) => {
 				this.config.rootShellApp = this.config.rootShell + 'vue/'
 				var fixName, caseName, skip
 
 				const list = [
+					...this.coreFeatureDefault(core, {
+						framework: 'vue',
+						fixName: fixName,
+						caseName: caseName
+					}),
 					{
 						name: 'component',
+						console: {
+							name: '--component=name.vue',
+							description: 'Generate component',
+							tab: 2
+						},
 						action: async() => {
 							createDirRecursive(this.config.directory.component + 's', fixName)
 							var code = read(this.config.rootShellApp + 'component.vue').toString().replaceAll('caseName', caseName)
@@ -521,6 +603,11 @@ class Shell{
 					},
 					{
 						name: 'route',
+						console: {
+							name: '--route=name.vue',
+							description: 'Generate route pages',
+							tab: 2
+						},
 						action: async() => {
 							createDirRecursive(this.config.directory.route, fixName)
 							var code = read(this.config.rootShellApp + 'component.vue').toString().replaceAll('caseName', caseName)
@@ -530,6 +617,11 @@ class Shell{
 					},
 					{
 						name: 'store',
+						console: {
+							name: '--store=name.js',
+							description: 'Generate store',
+							tab: 2
+						},
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							caseName = caseName.toLowerCase()
@@ -540,42 +632,25 @@ class Shell{
 						}
 					},
 					{
-						name: 'tailwindcss',
-						action: async() => {
-							core.createTailwind('vue')
-						}
-					},
-					{
-						name: 'firebase-storage',
-						action: async() => {
-							core.createFirebaseStorage(fixName)
-						}
-					},
-					{
-						name: 'init-firebase',
-						action: () => {
-							core.initializeFirebase()
-						}
-					},
-					{
-						name: 'model-firestore',
-						action: () => {
-							core.createModelFirestore(caseName)
-							
-						}
-					},
-					{
 						name: 'project',
+						console: {
+							name: '--project',
+							description: 'Create new project using vite',
+							tab: 3
+						},
 						action: () => {
 							this.core().createProject('vue')
 						}
 					}
 				]
+				if(showList){
+					return list
+				}
 				var find = list.find((check, index) => {
 					if(check.name === this.options.choose){
-						const name = this.options.name
+						const name = String(this.options.name)
 						input.name = name
-						fixName = String(name)[0].toUpperCase() + name.slice(1)
+						fixName = name[0].toUpperCase() + name.slice(1)
 						if(name.indexOf('.') !== -1){
 							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
 						}
@@ -588,14 +663,17 @@ class Shell{
 					return
 				}
 			},
-			express: () => {
+			express: (showList = false) => {
 				this.config.rootShellApp = this.config.rootShell + 'express/'
 				var fixName, caseName, skip
 				const list = [
-					// model
 					{
-						id: 0,
 						name: 'model',
+						console: {
+							name: '--model=name;sequelize|mongoose',
+							description: 'Generate model',
+							tab: 1
+						},
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							if(['mongoose', 'sequelize'].find(v => v == this.options.lib)){
@@ -608,10 +686,13 @@ class Shell{
 							}
 						}
 					},
-					// api
 					{
-						id: 1,
 						name: 'api',
+						console: {
+							name: '--api=name.js',
+							description: 'Generate api',
+							tab: 4
+						},
 						action : () => {
 							fixName = fixName.toLowerCase()
 							copy(this.config.rootShellApp + 'api.js', this.config.directory.api + '/' + fixName)
@@ -622,10 +703,13 @@ class Shell{
 							core.success()
 						}
 					},
-					// project
 					{
-						id: 2,
 						name: 'project',
+						console: {
+							name: '--project',
+							description: 'Create new project',
+							tab: 4
+						},
 						action: () => {
 							if(this.arg.length === 3){
 								var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
@@ -666,10 +750,13 @@ class Shell{
 							}
 						}
 					},
-					// google-cloud-storage
 					{
-						id: 3,
 						name: 'google-cloud-storage',
+						console: {
+							name: '--google-cloud-storage',
+							description: 'Generate @google-cloud/storage & api route',
+							tab: 2
+						},
 						action: () => {
 							createDirRecursive(this.env.root + '/service')
 							createDirRecursive(this.env.root + '/api')
@@ -679,11 +766,14 @@ class Shell{
 						}
 					}
 				]
+				if(showList){
+					return list
+				}
 				var find = list.find((check, index) => {
 					if(check.name === this.options.choose){
-						const name = this.options.name
+						const name = String(this.options.name)
 						input.name = name
-						fixName = String(name)[0].toUpperCase() + name.slice(1)
+						fixName = name[0].toUpperCase() + name.slice(1)
 						skip = true
 						if(name.indexOf('.') !== -1){
 							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
@@ -695,37 +785,6 @@ class Shell{
 				if(!find){
 					return
 				}
-			}
-		}
-	}
-	static CONSOLE_HELP(){
-		return{
-			react(){
-				console.log('\t', '--component=name.jsx', '\t\t', 'Generate component')
-				console.log('\t', '--store=name.js', '\t\t', 'Generate store')
-				console.log('\t', '--route=name.js', '\t\t', 'Generate route pages')
-				console.log('\t', '--tailwindcss', '\t\t\t', 'Installation & configuration for tailwindcss')
-				console.log('\t', '--firebase-storage', '\t\t', 'Generate service firebase-storage for upload & remove (v8)')
-				console.log('\t', '--init-firebase', '\t\t', 'Generate config firebase (v9)')
-				console.log('\t', '--model-firestore=name.js', '\t', 'Generate model firestore (v9)')
-				console.log('\t', '--route-crud-store', '\t\t', 'Generate route crud for store')
-				console.log('\t', '--project', '\t\t\t', 'Create new project using vite')
-			},
-			vue(){
-				console.log('\t', '--component=name.vue', '\t\t', 'Generate component')
-				console.log('\t', '--store=name.js', '\t\t', 'Generate store')
-				console.log('\t', '--route=name.vue', '\t\t', 'Generate route pages')
-				console.log('\t', '--tailwindcss', '\t\t\t', 'Installation & configuration for tailwindcss')
-				console.log('\t', '--firebase-storage', '\t\t', 'Generate service firebase-storage for upload & remove (v8)')
-				console.log('\t', '--init-firebase', '\t\t', 'Generate config firebase (v9)')
-				console.log('\t', '--model-firestore=name.js', '\t', 'Generate model firestore (v9)')
-				console.log('\t', '--project', '\t\t\t', 'Create new project using vite')
-			},
-			express(){
-				console.log('\t', '--model=name;sequelize|mongoose', '\t', 'Generate model')
-				console.log('\t', '--api=name.js', '\t\t\t\t', 'Generate api')
-				console.log('\t', '--project', '\t\t\t\t', 'Create new project using vite')
-				console.log('\t', '--google-cloud-storage', '\t\t', 'Generate @google-cloud/storage & api route')
 			}
 		}
 	}
