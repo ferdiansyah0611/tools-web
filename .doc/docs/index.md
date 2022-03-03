@@ -31,5 +31,6 @@ The analogy is that if you are a backend developer, you are familiar with the co
 - Middleware
 - Authentication
 - Firebase Storage
+- Firebase Firestore
 # Contributor
 ![gaa](https://avatars.githubusercontent.com/u/47508140?v=4)

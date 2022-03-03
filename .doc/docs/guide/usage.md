@@ -31,6 +31,14 @@ Did you know that tools-web can integrate other tools made by developers?
 	```bash
 	node index.js react --firebase-storage
 	```
+- **Generate config firebase (v9)**
+	```bash
+	node index.js react --init-firebase
+	```
+- **Generate model firestore (v9)**
+	```bash
+	node index.js react --model-firestore=user.js
+	```
 - **Generate route crud for store**
 	```bash
 	node index.js react --route-crud-store
@@ -59,6 +67,14 @@ Did you know that tools-web can integrate other tools made by developers?
 - **Generate service firebase-storage for upload & remove (v8)**
 	```bash
 	node index.js vue --firebase-storage
+	```
+- **Generate config firebase (v9)**
+	```bash
+	node index.js vue --init-firebase
+	```
+- **Generate model firestore (v9)**
+	```bash
+	node index.js vue --model-firestore=user.js
 	```
 
 ## Express

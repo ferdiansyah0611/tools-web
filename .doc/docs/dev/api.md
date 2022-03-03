@@ -129,6 +129,21 @@ Generate service firebase-storage for upload & remove (v8).
 ```javascript
 core.createFirebaseStorage('vue')
 ```
+### initializeFirebase()
+Generate config firebase (v9).
+```javascript
+core.initializeFirebase()
+```
+### createModelFirestore()
+Generate model firestore (v9).
+```javascript
+core.createModelFirestore(caseName)
+```
+### success()
+Call this function if end of execute.
+```javascript
+core.success()
+```
 ## application()
 run list of application framework/library.
 ```javascript
