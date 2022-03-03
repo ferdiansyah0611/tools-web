@@ -90,13 +90,6 @@ return datetime [hours:minutes].
 ```javascript
 sh.time()
 ```
-## consoleHelper(func)
-show help command with options customize.
-```javascript
-sh.consoleHelper((log) => {
-	log('--test', ':= test code')
-})
-```
 ## generateStyle(name, type)
 function to generate style.
 ```javascript
@@ -107,6 +100,13 @@ function to run subprocess cli.
 ```javascript
 sh.subprocess('npm --help', {
 	close: () => sh.log('closed')
+})
+```
+## consoleHelper(func)
+show help command with options customize.
+```javascript
+sh.consoleHelper((log) => {
+	log('--test', ':= test code')
 })
 ```
 ## core()
@@ -148,7 +148,8 @@ core.success()
 run list of application framework/library.
 ```javascript
 const app = sh.application()
-app.react()
-app.vue()
-app.express()
+// if parameter is true, return list of cli on this framework/library
+app.react(false)
+app.vue(false)
+app.express(false)
 ```

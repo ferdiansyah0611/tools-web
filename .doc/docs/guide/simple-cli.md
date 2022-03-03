@@ -37,3 +37,7 @@ Change mode env.
 ```bash
 mode=production
 ```
+Run previous command.
+```bash
+-1
+```
