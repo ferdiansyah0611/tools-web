@@ -269,7 +269,8 @@ class Shell{
 				this.log('create new project...')
 				this.subprocess('npm create vite@latest ' + this.arg[1] + ' -- --template ' + name, {
 					close: () => {
-						var code = read(this.config.rootShell + 'vite.config.js').toString(), core = this.core()
+						var core = this.core()
+						var code = read(this.config.rootShell + 'vite.config.js').toString()
 						code = code.replace("plugin-react", "plugin-" + name)
 						write(this.env.root + '/vite.config.js', code)
 						end()
@@ -298,8 +299,26 @@ class Shell{
 				this.log(`import {storage, upload, remove} from '@service/firebase-storage.js'`)
 				write(this.config.directory.service + '/firebase-storage.js', code)
 			},
+			initializeFirebase: () => {
+				createDirRecursive(this.env.root + '/src')
+				createDirRecursive(this.env.root + '/src/service')
+				copy(this.config.rootShell + 'firebase/firebase.js', this.env.root + '/src/firebase.js')
+				copy(this.config.rootShell + 'firebase/validate.js', this.env.root + '/src/service/validate-auth.js')
+				var core = this.core()
+				core.success()
+			},
+			createModelFirestore: (caseName) => {
+				caseName = caseName.toLowerCase()
+				createDirRecursive(this.env.root + '/src/model')
+				var code = read(this.config.rootShell + 'firebase/model.js')
+					.toString()
+					.replaceAll('model', caseName)
+				write(this.env.root + '/src/model/' + caseName + '.js', code)
+				var core = this.core()
+				core.success()
+			},
 			success: () => {
-				this.log('create successfuly!\n')
+				this.log('done!\n')
 				this.exit()
 			}
 		}
@@ -308,30 +327,15 @@ class Shell{
 		const { input, quest } = this
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		const core = this.core()
-		const writing = core.writing
 
 		return{
 			react: () => {
 				this.config.rootShellApp = this.config.rootShell + 'react/'
-				var listcli = ['component', 'route', 'store', 'tailwindcss', 'firebase-storage', 'route-crud-store', 'project'];
-				const choose = listcli.indexOf(this.options.choose)
-				var skip = false
-				var fixName, caseName
-				if(!choose && choose !== 0){
-					return
-				}
-				if(Number(choose) in [3,4,5,6]){
-					const name = String(this.options.name)
-					input.name = name
-					fixName = name[0].toUpperCase() + name.slice(1)
-					caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-					skip = true
-				}
+				var fixName, caseName, skip
 
 				const list = [
-					// component
 					{
-						id: 0,
+						name: 'component',
 						action: async() => {
 							createDirRecursive(this.config.directory.component, fixName)
 							var code = read(this.config.rootShellApp + 'component.jsx').toString().replaceAll('caseName', caseName)
@@ -343,9 +347,8 @@ class Shell{
 							core.success()
 						}
 					},
-					// route
 					{
-						id: 1,
+						name: 'route',
 						action: async() => {
 							createDirRecursive(this.config.directory.route, fixName)
 							var code = read(this.config.rootShellApp + 'route.jsx').toString().replaceAll('caseName', caseName)
@@ -357,9 +360,8 @@ class Shell{
 							core.success()
 						}
 					},
-					// CRUD reducer
 					{
-						id: 2,
+						name: 'store',
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							caseName = caseName.toLowerCase()
@@ -392,23 +394,20 @@ class Shell{
 							core.success()
 						}
 					},
-					// tailwind
 					{
-						id: 3,
+						name: 'tailwindcss',
 						action: async() => {
 							core.createTailwind('react')
 						}
 					},
-					// firebase-storage
 					{
-						id: 4,
+						name: 'firebase-storage',
 						action: async() => {
 							core.createFirebaseStorage(fixName)
 						}
 					},
-					// route-crud store
 					{
-						id: 5,
+						name: 'route-crud-store',
 						action: async() => {
 							input.name = null
 							var store = quest('type store name (user) : ')
@@ -444,9 +443,21 @@ class Shell{
 							core.success()
 						}
 					},
-					// project
 					{
-						id: 6,
+						name: 'init-firebase',
+						action: () => {
+							core.initializeFirebase()
+						}
+					},
+					{
+						name: 'model-firestore',
+						action: () => {
+							core.createModelFirestore(caseName)
+							
+						}
+					},
+					{
+						name: 'project',
 						action: () => {
 							this.core().createProject('react', () => {
 								 var rootapp = this.config.rootShellApp,
@@ -476,10 +487,18 @@ class Shell{
 						}
 					}
 				]
-				var find = list.find((check) => {
-					if(check.id === Number(choose)){
+
+				var find = list.find((check, index) => {
+					if(check.name === this.options.choose){
+						const name = String(this.options.name)
+						input.name = name
+						fixName = name[0].toUpperCase() + name.slice(1)
+						if(name.indexOf('.') !== -1){
+							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+						}
+						skip = true
 						check.action()
-						return true
+						return check
 					}
 				})
 				if(!find){
@@ -488,25 +507,11 @@ class Shell{
 			},
 			vue: () => {
 				this.config.rootShellApp = this.config.rootShell + 'vue/'
-				var listcli = ['component', 'route', 'store', 'tailwindcss', 'firebase-storage', 'project'];
-				const choose = listcli.indexOf(this.options.choose)
-				var skip = false
-				var fixName, caseName
-				if(!choose && choose !== 0){
-					return
-				}
-				if(Number(choose) in [1,2,3]){
-					const name = this.options.name
-					input.name = name
-					fixName = String(name)[0].toUpperCase() + name.slice(1)
-					caseName = String(name)[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-					skip = true
-				}
+				var fixName, caseName, skip
 
 				const list = [
-					// component
 					{
-						id: 0,
+						name: 'component',
 						action: async() => {
 							createDirRecursive(this.config.directory.component + 's', fixName)
 							var code = read(this.config.rootShellApp + 'component.vue').toString().replaceAll('caseName', caseName)
@@ -514,9 +519,8 @@ class Shell{
 							core.success()
 						}
 					},
-					// route
 					{
-						id: 1,
+						name: 'route',
 						action: async() => {
 							createDirRecursive(this.config.directory.route, fixName)
 							var code = read(this.config.rootShellApp + 'component.vue').toString().replaceAll('caseName', caseName)
@@ -524,9 +528,8 @@ class Shell{
 							core.success()
 						}
 					},
-					// store
 					{
-						id: 2,
+						name: 'store',
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							caseName = caseName.toLowerCase()
@@ -536,30 +539,47 @@ class Shell{
 							core.success()
 						}
 					},
-					// tailwind
 					{
-						id: 3,
+						name: 'tailwindcss',
 						action: async() => {
 							core.createTailwind('vue')
 						}
 					},
-					// firebase-storage
 					{
-						id: 4,
+						name: 'firebase-storage',
 						action: async() => {
 							core.createFirebaseStorage(fixName)
 						}
 					},
-					// project
 					{
-						id: 5,
+						name: 'init-firebase',
+						action: () => {
+							core.initializeFirebase()
+						}
+					},
+					{
+						name: 'model-firestore',
+						action: () => {
+							core.createModelFirestore(caseName)
+							
+						}
+					},
+					{
+						name: 'project',
 						action: () => {
 							this.core().createProject('vue')
 						}
 					}
 				]
-				var find = list.find((check) => {
-					if(check.id === Number(choose)){
+				var find = list.find((check, index) => {
+					if(check.name === this.options.choose){
+						const name = this.options.name
+						input.name = name
+						fixName = String(name)[0].toUpperCase() + name.slice(1)
+						if(name.indexOf('.') !== -1){
+							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+						}
+						skip = true
 						check.action()
 						return true
 					}
@@ -570,23 +590,12 @@ class Shell{
 			},
 			express: () => {
 				this.config.rootShellApp = this.config.rootShell + 'express/'
-				var listcli = ['model', 'api', 'project', 'google-cloud-storage'], skip = false, fixName, caseName;
-				const choose = listcli.indexOf(this.options.choose)
-				if(!choose && choose !== 0){
-					return
-				}
-				if(Number(choose) in [0, 1]){
-					const name = this.options.name
-					input.name = name
-					fixName = String(name)[0].toUpperCase() + name.slice(1)
-					caseName = String(name)[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-					skip = true
-				}
-
+				var fixName, caseName, skip
 				const list = [
 					// model
 					{
 						id: 0,
+						name: 'model',
 						action: async() => {
 							fixName = fixName.toLowerCase()
 							if(['mongoose', 'sequelize'].find(v => v == this.options.lib)){
@@ -602,6 +611,7 @@ class Shell{
 					// api
 					{
 						id: 1,
+						name: 'api',
 						action : () => {
 							fixName = fixName.toLowerCase()
 							copy(this.config.rootShellApp + 'api.js', this.config.directory.api + '/' + fixName)
@@ -615,6 +625,7 @@ class Shell{
 					// project
 					{
 						id: 2,
+						name: 'project',
 						action: () => {
 							if(this.arg.length === 3){
 								var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
@@ -658,15 +669,25 @@ class Shell{
 					// google-cloud-storage
 					{
 						id: 3,
+						name: 'google-cloud-storage',
 						action: () => {
+							createDirRecursive(this.env.root + '/service')
+							createDirRecursive(this.env.root + '/api')
 							copy(this.config.rootShell + 'firebase/storage-be.js', this.env.root + '/service' + '/storage-cloud.js')
 							copy(this.config.rootShellApp + 'api/storage.js', this.env.root + '/api' + '/storage.js')
 							core.success()
 						}
 					}
 				]
-				var find = list.find((check) => {
-					if(check.id === Number(choose)){
+				var find = list.find((check, index) => {
+					if(check.name === this.options.choose){
+						const name = this.options.name
+						input.name = name
+						fixName = String(name)[0].toUpperCase() + name.slice(1)
+						skip = true
+						if(name.indexOf('.') !== -1){
+							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+						}
 						check.action()
 						return true
 					}
@@ -680,27 +701,31 @@ class Shell{
 	static CONSOLE_HELP(){
 		return{
 			react(){
-				console.log('\t', '--component=name', ':= Generate component')
-				console.log('\t', '--store=name', ':= Generate store')
-				console.log('\t', '--route=name', ':= Generate route pages')
-				console.log('\t', '--tailwindcss', ':= Installation & configuration for tailwindcss')
-				console.log('\t', '--firebase-storage', ':= Generate service firebase-storage for upload & remove (v8)')
-				console.log('\t', '--route-crud-store', ':= Generate route crud for store')
-				console.log('\t', '--project', ':= Create new project using vite')
+				console.log('\t', '--component=name.jsx', '\t\t', 'Generate component')
+				console.log('\t', '--store=name.js', '\t\t', 'Generate store')
+				console.log('\t', '--route=name.js', '\t\t', 'Generate route pages')
+				console.log('\t', '--tailwindcss', '\t\t\t', 'Installation & configuration for tailwindcss')
+				console.log('\t', '--firebase-storage', '\t\t', 'Generate service firebase-storage for upload & remove (v8)')
+				console.log('\t', '--init-firebase', '\t\t', 'Generate config firebase (v9)')
+				console.log('\t', '--model-firestore=name.js', '\t', 'Generate model firestore (v9)')
+				console.log('\t', '--route-crud-store', '\t\t', 'Generate route crud for store')
+				console.log('\t', '--project', '\t\t\t', 'Create new project using vite')
 			},
 			vue(){
-				console.log('\t', '--component=name', ':= Generate component')
-				console.log('\t', '--store=name', ':= Generate store')
-				console.log('\t', '--route=name', ':= Generate route pages')
-				console.log('\t', '--tailwindcss', ':= Installation & configuration for tailwindcss')
-				console.log('\t', '--firebase-storage', ':= Generate service firebase-storage for upload & remove (v8)')
-				console.log('\t', '--project', ':= Create new project using vite')
+				console.log('\t', '--component=name.vue', '\t\t', 'Generate component')
+				console.log('\t', '--store=name.js', '\t\t', 'Generate store')
+				console.log('\t', '--route=name.vue', '\t\t', 'Generate route pages')
+				console.log('\t', '--tailwindcss', '\t\t\t', 'Installation & configuration for tailwindcss')
+				console.log('\t', '--firebase-storage', '\t\t', 'Generate service firebase-storage for upload & remove (v8)')
+				console.log('\t', '--init-firebase', '\t\t', 'Generate config firebase (v9)')
+				console.log('\t', '--model-firestore=name.js', '\t', 'Generate model firestore (v9)')
+				console.log('\t', '--project', '\t\t\t', 'Create new project using vite')
 			},
 			express(){
-				console.log('\t', '--model=name;sequelize|mongoose', ':= Generate model')
-				console.log('\t', '--api=name.js', ':= Generate api')
-				console.log('\t', '--project', ':= Create new project using vite')
-				console.log('\t', '--google-cloud-storage', ':= Generate @google-cloud/storage & api route')
+				console.log('\t', '--model=name;sequelize|mongoose', '\t', 'Generate model')
+				console.log('\t', '--api=name.js', '\t\t\t\t', 'Generate api')
+				console.log('\t', '--project', '\t\t\t\t', 'Create new project using vite')
+				console.log('\t', '--google-cloud-storage', '\t\t', 'Generate @google-cloud/storage & api route')
 			}
 		}
 	}
