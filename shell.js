@@ -52,10 +52,6 @@ class Shell{
 		this.env = env
 		this.arg = []
 		this.history = []
-		this.input = {
-			name: '',
-			code: ''
-		}
 		this.options = {
 			dir: null,
 			choose: '',
@@ -125,46 +121,37 @@ class Shell{
 			this.application = this.application.bind(this)
 			const app = this.application()
 			// statement app
-			switch(this.framework){
-				case "react":
+			var list = [
+				{ name: 'react' },
+				{ name: 'vue' },
+				{ name: 'express' },
+			]
+			var find = list.find(v => {
+				if(v.name === this.framework){
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(() => showHelper(app.react(true)))
+						this.consoleHelper(() => showHelper(app[v.name](true)))
 						this.exit()
 					}else{
-						app.react()
+						app[v.name]()
 					}
-					break
-				case "vue":
+					return v
+				}
+			})
+			if(!find){
+				var plugin = this.plugin.find(v => v.name == this.framework)
+				if(plugin){
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(() => showHelper(app.vue(true)))
+						this.consoleHelper(plugin.help)
 						this.exit()
 					}else{
-						app.vue()
-					}
-					break
-				case "express":
-					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(() => showHelper(app.express(true)))
-						this.exit()
-					}else{
-						app.express()
-					}
-					break
-				default:
-					var plugin = this.plugin.find(v => v.name == this.framework)
-					if(plugin){
-						if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-							this.consoleHelper(plugin.help)
-							this.exit()
-						}else{
-							var action = plugin.action.find(v => v.name === this.options.choose)
-							if(action){
-								action.action()
-							}
+						var action = plugin.action.find(v => v.name === this.options.choose)
+						if(action){
+							action.action()
 						}
-					}else{
-						this.exit()
 					}
+				}else{
+					this.exit()
+				}
 			}
 		}
 		if(['-h', '--help'].indexOf(firstArg) !== -1){
@@ -181,7 +168,8 @@ class Shell{
 				}
 				if(firstArg == 'exit' || firstArg == ''){
 					this.log('Good Bye!')
-					process.exit()
+					this.startcli = false
+					this.exit(true)
 				}
 				if(checkIndex(firstArg, 'app', '=')){
 					var name = firstArg.split('=')[1]
@@ -240,7 +228,6 @@ class Shell{
 		})
 	}
 	generateStyle(caseName, typeSelect){
-		console.log('')
 		var type = prompt(this.time() + ` generate (css|scss|sass) : `);
 		var dir = this.env.root + '/src/style' + '/' + typeSelect
 		if (!fs.existsSync(dir)){
@@ -261,11 +248,6 @@ class Shell{
 		console.log(this.time(), ...log)
 	}
 	exit(skip = false){
-		const autoremove = () => {
-			if(!this.isProduction){
-				fs.rmSync(this.env.root, { recursive: true, force: true })
-			}
-		}
 		if(this.startcli){
 			this.cli()
 		}else{
@@ -273,7 +255,6 @@ class Shell{
 				process.exit()
 			}
 		}
-		autoremove()
 	}
 	time(){
 		var date = new Date()
@@ -391,14 +372,26 @@ class Shell{
 		]
 	}
 	application(){
-		const { input, quest } = this
-		const { createDirRecursive, copy, read, write, append } = this.SystemFile
-		const core = this.core()
+		var { quest } = this
+		var { createDirRecursive, copy, read, write, append } = this.SystemFile
+		var core = this.core()
+		var fixName, caseName, skip
+		const findAndRun = (list) => list.find((check) => {
+			if(check.name === this.options.choose){
+				const name = String(this.options.name)
+				fixName = name[0].toUpperCase() + name.slice(1)
+				skip = true
+				if(name.indexOf('.') !== -1){
+					caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+				}
+				check.action()
+				return check
+			}
+		})
 
 		return{
 			react: (showList = false) => {
 				this.config.rootShellApp = this.config.rootShell + 'react/'
-				var fixName, caseName, skip
 
 				const list = [
 					...this.coreFeatureDefault(core, {
@@ -489,7 +482,6 @@ class Shell{
 							tab: 2
 						},
 						action: async() => {
-							input.name = null
 							var store = quest('name : ')
 							createDirRecursive(this.config.directory.route + '/' + store, fixName)
 							var upperName = String(store)[0].toUpperCase() + store.slice(1),
@@ -533,7 +525,7 @@ class Shell{
 						action: () => {
 							this.core().createProject('react', () => {
 								 var rootapp = this.config.rootShellApp,
-								 exec = 'cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios'
+								 exec = 'cd ' + this.env.root + (this.isProduction ? ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
 								 createDirRecursive(this.config.directory.service);
 								 createDirRecursive(this.config.directory.style);
 								 createDirRecursive(this.config.directory.component);
@@ -549,12 +541,10 @@ class Shell{
 								 copy(rootapp + 'component/template.jsx', this.config.directory.component + '/template.jsx')
 								 copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
 								 copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
-								 if(this.isProduction){
-								 	this.log(exec)
-								 	this.subprocess(exec, {
-								 		close: () => {}
-								 	})
-								 }
+								 this.log(exec)
+								 this.subprocess(exec, {
+								 	close: () => {}
+								 })
 							})
 						}
 					}
@@ -562,26 +552,13 @@ class Shell{
 				if(showList){
 					return list
 				}
-				var find = list.find((check, index) => {
-					if(check.name === this.options.choose){
-						const name = String(this.options.name)
-						input.name = name
-						fixName = name[0].toUpperCase() + name.slice(1)
-						if(name.indexOf('.') !== -1){
-							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-						}
-						skip = true
-						check.action()
-						return check
-					}
-				})
+				var find = findAndRun(list)
 				if(!find){
 					return
 				}
 			},
 			vue: (showList = false) => {
 				this.config.rootShellApp = this.config.rootShell + 'vue/'
-				var fixName, caseName, skip
 
 				const list = [
 					...this.coreFeatureDefault(core, {
@@ -648,26 +625,13 @@ class Shell{
 				if(showList){
 					return list
 				}
-				var find = list.find((check, index) => {
-					if(check.name === this.options.choose){
-						const name = String(this.options.name)
-						input.name = name
-						fixName = name[0].toUpperCase() + name.slice(1)
-						if(name.indexOf('.') !== -1){
-							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-						}
-						skip = true
-						check.action()
-						return true
-					}
-				})
+				var find = findAndRun(list)
 				if(!find){
 					return
 				}
 			},
 			express: (showList = false) => {
 				this.config.rootShellApp = this.config.rootShell + 'express/'
-				var fixName, caseName, skip
 				const list = [
 					{
 						name: 'model',
@@ -771,19 +735,7 @@ class Shell{
 				if(showList){
 					return list
 				}
-				var find = list.find((check, index) => {
-					if(check.name === this.options.choose){
-						const name = String(this.options.name)
-						input.name = name
-						fixName = name[0].toUpperCase() + name.slice(1)
-						skip = true
-						if(name.indexOf('.') !== -1){
-							caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-						}
-						check.action()
-						return true
-					}
-				})
+				var find = findAndRun(list)
 				if(!find){
 					return
 				}
