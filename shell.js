@@ -81,11 +81,14 @@ class Shell{
 		this.startcli = true
 		const arg = this.quest('')
 		this.arg = arg.split(' ')
-		this.start()
+		this.start();
 	}
 	start(){
 		if(!this.startcli){
 			this.arg = process.argv.slice(2)
+		}
+		if(this.arg.length === 0){
+			this.cli()
 		}
 		this.history.push(this.arg)
 
@@ -141,12 +144,13 @@ class Shell{
 				var plugin = this.plugin.find(v => v.name == this.framework)
 				if(plugin){
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
-						this.consoleHelper(plugin.help)
+						this.consoleHelper(() => showHelper(plugin.action))
 						this.exit()
 					}else{
 						var action = plugin.action.find(v => v.name === this.options.choose)
 						if(action){
 							action.action()
+							this.cli()
 						}
 					}
 				}else{
