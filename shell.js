@@ -92,7 +92,7 @@ class Shell{
 			this.arg = process.argv.slice(2)
 		}
 		this.history.push(this.arg)
-		
+
 		var firstArg = this.arg[0]
 		var isFound = false
 
@@ -241,7 +241,7 @@ class Shell{
 	}
 	generateStyle(caseName, typeSelect){
 		console.log('')
-		var type = prompt(this.time() + ` generate (css|scss|sass) or empty : `);
+		var type = prompt(this.time() + ` generate (css|scss|sass) : `);
 		var dir = this.env.root + '/src/style' + '/' + typeSelect
 		if (!fs.existsSync(dir)){
 		    fs.mkdirSync(dir, { recursive: true });
@@ -283,8 +283,10 @@ class Shell{
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		return{
 			createProject: (name, end = Function) => {
+				var exec = 'npm create vite@latest ' + this.arg[1] + ' -- --template ' + name + (this.isProduction ? ' && npm i': '')
 				this.log('create new project...')
-				this.subprocess('npm create vite@latest ' + this.arg[1] + ' -- --template ' + name, {
+				this.log(exec)
+				this.subprocess(exec, {
 					close: () => {
 						var core = this.core()
 						var code = read(this.config.rootShell + 'vite.config.js').toString()
@@ -296,9 +298,9 @@ class Shell{
 				})
 			},
 			createTailwind: (type) => {
-				var install_tailwind = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
-				this.log(install_tailwind)
-				this.subprocess(install_tailwind, {
+				var exec = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
+				this.log(exec)
+				this.subprocess(exec, {
 					close: () => {
 						copy(this.config.rootShell + 'tailwind.sass', this.env.root + '/src/tailwind.sass')
 						copy(this.config.rootShell + 'tailwind.config.js', this.env.root + '/tailwind.config.js')
@@ -454,7 +456,7 @@ class Shell{
 							var crud = quest(`type y to create CRUD using createAsyncThunk : `);
 							var code
 							if(String(crud).toLowerCase() == 'y'){
-								var url = quest(`base url (http://localhost:8000/api/user) : `);
+								var url = quest(`base url : `);
 								url = url || 'http://localhost:8000/api/user'
 								code = read(this.config.rootShellApp + 'store-crud.js')
 									.toString()
@@ -466,13 +468,13 @@ class Shell{
 									var txt = read(this.config.rootShellApp + 'store-crud-reducer.js')
 									var firstCase = caseName[0].toUpperCase() + caseName.slice(1)
 									code = txt.toString().replaceAll('app', caseName)
-										.replaceAll('namestore', input.name)
+										.replaceAll('namestore', caseName)
 										.replaceAll('NameExport', firstCase)
-										.replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @s/${input.name}`)
+										.replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @s/${caseName}`)
 								}else{
-									var code = read(this.config.rootShellApp + 'store.js').toString()
+									code = read(this.config.rootShellApp + 'store.js').toString()
 										.replaceAll('appSlice', caseName + 'Slice')
-										.replaceAll('namestore', input.name)
+										.replaceAll('namestore', caseName)
 								}
 							}
 							write(this.config.directory.store + '/' + fixName, code)
