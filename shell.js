@@ -222,14 +222,17 @@ class Shell{
 	}
 	subprocess(run, action = {close: Function}){
 		const { exec } = require('child_process');
-		exec(run, (err, stdout, stderr) => {
-		  if (err) {
-		    this.log(stderr)
-		    action.close(stderr)
-		    return;
-		  }
-		  console.log(stdout)
-		  action.close(stdout)
+		exec(run, async (err, stdout, stderr) => {
+			if (err) {
+				this.log(stderr)
+				action.close(stderr)
+				return;
+			}
+			await new Promise((res) => {
+				setTimeout(() => res(true), 1000)
+			})
+			console.log(stdout)
+			action.close(stdout)
 		})
 	}
 	generateStyle(caseName, typeSelect){
@@ -529,27 +532,29 @@ class Shell{
 						},
 						action: () => {
 							this.core().createProject('react', () => {
-								 var rootapp = this.config.rootShellApp,
-								 exec = 'cd ' + this.env.root + (this.isProduction ? ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
-								 createDirRecursive(this.config.directory.service);
-								 createDirRecursive(this.config.directory.style);
-								 createDirRecursive(this.config.directory.component);
-								 createDirRecursive(this.config.directory.store);
-								 createDirRecursive(this.config.directory.route);
-								 copy(rootapp + 'route/index.jsx', this.config.directory.route + '/index.jsx')
-								 copy(rootapp + 'route/Home.jsx', this.config.directory.route + '/Home.jsx')
-								 copy(rootapp + 'route/About.jsx', this.config.directory.route + '/About.jsx')
-								 copy(rootapp + 'service/auth.js', this.config.directory.service + '/auth.js')
-								 copy(rootapp + 'service/http.js', this.config.directory.service + '/http.js')
-								 copy(rootapp + 'store/index.js', this.config.directory.store + '/index.js')
-								 copy(rootapp + 'store/app.js', this.config.directory.store + '/app.js')
-								 copy(rootapp + 'component/template.jsx', this.config.directory.component + '/template.jsx')
-								 copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
-								 copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
-								 this.log(exec)
-								 this.subprocess(exec, {
-								 	close: () => {}
-								 })
+								var rootapp = this.config.rootShellApp,
+								exec = 'cd ' + this.env.root + (this.isProduction ? ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
+								createDirRecursive(this.config.directory.service);
+								createDirRecursive(this.config.directory.style);
+								createDirRecursive(this.config.directory.component);
+								createDirRecursive(this.config.directory.store);
+								createDirRecursive(this.config.directory.route);
+								copy(rootapp + 'route/index.jsx', this.config.directory.route + '/index.jsx')
+								copy(rootapp + 'route/Home.jsx', this.config.directory.route + '/Home.jsx')
+								copy(rootapp + 'route/About.jsx', this.config.directory.route + '/About.jsx')
+								copy(rootapp + 'service/auth.js', this.config.directory.service + '/auth.js')
+								copy(rootapp + 'service/http.js', this.config.directory.service + '/http.js')
+								copy(rootapp + 'store/index.js', this.config.directory.store + '/index.js')
+								copy(rootapp + 'store/app.js', this.config.directory.store + '/app.js')
+								copy(rootapp + 'component/template.jsx', this.config.directory.component + '/template.jsx')
+								copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
+								copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
+								if(exec){
+									this.log(exec)
+									this.subprocess(exec, {
+										close: () => {}
+									})
+								}
 							})
 						}
 					}
