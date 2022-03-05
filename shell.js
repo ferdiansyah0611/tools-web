@@ -282,7 +282,6 @@ class Shell{
 						code = code.replace("plugin-react", "plugin-" + name)
 						write(this.env.root + '/vite.config.js', code)
 						end()
-						core.success()
 					}
 				})
 			},
@@ -531,7 +530,7 @@ class Shell{
 							tab: 3
 						},
 						action: () => {
-							this.core().createProject('react', () => {
+							core.createProject('react', () => {
 								var rootapp = this.config.rootShellApp,
 								exec = 'cd ' + this.env.root + (this.isProduction ? ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
 								createDirRecursive(this.config.directory.service);
@@ -552,7 +551,10 @@ class Shell{
 								if(exec){
 									this.log(exec)
 									this.subprocess(exec, {
-										close: () => {}
+										close: () => {
+											this.log('installed')
+											core.success()
+										}
 									})
 								}
 							})
@@ -628,7 +630,9 @@ class Shell{
 							tab: 3
 						},
 						action: () => {
-							this.core().createProject('vue')
+							core.createProject('vue', () => {
+								core.success()
+							})
 						}
 					}
 				]
