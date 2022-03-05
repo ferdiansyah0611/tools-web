@@ -84,16 +84,17 @@ class Shell{
 		this.start();
 	}
 	start(){
+		var firstArg = this.arg[0]
+		var isFound = false
+
 		if(!this.startcli){
 			this.arg = process.argv.slice(2)
 		}
 		if(this.arg.length === 0){
-			this.cli()
+			firstArg = '-h'
 		}
 		this.history.push(this.arg)
 
-		var firstArg = this.arg[0]
-		var isFound = false
 
 		if(this.LIST.indexOf(firstArg) !== -1){
 			this.framework = firstArg
