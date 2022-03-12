@@ -21,6 +21,11 @@ class SystemFile{
 		fs.writeFileSync(filepath, first + text + (end || ''))
 	}
 	copy(copy, dir, callback = Function){
+		if (!fs.existsSync(dir)) {
+			var folder = dir.split('/')
+			folder = folder.slice(0, folder.length - 1).join('/')
+			fs.mkdirSync(folder, { recursive: true });
+		}
 		fs.copyFile(copy, dir, callback)
 		return this.app.log('writing', dir)
 	}
@@ -47,6 +52,7 @@ class Shell{
 				api: env.root + '/api',
 			}
 		}
+		this.root = env.root
 		this.framework = null
 		this.LIST = ['react', 'vue', 'express']
 		this.env = env
