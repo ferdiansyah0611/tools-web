@@ -15,6 +15,11 @@ list of argument cli
 ```javascript
 this.log(sh.arg)
 ```
+## root: String
+default root app
+```javascript
+this.log(sh.root)
+```
 ## plugin: Array
 list of plugin registered.
 ```javascript

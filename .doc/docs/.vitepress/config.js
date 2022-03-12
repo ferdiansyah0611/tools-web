@@ -18,7 +18,16 @@ function getGuideSidebar() {
         },
         { text: 'API Reference', link: '/dev/api' },
       ]
-    }
+    },
+    {
+      text: 'Plugin',
+      children: [
+        {
+          text: 'Codeigniter 4',
+          link: '/plugin/codeigniter4'
+        },
+      ]
+    },
   ]
 }
 
