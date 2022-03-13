@@ -5,4 +5,4 @@ const sh = new Shell({
 	root: 'myapp',
 	engine: 'ejs'
 })
-sh.start()
+sh.cli()

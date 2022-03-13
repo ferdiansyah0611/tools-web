@@ -114,11 +114,20 @@ class Shell{
 			this.framework = firstArg
 			isFound = true
 			if(this.arg.length >= 3){
-				var options = this.arg[2].split('=')
-				this.options = {
-					dir: this.arg[1],
-					choose: options[0].split('--')[1],
-					name: options[1]
+				if(this.arg[2].indexOf('=') !== -1){
+					var options = this.arg[2].split('=')
+					this.options = {
+						dir: this.arg[1],
+						choose: options[0].split('--')[1],
+						name: options[1]
+					}
+				}else{
+					var options = this.arg[1]
+					this.options = {
+						dir: null,
+						choose: options.split('--')[1],
+						name: ''
+					}
 				}
 			}
 			if(this.arg.length === 2){
@@ -164,8 +173,14 @@ class Shell{
 					}else{
 						var action = plugin.action.find(v => v.name === this.options.choose)
 						if(action){
-							action.action()
-							this.cli()
+							if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
+								this.log('Error: must be 2 argument')
+								this.cli()
+								return
+							}else{
+								action.action(this.arg.slice(2))
+								this.cli()
+							}
 						}
 					}
 				}else{

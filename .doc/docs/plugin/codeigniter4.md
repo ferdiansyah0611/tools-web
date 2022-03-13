@@ -20,10 +20,10 @@ Here are some uses of the cli Codeigniter 4 on tools-web.
 ci4 --auth
 ci4 --user
 ci4 --template-argon
-ci4 --view-argon=namefolderviews
+ci4 --view-argon folders
 ci4 --auth-view-argon
 ci4 --project
 ci4 --auth-api
-ci4 --crud=MyController;MyModel
-ci4 --crud-api=MyController;MyModel
+ci4 --crud MyController MyModel
+ci4 --crud-api MyController MyModel
 ```

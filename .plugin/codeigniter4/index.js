@@ -44,15 +44,17 @@ const CI4 = function(sh){
 		},
 		{
 			name: 'view-argon',
+			maxArg: 1,
 			console: {
 				name: '--view-argon',
 				description: 'Generate view index & create using template argon',
 				tab: 2
 			},
-			action: () => {
+			action: (arg) => {
 				const file = sh.SystemFile
-				file.copy(this.path.argon + '/create', sh.root + `/app/Views/${sh.options.name}/create.php`, () => sh.log('success'))
-				file.copy(this.path.argon + '/index', sh.root + `/app/Views/${sh.options.name}/index.php`, () => sh.log('success'))
+				var folder = arg[0]
+				file.copy(this.path.argon + '/create', sh.root + `/app/Views/${folder}/create.php`, () => sh.log('success'))
+				file.copy(this.path.argon + '/index', sh.root + `/app/Views/${folder}/index.php`, () => sh.log('success'))
 			}
 		},
 		{
@@ -98,32 +100,38 @@ const CI4 = function(sh){
 		},
 		{
 			name: 'crud',
+			maxArg: 2,
 			console: {
 				name: '--crud',
 				description: 'Create new crud',
 				tab: 2
 			},
-			action: () => {
+			action: (arg) => {
 				const file = sh.SystemFile
+				var name = arg[0]
+				var model = arg[1]
 				var code = file.read('.plugin/codeigniter4/src/CRUD').toString()
-					.replaceAll('CRUDController', sh.options.name)
-					.replaceAll('YourModel', sh.options.lib)
-				file.write(sh.root + `/app/Controllers/${sh.options.name}.php`, code)
+					.replaceAll('CRUDController', name)
+					.replaceAll('YourModel', model)
+				file.write(sh.root + `/app/Controllers/${name}.php`, code)
 			}
 		},
 		{
 			name: 'crud-api',
+			maxArg: 2,
 			console: {
 				name: '--crud-api',
 				description: 'Create new crud api',
-				tab: 2
+				tab: 2,
 			},
-			action: () => {
+			action: (arg) => {
 				const file = sh.SystemFile
+				var name = arg[0]
+				var model = arg[1]
 				var code = file.read('.plugin/codeigniter4/src/CRUDAPI').toString()
-					.replaceAll('CRUDController', sh.options.name)
-					.replaceAll('YourModel', sh.options.lib)
-				file.write(sh.root + `/app/Controllers/${sh.options.name}.php`, code)
+					.replaceAll('CRUDController', name)
+					.replaceAll('YourModel', model)
+				file.write(sh.root + `/app/Controllers/${name}.php`, code)
 			}
 		},
 	]
