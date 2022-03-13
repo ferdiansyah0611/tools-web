@@ -105,8 +105,22 @@ const CI4 = function(sh){
 			},
 			action: () => {
 				const file = sh.SystemFile
-				var code = file.read('.plugin/codeigniter4/src/CRUD')
-					.toString()
+				var code = file.read('.plugin/codeigniter4/src/CRUD').toString()
+					.replaceAll('CRUDController', sh.options.name)
+					.replaceAll('YourModel', sh.options.lib)
+				file.write(sh.root + `/app/Controllers/${sh.options.name}.php`, code)
+			}
+		},
+		{
+			name: 'crud-api',
+			console: {
+				name: '--crud-api',
+				description: 'Create new crud api',
+				tab: 2
+			},
+			action: () => {
+				const file = sh.SystemFile
+				var code = file.read('.plugin/codeigniter4/src/CRUDAPI').toString()
 					.replaceAll('CRUDController', sh.options.name)
 					.replaceAll('YourModel', sh.options.lib)
 				file.write(sh.root + `/app/Controllers/${sh.options.name}.php`, code)

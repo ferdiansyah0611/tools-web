@@ -1,0 +1,90 @@
+<?php
+namespace App\Controllers;
+ 
+use CodeIgniter\RESTful\ResourceController;
+use CodeIgniter\API\ResponseTrait;
+use App\Models\YourModel;
+ 
+class CRUDController extends ResourceController
+{
+    use ResponseTrait;
+
+    public function _wrap()
+    {
+        $data = [
+            'name' => $this->request->getPost('name'),
+            'value' => $this->request->getPost('value')
+        ];
+        return $data;
+    }
+
+    public function index()
+    {
+        $model = new YourModel();
+        $data = $model->findAll();
+        return $this->respond($data, 200);
+    }
+ 
+    public function show($id = null)
+    {
+        $model = new YourModel();
+        $data = $model->where(['id' => $id])->get()->getResult();
+        if($data){
+            return $this->respond($data);
+        }else{
+            return $this->failNotFound('no data found with id ' . $id);
+        }
+    }
+ 
+    public function create()
+    {
+        $model = new YourModel();
+        $data = $this->_wrap();
+        $model->insert($data);
+        $response = [
+            'status'   => 201,
+            'error'    => null,
+            'messages' => [
+                'success' => 'data has been saved'
+            ]
+        ];
+         
+        return $this->respondCreated($data, 201);
+    }
+ 
+    public function update($id = null)
+    {
+        $model = new YourModel();
+        $data = $this->_wrap();
+        $model->update($id, $data);
+        $response = [
+            'status'   => 200,
+            'error'    => null,
+            'messages' => [
+                'success' => 'data has been updated'
+            ]
+        ];
+        return $this->respond($response);
+    }
+ 
+    public function delete($id = null)
+    {
+        $model = new YourModel();
+        $data = $model->find($id);
+        if($data){
+            $model->delete($id);
+            $response = [
+                'status'   => 200,
+                'error'    => null,
+                'messages' => [
+                    'success' => 'data has been deleted'
+                ]
+            ];
+            return $this->respondDeleted($response);
+        }else{
+            return $this->failNotFound('no data found with id ' . $id);
+        }
+         
+    }
+ 
+}

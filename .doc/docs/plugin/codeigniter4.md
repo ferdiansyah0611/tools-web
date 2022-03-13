@@ -25,4 +25,5 @@ ci4 --auth-view-argon
 ci4 --project
 ci4 --auth-api
 ci4 --crud=MyController;MyModel
+ci4 --crud-api=MyController;MyModel
 ```
