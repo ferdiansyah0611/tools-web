@@ -1,6 +1,6 @@
 <?= $this->extend('template') ?>
 <?= $this->section('title') ?>
-Create Brand
+Create
 <?= $this->endSection() ?>
 <?= $this->section('content') ?>
 <div class="row mt-1">

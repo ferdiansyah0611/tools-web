@@ -1,0 +1,105 @@
+<?php
+namespace App\Controllers;
+ 
+use \Firebase\JWT\JWT;
+use App\Models\User;
+use CodeIgniter\RESTful\ResourceController;
+
+class AuthController extends ResourceController
+{
+    public function __construct()
+    {
+        $this->auth = new User();
+        $this->rules = [
+            'name' => 'required|min_length[3]|max_length[25]',
+            'email' => 'required|valid_email|is_unique[app_user.email,id,4]',
+            'password' => 'required|min_length[8]|max_length[25]',
+            'born' => 'required|min_length[3]|max_length[25]',
+            'gender' => 'required|min_length[4]|max_length[6]',
+            'location' => 'required|min_length[3]|max_length[50]',
+            'avatar' => 'uploaded[avatar]|max_size[avatar,2048]'
+        ];
+    }
+    public function register()
+    {
+        $request = $this->request;
+        $validation =  \Config\Services::validation();
+        $validation->setRules($this->rules);
+        if($validation->withRequest($request)->run() === true)
+        {
+            $_wrap = [
+                'name' => $request->getPost('name'),
+                'email' => $request->getPost('email'),
+                'password' => password_hash($request->getPost('password'), PASSWORD_DEFAULT),
+                'born' => $request->getPost('born'),
+                'gender' => $request->getPost('gender'),
+                'location' => $request->getPost('location'),
+                'role' => 'user',
+                'created_at' => date('Y-m-d H:i:s')
+            ];
+            $this->auth->save($_wrap);
+            return $this->respond(['message' => 'Successfully register', 'status' => 200]);
+        }else{
+            return $this->respond(['message' => $validation->listErrors()], 403);
+        }
+    }
+    public function login()
+    {
+        $validation =  \Config\Services::validation();
+        unset($this->rules['name']);
+        unset($this->rules['born']);
+        unset($this->rules['gender']);
+        unset($this->rules['location']);
+        unset($this->rules['avatar']);
+        $validation->setRules($this->rules);
+        if($validation->withRequest($this->request)->run() === true)
+        {
+            $email = $this->request->getPost('email');
+            $password = $this->request->getPost('password');
+            $check = $this->auth->where('email', $email)->first();
+            if(password_verify($password, $check['password']))
+            {
+                foreach ($verified as $key => $value) {
+                    if($value->verified_at !== null)
+                    {
+                        unset($check['password']);
+
+                        $secret_key = getenv('TOKEN_SECRET');
+                        $issuedat_claim = time();
+                        $notbefore_claim = $issuedat_claim + 10;
+                        $expire_claim = $issuedat_claim + 7200;
+                        $token = array(
+                            "iss" => "THE_CLAIM",
+                            "aud" => "THE_AUDIENCE",
+                            "iat" => $issuedat_claim,
+                            "nbf" => $notbefore_claim,
+                            "exp" => $expire_claim,
+                            "data" => $check
+                        );
+                        $token = JWT::encode($token, $secret_key);
+                        $output = [
+                            'status' => 200,
+                            'message' => 'Successfully Login',
+                            "token" => $token,
+                            'csrf_name' => csrf_token(),
+                            'csrf_value' => csrf_hash(),
+                            "data" => $check,
+                            "expireAt" => $expire_claim
+                        ];
+                        return $this->respond($output, 200);
+                    }
+                }
+            } else {
+                $output = [
+                    'status' => 401,
+                    'message' => 'email or password is wrong',
+                    "password" => $password
+                ];
+                return $this->respond($output, 401);
+            }
+
+        }else{
+            return $this->respond(['message' => $validation->listErrors()], 403);
+        }
+    }
+}

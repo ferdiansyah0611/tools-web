@@ -56,6 +56,32 @@ const CI4 = function(sh){
 			}
 		},
 		{
+			name: 'auth-view-argon',
+			console: {
+				name: '--view-argon',
+				description: 'Generate view auth login & register using template argon',
+				tab: 2
+			},
+			action: () => {
+				const file = sh.SystemFile
+				file.copy(this.path.argon + '/login', sh.root + `/app/Views/auth/login.php`, () => sh.log('success'))
+				file.copy(this.path.argon + '/register', sh.root + `/app/Views/auth/register.php`, () => sh.log('success'))
+			}
+		},
+		{
+			name: 'auth-api',
+			console: {
+				name: '--auth-api',
+				description: 'Generate AuthController & Filters API',
+				tab: 2
+			},
+			action: () => {
+				const file = sh.SystemFile
+				file.copy('.plugin/codeigniter4/src//AuthControllerAPI', sh.root + `/app/Controllers/AuthController.php`, () => sh.log('success'))
+				file.copy('.plugin/codeigniter4/src//AuthFilterAPI', sh.root + `/app/Filters/AuthFilterAPI.php`, () => sh.log('success'))
+			}
+		},
+		{
 			name: 'project',
 			console: {
 				name: '--project',

@@ -13,7 +13,7 @@ This section will help you use plugin Codeigniter 4 from scratch.
 	ci4 --help
 	```
 # Feature
-This plugin has several features such as create new project, usercontroller, CRUD, generate views using argon, and authentication.
+This plugin has several features such as create new project, UserController, CRUD, generate views using argon, authentication, and authentication API.
 # Usage CLI
 Here are some uses of the cli Codeigniter 4 on tools-web.
 ```bash
@@ -21,6 +21,8 @@ ci4 --auth
 ci4 --user
 ci4 --template-argon
 ci4 --view-argon=namefolderviews
+ci4 --auth-view-argon
 ci4 --project
+ci4 --auth-api
 ci4 --crud=MyController;MyModel
 ```

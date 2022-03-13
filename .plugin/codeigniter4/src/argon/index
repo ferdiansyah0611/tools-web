@@ -1,6 +1,6 @@
 <?= $this->extend('template') ?>
 <?= $this->section('title') ?>
-Brand
+Index
 <?= $this->endSection() ?>
 <?= $this->section('header') ?>
 <!-- Header -->
