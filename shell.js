@@ -40,22 +40,30 @@ class SystemFile{
 
 class Shell{
 	constructor(env = {mode: 'production', root: 'myapp', engine: 'ejs'}){
+		this.env = new Proxy(env, {
+			get(obj, prop){
+				return obj[prop]
+			},
+			set(obj, prop, val){
+				obj[prop] = val
+				return true
+			}
+		})
 		this.config = {
 			rootShell: './.shell/',
 			directory: {
-				component: env.root + '/src/component',
-				route: env.root + '/src/route',
-				store: env.root + '/src/store',
-				style: env.root + '/src/style',
-				service: env.root + '/src/service',
-				model: env.root + '/model',
-				api: env.root + '/api',
+				component: this.env.root + '/src/component',
+				route: this.env.root + '/src/route',
+				store: this.env.root + '/src/store',
+				style: this.env.root + '/src/style',
+				service: this.env.root + '/src/service',
+				model: this.env.root + '/model',
+				api: this.env.root + '/api',
 			}
 		}
-		this.root = env.root
+		this.root = this.env.root
 		this.framework = null
 		this.LIST = ['react', 'vue', 'express']
-		this.env = env
 		this.arg = []
 		this.history = []
 		this.options = {
@@ -177,7 +185,15 @@ class Shell{
 				const checkIndex = (text, arg1, arg2) => {
 					return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
 				}
-				if(firstArg == 'exit' || firstArg == ''){
+				if(firstArg == ''){
+					this.cli()
+				}
+				if(firstArg == 'clear'){
+					this.history = []
+					this.log('cleared history command')
+					this.cli()
+				}
+				if(firstArg == 'exit'){
 					this.log('Good Bye!')
 					this.startcli = false
 					this.exit(true)
@@ -185,6 +201,7 @@ class Shell{
 				if(checkIndex(firstArg, 'app', '=')){
 					var name = firstArg.split('=')[1]
 					this.env.root = name
+					this.root = this.env.root
 					this.log('change default app to', name)
 					this.cli()
 				}
@@ -192,6 +209,7 @@ class Shell{
 					var name = firstArg.split('=')[1]
 					if(['production', 'development'].find(v => v == name)){
 						this.env.mode = name
+						this.isProduction = this.env.mode === 'production'
 						this.log('change mode to', name)
 						this.cli()
 					}
