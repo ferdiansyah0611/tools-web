@@ -254,7 +254,6 @@ class Shell{
 	consoleHelper(options = Function){
 		console.log('')
 		console.log('Help Commands: ')
-		console.log('\t', `node index.js [${this.LIST.join(', ')}] folder? [options]`)
 		console.log('\t', `node index.js [${this.LIST.join(', ')}] [options]`)
 		console.log('options: ')
 		options((...arg) => console.log('\t', ...arg))
@@ -311,7 +310,7 @@ class Shell{
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		return{
 			createProject: (name, end = Function) => {
-				var exec = 'npm create vite@latest ' + this.arg[1] + ' -- --template ' + name + (this.isProduction ? ' && npm i': '')
+				var exec = 'npm create vite@latest ' + this.env.root + ' -- --template ' + name + (this.isProduction ? ' && npm i': '')
 				this.log('create new project...')
 				this.log(exec)
 				this.subprocess(exec, {
@@ -730,10 +729,10 @@ class Shell{
 							tab: 4
 						},
 						action: () => {
-							if(this.arg.length === 3){
+							if(this.arg.length === 2){
 								var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
 								if(engine.find(v => v == this.env.engine)){
-									var folder = this.arg[1]
+									var folder = this.env.root
 									var exec = 'npx express-generator ' + folder + ' --' + this.env.engine + (
 										this.isProduction ?
 											' && cd ' + folder +	' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose'

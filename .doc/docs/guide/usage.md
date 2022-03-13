@@ -13,7 +13,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new project**
 	```bash
-	node index.js react myapp --project
+	node index.js react --project
 	```
 - **Create new component**
 	```bash
@@ -50,7 +50,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new project**
 	```bash
-	node index.js vue myapp --project
+	node index.js vue --project
 	```
 - **Create new component**
 	```bash
@@ -84,7 +84,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new project**
 	```bash
-	node index.js express myapp --project
+	node index.js express --project
 	```
 - **Create new api**
 	```bash
