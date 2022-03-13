@@ -48,7 +48,7 @@ const CI4 = function(sh){
 			console: {
 				name: '--view-argon',
 				description: 'Generate view index & create using template argon',
-				tab: 1
+				tab: 2
 			},
 			action: (arg) => {
 				const file = sh.SystemFile
@@ -62,7 +62,7 @@ const CI4 = function(sh){
 			console: {
 				name: '--auth-view-argon',
 				description: 'Generate view auth login & register using template argon',
-				tab: 2
+				tab: 1
 			},
 			action: () => {
 				const file = sh.SystemFile
