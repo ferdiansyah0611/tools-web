@@ -60,7 +60,7 @@ const CI4 = function(sh){
 		{
 			name: 'auth-view-argon',
 			console: {
-				name: '--view-argon',
+				name: '--auth-view-argon',
 				description: 'Generate view auth login & register using template argon',
 				tab: 2
 			},
