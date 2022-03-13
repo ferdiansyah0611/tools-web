@@ -48,7 +48,7 @@ const CI4 = function(sh){
 			console: {
 				name: '--view-argon',
 				description: 'Generate view index & create using template argon',
-				tab: 2
+				tab: 1
 			},
 			action: (arg) => {
 				const file = sh.SystemFile
