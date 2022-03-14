@@ -45,3 +45,7 @@ Clear the history command.
 ```bash
 clear
 ```
+Get version of tools-web.
+```bash
+-v
+```

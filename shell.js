@@ -62,6 +62,7 @@ class Shell{
 			}
 		}
 		this.root = this.env.root
+		this.version = 'v1.0'
 		this.framework = null
 		this.LIST = ['react', 'vue', 'express']
 		this.arg = []
@@ -108,7 +109,6 @@ class Shell{
 			firstArg = '-h'
 		}
 		this.history.push(this.arg)
-
 
 		if(this.LIST.indexOf(firstArg) !== -1){
 			this.framework = firstArg
@@ -195,6 +195,11 @@ class Shell{
 			this.consoleHelper(() => {
 				console.log('\t', '-h --help', 'Show help command')
 			})
+			this.exit()
+		}
+		if(['-v', '--version'].indexOf(firstArg) !== -1){
+			isFound = true
+			this.log(this.version)
 			this.exit()
 		}
 		var handle = () => {
