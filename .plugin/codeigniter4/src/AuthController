@@ -47,10 +47,6 @@ class AuthController extends BaseController
 				$data = $find;
 				$data['password'] = null;
 				$this->session->set($data);
-				if($find['role'] == 'user'){
-					$this->session->setFlashdata('validation', ['Please wait, you are not confirmed to be customer.']);
-					return redirect()->back();
-				}
 				return redirect()->to('/');
 			}
 			$this->session->setFlashdata('validation', ['Password not match.']);
