@@ -19,6 +19,7 @@ Here are some uses of the cli Codeigniter 4 on tools-web.
 ```bash
 ci4 --auth
 ci4 --user
+ci4 --server
 ci4 --template-argon
 ci4 --view-argon folders
 ci4 --auth-view-argon

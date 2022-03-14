@@ -85,7 +85,7 @@ class Shell{
 		this.cli = this.cli.bind(this)
 	}
 	quest(msg){
-		return prompt(this.time() + ' ' + msg)
+		return prompt(this.time() + ' > ' + msg)
 	}
 	use(Class){
 		var plugin = new Class(this)

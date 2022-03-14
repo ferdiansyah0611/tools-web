@@ -99,6 +99,21 @@ const CI4 = function(sh){
 			}
 		},
 		{
+			name: 'server',
+			console: {
+				name: '--server',
+				description: 'Run the server application',
+				tab: 2
+			},
+			action: async () => {
+				await sh.subprocess('cd ' + sh.root + ' && php spark serve', {
+					close: () => {
+						sh.log('done!')
+					}
+				})
+			}
+		},
+		{
 			name: 'crud',
 			maxArg: 2,
 			console: {
