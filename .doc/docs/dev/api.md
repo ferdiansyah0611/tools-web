@@ -15,6 +15,11 @@ list of argument cli
 ```javascript
 this.log(sh.arg)
 ```
+## env: Object
+config on parameter.
+```javascript
+this.log(sh.env.mode, sh.env.root, sh.env.engine)
+```
 ## root: String
 default root app
 ```javascript
@@ -103,9 +108,11 @@ sh.generateStyle('myapp.scss', 'component')
 ## subprocess(run, action)
 function to run subprocess cli.
 ```javascript
-sh.subprocess('npm --help', {
-	close: () => sh.log('closed')
-})
+(async() => {
+	await sh.subprocess('npm --help', {
+		close: () => sh.log('closed')
+	})
+})()
 ```
 ## consoleHelper(func)
 show help command with options customize.

@@ -178,8 +178,10 @@ class Shell{
 								this.cli()
 								return
 							}else{
-								action.action(this.arg.slice(2))
-								this.cli()
+								(async() => {
+									await action.action(this.arg.slice(2))
+									this.cli()
+								})()
 							}
 						}
 					}
@@ -240,11 +242,14 @@ class Shell{
 				}
 				else{
 					if(this.arg.length > 0){
-						this.subprocess(this.arg.join(' '), {
-							close: (res) => {
-								this.cli()
-							}
-						})
+						const sub = async () => {
+							await this.subprocess(this.arg.join(' '), {
+								close: (res) => {
+									this.cli()
+								}
+							})
+						}
+						sub()
 					}
 				}
 			}
@@ -258,20 +263,24 @@ class Shell{
 		console.log('options: ')
 		options((...arg) => console.log('\t', ...arg))
 	}
-	subprocess(run, action = {close: Function}){
-		const { exec } = require('child_process');
-		exec(run, async (err, stdout, stderr) => {
-			if (err) {
-				this.log(stderr)
-				action.close(stderr)
-				return;
-			}
-			await new Promise((res) => {
-				setTimeout(() => res(true), 1000)
-			})
-			console.log(stdout)
-			action.close(stdout)
+	async subprocess(run, action = {close: Function}){
+		const util = require('util');
+		const exec = util.promisify(require('child_process').exec)
+		const controller = new AbortController();
+		const { signal } = controller;
+
+		const { stdout, stderr } = await exec(run, { signal });
+		if (stderr) {
+			this.log(stderr)
+			action.close(stderr)
+			return;
+		}
+		await new Promise((res) => {
+			setTimeout(() => res(true), 500)
 		})
+		console.log(stdout)
+		action.close(stdout)
+		controller.abort();
 	}
 	generateStyle(caseName, typeSelect){
 		var type = prompt(this.time() + ` generate (css|scss|sass) : `);
@@ -309,11 +318,11 @@ class Shell{
 	core(){
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		return{
-			createProject: (name, end = Function) => {
+			createProject: async(name, end = Function) => {
 				var exec = 'npm create vite@latest ' + this.env.root + ' -- --template ' + name + (this.isProduction ? ' && npm i': '')
 				this.log('create new project...')
 				this.log(exec)
-				this.subprocess(exec, {
+				await this.subprocess(exec, {
 					close: () => {
 						var core = this.core()
 						var code = read(this.config.rootShell + 'vite.config.js').toString()
@@ -323,10 +332,10 @@ class Shell{
 					}
 				})
 			},
-			createTailwind: (type) => {
+			createTailwind: async(type) => {
 				var exec = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
 				this.log(exec)
-				this.subprocess(exec, {
+				await this.subprocess(exec, {
 					close: () => {
 						copy(this.config.rootShell + 'tailwind.sass', this.env.root + '/src/tailwind.sass')
 						copy(this.config.rootShell + 'tailwind.config.js', this.env.root + '/tailwind.config.js')
@@ -568,7 +577,7 @@ class Shell{
 							tab: 3
 						},
 						action: () => {
-							core.createProject('react', () => {
+							core.createProject('react', async () => {
 								var rootapp = this.config.rootShellApp,
 								exec = 'cd ' + this.env.root + (this.isProduction ? ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
 								createDirRecursive(this.config.directory.service);
@@ -588,7 +597,7 @@ class Shell{
 								copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
 								if(exec){
 									this.log(exec)
-									this.subprocess(exec, {
+									await this.subprocess(exec, {
 										close: () => {
 											this.log('installed')
 											core.success()
@@ -728,7 +737,7 @@ class Shell{
 							description: 'Create new project',
 							tab: 4
 						},
-						action: () => {
+						action: async() => {
 							if(this.arg.length === 2){
 								var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
 								if(engine.find(v => v == this.env.engine)){
@@ -739,7 +748,7 @@ class Shell{
 											: ''
 										)
 									this.log(exec)
-									this.subprocess(exec, {
+									await this.subprocess(exec, {
 										close: () => {
 											var rootapp = this.config.rootShellApp
 											var code = read(rootapp + 'app.js').toString()

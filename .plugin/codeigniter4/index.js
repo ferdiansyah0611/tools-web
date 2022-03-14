@@ -90,8 +90,8 @@ const CI4 = function(sh){
 				description: 'Create new project',
 				tab: 2
 			},
-			action: () => {
-				sh.subprocess('composer create-project codeigniter4/appstarter ' + sh.root, {
+			action: async () => {
+				await sh.subprocess('composer create-project codeigniter4/appstarter ' + sh.root, {
 					close: () => {
 						sh.log('done!')
 					}
