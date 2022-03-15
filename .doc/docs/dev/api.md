@@ -7,7 +7,6 @@ Prototype in class Shell
 const sh = new Shell({
 	mode: 'development',
 	root: 'myapp',
-	engine: 'ejs'
 })
 ```
 ## arg: Array

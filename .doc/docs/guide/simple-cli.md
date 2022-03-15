@@ -7,7 +7,6 @@ Don't want to rerun using `node index.js` multiple times. The solution is to use
 const sh = new Shell({
 	mode: 'production',
 	root: 'myapp',
-	engine: 'ejs'
 })
 sh.use(App)
 sh.cli()

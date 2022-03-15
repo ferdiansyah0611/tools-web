@@ -26,7 +26,6 @@ This section will help you use tools-web from scratch.
 	const sh = new Shell({
 		mode: 'production',
 		root: 'myappdefault'
-		engine: 'ejs' // engine for express
 	})
 	sh.start()
 	```
