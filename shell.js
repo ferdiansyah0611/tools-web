@@ -39,7 +39,7 @@ class SystemFile{
 }
 
 class Shell{
-	constructor(env = {mode: 'production', root: 'myapp', engine: 'ejs'}){
+	constructor(env = {mode: 'production', root: 'myapp'}){
 		this.env = new Proxy(env, {
 			get(obj, prop){
 				return obj[prop]

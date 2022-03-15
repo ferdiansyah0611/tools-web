@@ -84,7 +84,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new project**
 	```bash
-	node index.js express make:project
+	node index.js express make:project dust|ejs|hbs|hjs|jade|pug|twig
 	```
 - **Create new api**
 	```bash
