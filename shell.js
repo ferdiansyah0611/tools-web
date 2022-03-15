@@ -122,21 +122,31 @@ class Shell{
 						name: options[1]
 					}
 				}else{
-					var options = this.arg[1]
+					var options = this.arg[1].indexOf('--') !== -1 ? this.arg[1].split('--') : this.arg[1]
 					this.options = {
 						dir: null,
-						choose: options.split('--')[1],
+						choose: Array.isArray(options) ? options[1]: options,
 						name: ''
 					}
 				}
 			}
 			if(this.arg.length === 2){
-				var options = this.arg[1].split('=')
-				this.options = {
-					dir: null,
-					choose: options[0].split('--')[1],
-					name: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/;\S+/), ''): options[1],
-					lib: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/\S+;/), ''): null
+				if (this.arg[1].indexOf('=') !== -1) {
+					var options = this.arg[1].split('=')
+					this.options = {
+						dir: null,
+						choose: options[0].split('--')[1],
+						name: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/;\S+/), ''): options[1],
+						lib: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/\S+;/), ''): null
+					}
+				}else{
+					var options = this.arg[1].indexOf('--') !== -1 ? this.arg[1].split('--') : this.arg[1]
+					this.options = {
+						dir: null,
+						choose: Array.isArray(options) ? options[1]: options,
+						name: null,
+						lib: null
+					}
 				}
 			}
 			const showHelper = (arr) => {
@@ -357,6 +367,8 @@ class Shell{
 				this.log('copy if you want to import!')
 				this.log(`import {storage, upload, remove} from '@service/firebase-storage.js'`)
 				write(this.config.directory.service + '/firebase-storage.js', code)
+				var core = this.core()
+				core.success()
 			},
 			initializeFirebase: () => {
 				createDirRecursive(this.env.root + '/src')

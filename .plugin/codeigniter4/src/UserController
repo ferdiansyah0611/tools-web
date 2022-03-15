@@ -154,46 +154,8 @@ class UserController extends BaseController
 		$this->model->where('id', $id)->delete();
 		return redirect()->back();
 	}
-	public function search_customer()
-	{
-		$model = $this->model->where('role', 'customer')
-			->like('username', $_GET['term'])
-			->limit(10)
-			->get()->getResult();
-		return json_encode($model);
-	}
-	public function customer()
-	{
-		$this->data['active'] = 'Customer';
-
-		$search = $this->request->getGet('search');
-		$this->model->where('role', 'customer');
-		if($search){
-			$this->model->like('id', $search);
-			$this->model->orLike('username', $search);
-			$this->model->orLike('email', $search);
-			$this->model->orLike('role', $search);
-		}
-		$this->data['list'] = $this->model->paginate(10);
-		$this->data['pager'] = $this->model->pager;
-		return view('user/index', $this->data);
-	}
-	public function worker()
-	{
-		$this->data['active'] = 'Worker';
-
-		$search = $this->request->getGet('search');
-		$this->model->where('role', 'worker');
-		if($search){
-			$this->model->like('id', $search);
-			$this->model->orLike('username', $search);
-			$this->model->orLike('email', $search);
-			$this->model->orLike('role', $search);
-		}
-		$this->data['list'] = $this->model->paginate(10);
-		$this->data['pager'] = $this->model->pager;
-		return view('user/index', $this->data);
-	}
+	
+	// profile user
 	public function profile()
 	{
 		$request = $this->request;

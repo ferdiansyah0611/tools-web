@@ -17,14 +17,14 @@ This plugin has several features such as create new project, UserController, CRU
 # Usage CLI
 Here are some uses of the cli Codeigniter 4 on tools-web.
 ```bash
-ci4 --auth
-ci4 --user
-ci4 --server
-ci4 --template-argon
-ci4 --view-argon folders
-ci4 --auth-view-argon
-ci4 --project
-ci4 --auth-api
-ci4 --crud MyController MyModel
-ci4 --crud-api MyController MyModel
+ci4 make:auth
+ci4 make:user
+ci4 make:crud MyController MyModel
+ci4 make:api:crud MyController MyModel
+ci4 make:api:auth
+ci4 make:project
+ci4 view:template-argon
+ci4 view:argon folders
+ci4 view:auth-argon
+ci4 run:server
 ```
