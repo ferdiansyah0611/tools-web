@@ -379,7 +379,7 @@ class Shell{
 				core.success()
 			},
 			createModelFirestore: (caseName) => {
-				caseName = caseName.toLowerCase()
+				caseName = String(caseName).toLowerCase()
 				createDirRecursive(this.env.root + '/src/model')
 				var code = read(this.config.rootShell + 'firebase/model.js')
 					.toString()
@@ -389,12 +389,12 @@ class Shell{
 				core.success()
 			},
 			success: () => {
-				this.log('done!\n')
+				// this.log('done!')
 				this.exit()
 			}
 		}
 	}
-	coreFeatureDefault(core, options){
+	coreFeatureDefault(core){
 		return[
 			{
 				name: 'tailwindcss',
@@ -403,7 +403,7 @@ class Shell{
 					description: 'Installation & configuration for tailwindcss',
 					tab: 3
 				},
-				action: async() => {
+				action: async(arg, options) => {
 					core.createTailwind(options.framework)
 				}
 			},
@@ -414,7 +414,7 @@ class Shell{
 					description: 'Generate service firebase-storage for upload & remove (v8)',
 					tab: 2
 				},
-				action: async() => {
+				action: async(arg, options) => {
 					core.createFirebaseStorage(options.fixName)
 				}
 			},
@@ -425,7 +425,7 @@ class Shell{
 					description: 'Generate config firebase (v9)',
 					tab: 2
 				},
-				action: () => {
+				action: (arg, options) => {
 					core.initializeFirebase()
 				}
 			},
@@ -436,7 +436,7 @@ class Shell{
 					description: 'Generate model firestore (v9)',
 					tab: 1
 				},
-				action: () => {
+				action: (arg, options) => {
 					core.createModelFirestore(options.caseName)
 				}
 			},
@@ -450,12 +450,18 @@ class Shell{
 		const findAndRun = (list) => list.find((check) => {
 			if(check.name === this.options.choose){
 				const name = String(this.options.name)
-				fixName = name[0].toUpperCase() + name.slice(1)
 				skip = true
+				if (name) {
+					fixName = name[0].toUpperCase() + name.slice(1)
+				}
 				if(name.indexOf('.') !== -1){
 					caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
 				}
-				check.action()
+				(async() => await check.action(this.arg.slice(2), {
+					framework: this.framework,
+					fixName: fixName,
+					caseName: caseName
+				}))();
 				return check
 			}
 		})
@@ -712,94 +718,94 @@ class Shell{
 				this.config.rootShellApp = this.config.rootShell + 'express/'
 				const list = [
 					{
-						name: 'model',
+						name: 'make:model',
 						console: {
-							name: '--model=name;sequelize|mongoose',
+							name: 'make:model',
 							description: 'Generate model',
-							tab: 1
+							tab: 3
 						},
-						action: async() => {
-							fixName = fixName.toLowerCase()
-							if(['mongoose', 'sequelize'].find(v => v == this.options.lib)){
-								createDirRecursive(this.config.directory.model, fixName)
-								var code = read(this.config.rootShellApp + this.options.lib +  '.js').toString()
+						action: async(arg) => {
+							var name = arg[0].toLowerCase()
+							var lib = arg[1].toLowerCase()
+							var caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+							if(['mongoose', 'sequelize'].find(v => v == lib)){
+								createDirRecursive(this.config.directory.model, name)
+								var code = read(this.config.rootShellApp + lib +  '.js').toString()
 									.replaceAll('caseName', caseName)
-									.replaceAll('modelName', caseName.toLowerCase());
-								write(this.config.directory.model + '/' + fixName, code)
+									.replaceAll('modelName', name);
+								write(this.config.directory.model + '/' + name, code)
 								core.success()
 							}
 						}
 					},
 					{
-						name: 'api',
+						name: 'make:api',
 						console: {
-							name: '--api=name.js',
+							name: 'make:api',
 							description: 'Generate api',
-							tab: 4
+							tab: 3
 						},
-						action : () => {
-							fixName = fixName.toLowerCase()
-							copy(this.config.rootShellApp + 'api.js', this.config.directory.api + '/' + fixName)
+						action : (arg) => {
+							var name = arg[0].toLowerCase()
+							var caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
+							copy(this.config.rootShellApp + 'api.js', this.config.directory.api + '/' + name)
 							var code = read(this.env.root + '/app.js').toString()
-							code = `const ${caseName}Router = require('./api/${fixName}');\n` + code
+							code = `const ${caseName}Router = require('./api/${name}');\n` + code
 							code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/${caseName.toLowerCase()}', ${caseName}Router)` )
 							write(this.env.root + '/app.js', code)
 							core.success()
 						}
 					},
 					{
-						name: 'project',
+						name: 'make:project',
 						console: {
-							name: '--project',
+							name: 'make:project',
 							description: 'Create new project',
-							tab: 4
+							tab: 3
 						},
-						action: async() => {
-							if(this.arg.length === 2){
-								var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
-								if(engine.find(v => v == this.env.engine)){
-									var folder = this.env.root
-									var exec = 'npx express-generator ' + folder + ' --' + this.env.engine + (
-										this.isProduction ?
-											' && cd ' + folder +	' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose'
-											: ''
-										)
-									this.log(exec)
-									await this.subprocess(exec, {
-										close: () => {
-											var rootapp = this.config.rootShellApp
-											var code = read(rootapp + 'app.js').toString()
-											createDirRecursive(this.env.root + '/service');
-											createDirRecursive(this.env.root + '/api');
-											createDirRecursive(this.env.root + '/test');
-											createDirRecursive(this.config.directory.model);
-											copy(rootapp + 'jwt.js', this.env.root + '/service' + '/auth.js')
-											copy(rootapp + 'api/authenticate.js', this.env.root + '/api' + '/authenticate.js')
-											copy(rootapp + 'model/Token.js', this.env.root + '/model' + '/Token.js')
-											copy(rootapp + 'model/User.js', this.env.root + '/model' + '/User.js')
-											copy(rootapp + 'test/api.js', this.env.root + '/test' + '/api.js')
-											code = `const authenticate = require('./api/authenticate');\n` + code
-											code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)` )
-												.replace("'view engine', 'jade'", `'view engine', '${this.env.engine}'`)
-											write(this.env.root + '/app.js', code)
-											core.success()
-										}
-									})
-								}else{
-									this.log(this.env.engine, 'is not engine.')
-									process.exit()
-								}
+						action: async(arg) => {
+							var lib = arg[0].toLowerCase()
+							var engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
+							if(engine.find(v => v == lib)){
+								var folder = this.env.root
+								var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
+									this.isProduction ?
+										' && cd ' + folder +	' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose'
+										: ''
+									)
+								this.log(exec)
+								await this.subprocess(exec, {
+									close: () => {
+										var rootapp = this.config.rootShellApp
+										var code = read(rootapp + 'app.js').toString()
+										createDirRecursive(this.env.root + '/service');
+										createDirRecursive(this.env.root + '/api');
+										createDirRecursive(this.env.root + '/test');
+										createDirRecursive(this.config.directory.model);
+										copy(rootapp + 'jwt.js', this.env.root + '/service' + '/auth.js')
+										copy(rootapp + 'api/authenticate.js', this.env.root + '/api' + '/authenticate.js')
+										copy(rootapp + 'model/Token.js', this.env.root + '/model' + '/Token.js')
+										copy(rootapp + 'model/User.js', this.env.root + '/model' + '/User.js')
+										copy(rootapp + 'test/api.js', this.env.root + '/test' + '/api.js')
+										code = `const authenticate = require('./api/authenticate');\n` + code
+										code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)` )
+											.replace("'view engine', 'jade'", `'view engine', '${lib}'`)
+										write(this.env.root + '/app.js', code)
+										core.success()
+									}
+								})
 							}else{
-								this.log('please write your project folder')
+								this.log(lib, 'is not engine.')
+								process.exit()
 							}
 						}
 					},
 					{
-						name: 'google-cloud-storage',
+						name: 'make:gcp',
 						console: {
-							name: '--google-cloud-storage',
+							name: 'make:gcp',
 							description: 'Generate @google-cloud/storage & api route',
-							tab: 2
+							tab: 3
 						},
 						action: () => {
 							createDirRecursive(this.env.root + '/service')

@@ -84,19 +84,19 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new project**
 	```bash
-	node index.js express --project
+	node index.js express make:project
 	```
 - **Create new api**
 	```bash
-	node index.js express --api=user.js
+	node index.js express make:api user.js
 	```
 - **Create new model**
 	```bash
-	node index.js express --model=User.js;mongoose
+	node index.js express make:model User.js mongoose|sequelize
 	```
 - **Generate google-cloud-storage & storage route API**
 	```bash
-	node index.js express --google-cloud-storage
+	node index.js express make:gcp
 	```
 ::: warning
 don't be remove on this line at app.js
