@@ -73,6 +73,7 @@ class Shell{
 			name: ''
 		}
 		this.isProduction = this.env.mode === 'production'
+		this.customize = false
 		this.startcli = false
 		this.exit = this.exit.bind(this)
 		this.plugin = []
@@ -93,17 +94,23 @@ class Shell{
 		this.plugin.push(plugin)
 	}
 	cli(){
+		if (this.customize) {
+			return process.exit()
+		}
 		this.startcli = true
 		const arg = this.quest('')
 		this.arg = arg.split(' ')
 		this.start();
 	}
-	start(){
+	start(customize = null){
 		var firstArg = this.arg[0]
 		var isFound = false
-
 		if(!this.startcli){
 			this.arg = process.argv.slice(2)
+		}
+		if(Array.isArray(customize)){
+			this.customize = true
+			this.arg = customize
 		}
 		if(this.arg.length === 0){
 			firstArg = '-h'

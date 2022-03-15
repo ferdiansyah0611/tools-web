@@ -49,3 +49,16 @@ Get version of tools-web.
 ```bash
 -v
 ```
+# Multiple Run
+You can run multiple commands at once by passing them a parameter in the start function.
+```javascript
+const schedule = [
+	['ci4', 'make:user'],
+	['ci4', 'make:auth'],
+	['ci4', 'make:crud', 'CustomerController', 'Customer'],
+	['ci4', 'make:crud', 'ProductController', 'Product'],
+]
+schedule.map(v => {
+	sh.start(v)
+})
+```
