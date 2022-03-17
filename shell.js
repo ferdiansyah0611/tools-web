@@ -177,6 +177,7 @@ class Shell{
 						this.consoleHelper(() => showHelper(app[v.name](true)))
 						this.exit()
 					}else{
+						isFound = true
 						app[v.name]()
 					}
 					return v
@@ -197,6 +198,7 @@ class Shell{
 								return
 							}else{
 								(async() => {
+									isFound = true
 									await action.action(this.arg.slice(2))
 									this.cli()
 								})()
@@ -229,6 +231,7 @@ class Shell{
 					this.cli()
 				}
 				if(firstArg == 'clear'){
+					isFound = true
 					this.history = []
 					this.log('cleared history command')
 					this.cli()
@@ -240,6 +243,7 @@ class Shell{
 				}
 				if(checkIndex(firstArg, 'app', '=')){
 					var name = firstArg.split('=')[1]
+					isFound = true
 					this.env.root = name
 					this.root = this.env.root
 					this.log('change default app to', name)
@@ -248,6 +252,7 @@ class Shell{
 				if(checkIndex(firstArg, 'mode', '=')){
 					var name = firstArg.split('=')[1]
 					if(['production', 'development'].find(v => v == name)){
+						isFound = true
 						this.env.mode = name
 						this.isProduction = this.env.mode === 'production'
 						this.log('change mode to', name)
@@ -264,7 +269,7 @@ class Shell{
 					}
 				}
 				else{
-					if(this.arg.length > 0){
+					if(this.arg.length > 0 && !isFound){
 						const sub = async () => {
 							await this.subprocess(this.arg.join(' '), {
 								close: (res) => {
