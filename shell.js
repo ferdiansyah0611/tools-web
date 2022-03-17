@@ -181,7 +181,6 @@ class Shell{
 						this.consoleHelper(() => showHelper(app[v.name](true)))
 						this.exit()
 					}else{
-						isFound = true
 						app[v.name]()
 					}
 					return v
@@ -198,9 +197,8 @@ class Shell{
 						var action = plugin.action.find(v => v.name === this.options.choose)
 						if(action){
 							if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
-								this.log('Error: must be 2 argument')
+								this.log('Error: must be 2 argument'.red)
 								this.cli()
-								return
 							}else{
 								(async() => {
 									isFound = true
@@ -242,7 +240,8 @@ class Shell{
 					this.cli()
 				}
 				if(firstArg == 'exit'){
-					this.log('Good Bye!')
+					this.log('==> CREATED BY FERDIANSYAH0611 <=='.blue)
+					this.log('Good Bye!'.green)
 					this.startcli = false
 					this.exit(true)
 				}
@@ -476,11 +475,18 @@ class Shell{
 				if(name.indexOf('.') !== -1){
 					caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
 				}
-				(async() => await check.action(this.arg.slice(2), {
-					framework: this.framework,
-					fixName: fixName,
-					caseName: caseName
-				}))();
+				(async() => {
+					if (check.maxArg && this.arg.slice(2).length < check.maxArg) {
+						this.log('Error: must be 2 argument'.red)
+						this.cli()
+					}else{
+						await check.action(this.arg.slice(2), {
+							framework: this.framework,
+							fixName: fixName,
+							caseName: caseName
+						})
+					}
+				})()
 				return check
 			}
 		})
@@ -751,6 +757,7 @@ class Shell{
 				const list = [
 					{
 						name: 'make:model',
+						maxArg: 2,
 						console: {
 							name: 'make:model',
 							description: 'Generate model',
@@ -760,18 +767,23 @@ class Shell{
 							var name = arg[0].toLowerCase()
 							var lib = arg[1].toLowerCase()
 							var caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-							if(['mongoose', 'sequelize'].find(v => v == lib)){
+							var list = ['mongoose', 'sequelize']
+							if(list.find(v => v == lib)){
 								createDirRecursive(this.config.directory.model, name)
 								var code = read(this.config.rootShellApp + lib +  '.js').toString()
 									.replaceAll('caseName', caseName)
 									.replaceAll('modelName', name);
 								write(this.config.directory.model + '/' + name, code)
 								core.success()
+							}else{
+								this.log(lib.red, 'is not library.'.red, 'You can choose:', list.join(', ').underline)
+								core.success()
 							}
 						}
 					},
 					{
 						name: 'make:api',
+						maxArg: 1,
 						console: {
 							name: 'make:api',
 							description: 'Generate api',
@@ -790,6 +802,7 @@ class Shell{
 					},
 					{
 						name: 'make:project',
+						maxArg: 1,
 						console: {
 							name: 'make:project',
 							description: 'Create new project',
@@ -826,8 +839,8 @@ class Shell{
 									}
 								})
 							}else{
-								this.log(lib, 'is not engine.')
-								process.exit()
+								this.log(lib.red, 'is not engine.'.red, 'You can choose one:', engine.join(', ').underline)
+								core.success()
 							}
 						}
 					},
