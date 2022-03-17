@@ -3,3 +3,4 @@
 /.doc/node_modules
 /.doc/docs/.vitepress/dist
 /test.*
+/test

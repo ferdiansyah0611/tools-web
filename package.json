@@ -9,5 +9,8 @@
   "license": "ISC",
   "devDependencies": {
     "prompt-sync": "^4.1.6"
+  },
+  "dependencies": {
+    "colors": "^1.4.0"
   }
 }
