@@ -187,6 +187,7 @@ class Shell{
 				var plugin = this.plugin.find(v => v.name == this.framework)
 				if(plugin){
 					if(['-h', '--help'].indexOf(this.arg[1]) !== -1){
+						isFound = true
 						this.consoleHelper(() => showHelper(plugin.action))
 						this.exit()
 					}else{
