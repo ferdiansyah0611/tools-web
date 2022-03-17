@@ -50,18 +50,6 @@ class Shell{
 				return true
 			}
 		})
-		this.config = {
-			rootShell: './.shell/',
-			directory: {
-				component: this.env.root + '/src/component',
-				route: this.env.root + '/src/route',
-				store: this.env.root + '/src/store',
-				style: this.env.root + '/src/style',
-				service: this.env.root + '/src/service',
-				model: this.env.root + '/model',
-				api: this.env.root + '/api',
-			}
-		}
 		this.root = this.env.root
 		this.version = 'v1.0'
 		this.framework = null
@@ -85,6 +73,22 @@ class Shell{
 		this.quest = this.quest.bind(this)
 		this.coreFeatureDefault = this.coreFeatureDefault.bind(this)
 		this.cli = this.cli.bind(this)
+		this._config = this._config.bind(this)
+		this._config()
+	}
+	_config(){
+		this.config = {
+			rootShell: './.shell/',
+			directory: {
+				component: this.env.root + '/src/component',
+				route: this.env.root + '/src/route',
+				store: this.env.root + '/src/store',
+				style: this.env.root + '/src/style',
+				service: this.env.root + '/src/service',
+				model: this.env.root + '/model',
+				api: this.env.root + '/api',
+			}
+		}
 	}
 	quest(msg){
 		return prompt(this.time() + ' > ' + msg)
@@ -247,6 +251,7 @@ class Shell{
 					isFound = true
 					this.env.root = name
 					this.root = this.env.root
+					this._config()
 					this.log('change default app to', name)
 					this.cli()
 				}
@@ -307,7 +312,9 @@ class Shell{
 		await new Promise((res) => {
 			setTimeout(() => res(true), 500)
 		})
-		console.log(stdout)
+		if (stdout) {
+			console.log(stdout)
+		}
 		action.close(stdout)
 		controller.abort();
 	}
