@@ -614,7 +614,7 @@ class Shell{
 						action: () => {
 							core.createProject('react', async () => {
 								var rootapp = this.config.rootShellApp,
-								exec = (this.isProduction ? 'cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
+								exec = 'cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios'
 								createDirRecursive(this.config.directory.service);
 								createDirRecursive(this.config.directory.style);
 								createDirRecursive(this.config.directory.component);
@@ -630,13 +630,8 @@ class Shell{
 								copy(rootapp + 'component/template.jsx', this.config.directory.component + '/template.jsx')
 								copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
 								copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
-								if(exec){
-									await this.subprocess(exec, {
-										close: () => {
-											core.success()
-										}
-									})
-								}
+								this.log('please run:', exec.underline)
+								core.success()
 							})
 						}
 					},
@@ -729,6 +724,8 @@ class Shell{
 						},
 						action: () => {
 							core.createProject('vue', () => {
+								var exec = exec = 'cd ' + this.env.root + ' && npm i && npm i vuex@next vue-router@next'
+								this.log('please run:', exec.underline)
 								core.success()
 							})
 						}
