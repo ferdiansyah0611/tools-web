@@ -348,7 +348,7 @@ class Shell{
 		const { createDirRecursive, copy, read, write, append } = this.SystemFile
 		return{
 			createProject: async(name, end = Function) => {
-				var exec = 'npm create vite@latest ' + this.env.root + ' -- --template ' + name + (this.isProduction ? ' && npm i': '')
+				var exec = 'npm create vite@latest ' + this.env.root + ' -- --template ' + name
 				this.log('create new project...')
 				await this.subprocess(exec, {
 					close: () => {
