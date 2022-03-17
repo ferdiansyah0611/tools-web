@@ -1,5 +1,6 @@
 const fs = require('fs')
 const prompt = require("prompt-sync")({ sigint: true });
+var colors = require('colors');
 
 class SystemFile{
 	constructor(app){
@@ -12,7 +13,7 @@ class SystemFile{
 	}
 	createDirRecursive(dir){
 		if (!fs.existsSync(dir)){
-				this.app.log('create directory', dir)
+			this.app.log('create directory'.green, dir.green)
 		    return fs.mkdirSync(dir, { recursive: true });
 		}
 	}
@@ -27,11 +28,11 @@ class SystemFile{
 			fs.mkdirSync(folder, { recursive: true });
 		}
 		fs.copyFile(copy, dir, callback)
-		return this.app.log('writing', dir)
+		return this.app.log('writing'.green, dir.green)
 	}
 	write(dir, val){
 		fs.writeFileSync(dir, val)
-		return this.app.log('writing', dir)
+		return this.app.log('writing'.green, dir.green)
 	}
 	read(dir){
 		return fs.readFileSync(dir, 'utf8')
@@ -158,7 +159,7 @@ class Shell{
 			}
 			const showHelper = (arr) => {
 				arr.forEach(v => {
-					console.log('\t', v.console.name, '\t'.repeat(v.console.tab), v.console.description)
+					console.log('\t', (v.console.name), '\t'.repeat(v.console.tab), v.console.description)
 				})
 			}
 			// init app
@@ -281,7 +282,7 @@ class Shell{
 	consoleHelper(options = Function){
 		console.log('')
 		console.log('Help Commands: ')
-		console.log('\t', `node index.js [${this.LIST.join(', ')}] [options]`)
+		console.log('\t', `node index.js [${this.LIST.join(', ')}] [options]`.underline)
 		console.log('options: ')
 		options((...arg) => console.log('\t', ...arg))
 	}
@@ -290,7 +291,7 @@ class Shell{
 		const exec = util.promisify(require('child_process').exec)
 		const controller = new AbortController();
 		const { signal } = controller;
-
+		this.log(run.underline.blue)
 		const { stdout, stderr } = await exec(run, { signal });
 		if (stderr) {
 			this.log(stderr)
@@ -343,7 +344,6 @@ class Shell{
 			createProject: async(name, end = Function) => {
 				var exec = 'npm create vite@latest ' + this.env.root + ' -- --template ' + name + (this.isProduction ? ' && npm i': '')
 				this.log('create new project...')
-				this.log(exec)
 				await this.subprocess(exec, {
 					close: () => {
 						var core = this.core()
@@ -356,7 +356,6 @@ class Shell{
 			},
 			createTailwind: async(type) => {
 				var exec = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
-				this.log(exec)
 				await this.subprocess(exec, {
 					close: () => {
 						copy(this.config.rootShell + 'tailwind.sass', this.env.root + '/src/tailwind.sass')
@@ -609,7 +608,7 @@ class Shell{
 						action: () => {
 							core.createProject('react', async () => {
 								var rootapp = this.config.rootShellApp,
-								exec = 'cd ' + this.env.root + (this.isProduction ? ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
+								exec = (this.isProduction ? 'cd ' + this.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios': '')
 								createDirRecursive(this.config.directory.service);
 								createDirRecursive(this.config.directory.style);
 								createDirRecursive(this.config.directory.component);
@@ -626,17 +625,33 @@ class Shell{
 								copy(rootapp + 'App.jsx', this.env.root + '/src/App.jsx')
 								copy(rootapp + 'main.jsx', this.env.root + '/src/main.jsx')
 								if(exec){
-									this.log(exec)
 									await this.subprocess(exec, {
 										close: () => {
-											this.log('installed')
 											core.success()
 										}
 									})
 								}
 							})
 						}
-					}
+					},
+					{
+						name: 'install:mui',
+						console: {
+							name: 'install:mui',
+							description: 'Install the Material UI & include toggle dark/light theme & palette colors',
+							tab: 3
+						},
+						action: async() => {
+							await this.subprocess('cd ' + this.root + ' && npm install @mui/material @emotion/react @emotion/styled', {
+								close : () => {
+									copy(this.config.rootShellApp + 'store/theme', this.config.directory.store + '/theme.js', () => {})
+									copy(this.config.rootShellApp + 'mui.jsx', this.env.root + '/src/mui.jsx', () => {})
+									copy(this.config.rootShellApp + 'service/color.js', this.config.directory.service + '/color.js', () => {})
+									core.success()
+								}
+							})
+						}
+					},
 				]
 				if(showList){
 					return list
@@ -780,7 +795,6 @@ class Shell{
 										' && cd ' + folder +	' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose'
 										: ''
 									)
-								this.log(exec)
 								await this.subprocess(exec, {
 									close: () => {
 										var rootapp = this.config.rootShellApp
