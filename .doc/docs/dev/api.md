@@ -84,10 +84,11 @@ read specified file.
 ```javascript
 file.read('myapp/src/app.sass') // return value file utf8
 ```
-### append(filepath, first, end = null)
+### append(filepath, first, end = null, textCallback = null)
 function to append file.
 ```javascript
 file.append('myapp/index.js', 'import time\n')
+file.append('myapp/index.js', 'import time\n', null, (text) => text.replace(' ', 'hello world'))
 ```
 ### createDirRecursive(root, name)
 function to create directory recursive.
@@ -154,13 +155,4 @@ core.createModelFirestore(caseName)
 Call this function if end of execute.
 ```javascript
 core.success()
-```
-## application()
-run list of application framework/library.
-```javascript
-const app = sh.application()
-// if parameter is true, return list of cli on this framework/library
-app.react(false)
-app.vue(false)
-app.express(false)
 ```

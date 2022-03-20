@@ -3,10 +3,13 @@ title: Codeigniter 4
 ---
 # Getting Started
 This section will help you use plugin Codeigniter 4 from scratch.
-- **Step 1:** Require plugin
-	```javascript
-	const CI4 = require('./.plugin/codeigniter4')
-	sh.use(CI4)
+- **Step 1:** Run tools-web
+	```bash
+	twb
+	```
+- **Step 1:** Install the plugin
+	```bash
+	install ci4 tools-web.codeigniter4
 	```
 - **step 2:** Run your shell
 	```bash

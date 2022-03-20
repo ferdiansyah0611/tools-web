@@ -1,40 +1,24 @@
 ---
-title: Simple CLI
+title: Basic CLI
 ---
-# Simple CLI :robot:
-Don't want to rerun using `node index.js` multiple times. The solution is to use the Simple CLI. Just run it once and you are free to run any command.
-```javascript {7}
-const sh = new Shell({
-	mode: 'production',
-	root: 'myapp',
-})
-sh.use(App)
-sh.cli()
-// sh.start()
-```
-Run in one time
-```bash
-node index.js
-```
-And type your command without `node index.js` again
-```bash
-express -h
-```
-If you want stop cli
+# Basic CLI :robot:
+This section will explain about the basic commands in using tools-web
+
+Stop the command.
 ```bash
 exit
 ```
 You can run more command on system. Example
 ```bash
-dir .shell
+dir
 ```
 Change default root app.
 ```bash
-app=myapp
+app myapp
 ```
 Change mode env.
 ```bash
-mode=production
+mode production
 ```
 Run previous command.
 ```bash
@@ -48,8 +32,27 @@ Get version of tools-web.
 ```bash
 -v
 ```
-# Multiple Run
+## Edit file
+```bash
+edit
+# example result:
+# please run: cd C:\Users\ferdi\project\tools-web && vim index
+```
+## Install the plugin
+You can install another plugin or uninstall it.
+```bash
+install ci4 tools-web.codeigniter4
+```
+```bash
+uninstall ci4 tools-web.codeigniter4
+```
+## Multiple Run
 You can run multiple commands at once by passing them a parameter in the start function.
+Edit index using vim
+```bash
+edit
+```
+Add this code
 ```javascript
 const schedule = [
 	['ci4', 'make:user'],

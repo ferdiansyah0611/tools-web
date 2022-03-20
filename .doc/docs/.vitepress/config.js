@@ -6,7 +6,7 @@ function getGuideSidebar() {
         { text: 'What is tools-web', link: '/' },
         { text: 'Getting Started', link: '/guide/getting-started' },
         { text: 'Usage', link: '/guide/usage' },
-        { text: 'Simple CLI', link: '/guide/simple-cli'}
+        { text: 'Basic CLI', link: '/guide/basic-cli'}
       ]
     },
     {

@@ -1,16 +1,24 @@
 {
   "name": "tools-web",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "",
   "main": "index.js",
   "scripts": {},
-  "keywords": [],
+  "keywords": [
+    "cli",
+    "vue",
+    "express",
+    "react",
+    "codeigniter 4",
+    "tools"
+  ],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "prompt-sync": "^4.1.6"
+  "bin": {
+    "twb": "./index"
   },
   "dependencies": {
-    "colors": "^1.4.0"
+    "colors": "^1.4.0",
+    "prompt-sync": "^4.2.0"
   }
 }

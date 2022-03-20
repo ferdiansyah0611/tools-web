@@ -9,94 +9,94 @@ Did you know that tools-web can integrate other tools made by developers?
 ## React
 - **Start command**
 	```bash
-	node index.js react -h
+	react -h
 	```
 - **Create new project**
 	```bash
-	node index.js react --project
+	react make:project
 	```
 - **Create new component**
 	```bash
-	node index.js react --component=NameComponent.jsx
+	react make:component Button.jsx sass
 	```
 - **Create new route**
 	```bash
-	node index.js react --route=About.jsx
+	react make:route About.jsx sass
 	```
 - **Installation & configuration for tailwindcss**
 	```bash
-	node index.js react --tailwindcss
+	react install:tailwindcss
 	```
 - **Generate service firebase-storage for upload & remove (v8)**
 	```bash
-	node index.js react --firebase-storage
+	react make:gcs
 	```
 - **Generate config firebase (v9)**
 	```bash
-	node index.js react --init-firebase
+	react make:firebase
 	```
 - **Generate model firestore (v9)**
 	```bash
-	node index.js react --model-firestore=user.js
+	react make:model:firestore user.js
 	```
 - **Generate route crud for store**
 	```bash
-	node index.js react --route-crud-store
+	react make:route:crud users
 	```
 ## Vue
 - **Start command**
 	```bash
-	node index.js vue -h
+	vue -h
 	```
 - **Create new project**
 	```bash
-	node index.js vue --project
+	vue make:project
 	```
 - **Create new component**
 	```bash
-	node index.js vue --component=NameComponent.jsx
+	vue make:component Button.vue
 	```
 - **Create new route**
 	```bash
-	node index.js vue --route=About.jsx
+	vue make:route About.vue
 	```
 - **Installation & configuration for tailwindcss**
 	```bash
-	node index.js vue --tailwindcss
+	vue install:tailwindcss
 	```
 - **Generate service firebase-storage for upload & remove (v8)**
 	```bash
-	node index.js vue --firebase-storage
+	vue make:gcs
 	```
 - **Generate config firebase (v9)**
 	```bash
-	node index.js vue --init-firebase
+	vue make:firebase
 	```
 - **Generate model firestore (v9)**
 	```bash
-	node index.js vue --model-firestore=user.js
+	vue make:model:firestore user.js
 	```
 
 ## Express
 - **Start command**
 	```bash
-	node index.js express -h
+	express -h
 	```
 - **Create new project**
 	```bash
-	node index.js express make:project dust|ejs|hbs|hjs|jade|pug|twig
+	express make:project ejs
 	```
 - **Create new api**
 	```bash
-	node index.js express make:api user.js
+	express make:api user.js
 	```
 - **Create new model**
 	```bash
-	node index.js express make:model User.js mongoose|sequelize
+	express make:model User.js mongoose
 	```
 - **Generate google-cloud-storage & storage route API**
 	```bash
-	node index.js express make:gcp
+	express make:gcp
 	```
 ::: warning
 don't be remove on this line at app.js
