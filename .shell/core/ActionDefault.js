@@ -18,7 +18,7 @@ module.exports = [{
     statement: (arg) => arg[0] == 'exit',
     console: {
         name: 'exit',
-        description: 'Exit the command',
+        description: 'Exit the command. Not recommend if you run server on the background',
         tab: 6
     },
     action: async($this) => {
@@ -104,11 +104,28 @@ module.exports = [{
                         .trim()
                     ))
                     $this.log('restart now!')
-                }
+                },
+                hide: true
             })
         })()
     }
 
+}, {
+    statement: (arg) => arg[0] == 'update',
+    console: {
+        name: 'update',
+        description: 'Update the package',
+        tab: 5
+    },
+    action: async($this, ROOT) => {
+        await $this.subprocess('cd ' + ROOT + ' && npm update', {
+            close: () => {
+                $this.log('restart now!')
+            },
+            hide: true,
+            hideLog: true
+        })
+    }
 }, {
     statement: (arg) => arg[0] == 'uninstall',
     maxArg: 3,
@@ -134,7 +151,8 @@ module.exports = [{
                         .replace(`sh.use(${parse})`, '')
                     write(file, code.trim())
                     $this.log('restart now!')
-                }
+                },
+                hide: true
             })
         })()
     }

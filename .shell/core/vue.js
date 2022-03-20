@@ -36,7 +36,7 @@ const Vue = function(sh) {
 			console: {
 				name: 'make:route [file] [/url]',
 				description: 'Generate route pages',
-				tab: 4
+				tab: 3
 			},
 			action: async(arg) => {
 				const {createDirRecursive, read, write, core, fixName, caseName} = this.init(arg)

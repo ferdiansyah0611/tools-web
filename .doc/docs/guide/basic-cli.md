@@ -46,6 +46,10 @@ install ci4 tools-web.codeigniter4
 ```bash
 uninstall ci4 tools-web.codeigniter4
 ```
+Update the package
+```bash
+update
+```
 ## Multiple Run
 You can run multiple commands at once by passing them a parameter in the start function.
 Edit index using vim

@@ -241,7 +241,9 @@ class Shell {
         const {
             signal
         } = controller;
-        this.log(run.underline.blue)
+        if (!action.hideLog) {
+            this.log(run.underline.blue)
+        }
         const {
             stdout,
             stderr
@@ -256,8 +258,8 @@ class Shell {
         await new Promise((res) => {
             setTimeout(() => res(true), 500)
         })
-        if (stdout) {
-            console.log(stdout)
+        if (stdout && !action.hide) {
+            process.stdout.write(stdout)
         }
         action.close(stdout)
         controller.abort();
@@ -316,7 +318,9 @@ class Shell {
                         code = code.replace("plugin-react", "plugin-" + name)
                         write(this.env.root + '/vite.config.js', code)
                         end()
-                    }
+                    },
+                    hide: true,
+                    hideLog: true
                 })
             },
             createTailwind: async(type) => {
