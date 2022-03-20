@@ -199,6 +199,7 @@ class Shell {
                         if (!running) {
                             if (this.arg.length > 0 && !isFound) {
                                 const sub = async() => {
+                                    isFound = true
                                     await this.subprocess(this.arg.join(' '), {
                                         close: (res) => {
                                             this.cli()
