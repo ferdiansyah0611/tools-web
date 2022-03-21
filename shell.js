@@ -410,7 +410,7 @@ class Shell {
                 tab: 5
             },
             action: async() => {
-                const ls = this.subprocess('cd ' + this.root + ' && npm run dev', {
+                this.subprocess('cd ' + this.root + ' && npm run dev', {
                     close: () => {},
                     notSync: true
                 })

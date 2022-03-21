@@ -22,8 +22,8 @@ Here are some uses of the cli Codeigniter 4 on tools-web.
 ```bash
 ci4 make:auth
 ci4 make:user
-ci4 make:crud MyController MyModel
-ci4 make:api:crud MyController MyModel
+ci4 make:crud MyController MyModel user_id,product_id,payment
+ci4 make:api:crud MyController MyModel user_id,product_id,payment
 ci4 make:api:auth
 ci4 make:project
 ci4 view:template-argon

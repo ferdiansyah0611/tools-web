@@ -156,6 +156,19 @@ const Express = function(sh) {
                 core.success()
             }
         }
+    }, {
+        name: 'run:server',
+        console: {
+            name: 'run:server',
+            description: 'Run the server application on the background',
+            tab: 5
+        },
+        action: async() => {
+            sh.subprocess('cd ' + sh.root + ' && npm run start', {
+                close: () => {},
+                notSync: true
+            })
+        }
     }, ]
 }
 

@@ -43,6 +43,10 @@ Did you know that tools-web can integrate other tools made by developers?
 	```bash
 	react make:route:crud users
 	```
+- **Run the server on the background**
+	```bash
+	react run:server
+	```
 ## Vue
 - **Start command**
 	```bash
@@ -76,6 +80,10 @@ Did you know that tools-web can integrate other tools made by developers?
 	```bash
 	vue make:model:firestore user.js
 	```
+- **Run the server on the background**
+	```bash
+	react run:server
+	```
 
 ## Express
 - **Start command**
@@ -97,6 +105,10 @@ Did you know that tools-web can integrate other tools made by developers?
 - **Generate google-cloud-storage & storage route API**
 	```bash
 	express make:gcp
+	```
+- **Run the server on the background**
+	```bash
+	react run:server
 	```
 ::: warning
 don't be remove on this line at app.js
