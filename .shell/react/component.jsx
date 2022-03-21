@@ -5,7 +5,7 @@ import {
 	useDispatch, useSelector
 } from 'react-redux'
 import {
-	Link
+	useNavigate, Link, useParams, useLocation
 } from 'react-router-dom'
 
 export default function caseName() {

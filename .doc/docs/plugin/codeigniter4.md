@@ -27,7 +27,7 @@ ci4 make:api:crud MyController MyModel user_id,product_id,payment
 ci4 make:api:auth
 ci4 make:project
 ci4 view:template-argon
-ci4 view:argon folders
+ci4 view:argon folders user_id,product_id,payment
 ci4 view:auth-argon
 ci4 run:server
 ```
