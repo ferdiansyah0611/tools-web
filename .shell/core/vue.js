@@ -36,7 +36,7 @@ const Vue = function(sh) {
 			name: 'make:route',
 			maxArg: 2,
 			console: {
-				name: 'make:route [file] [/url]',
+				name: 'make:route [file] [url]',
 				description: 'Generate route pages',
 				tab: 3
 			},
