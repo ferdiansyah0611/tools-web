@@ -37,3 +37,6 @@ This section will help you use tools-web from scratch.
 	```bash
 	--help
 	```
+::: info
+Run your Command Line Interface with administration to prevent error.
+:::
