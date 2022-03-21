@@ -78,7 +78,7 @@ class Shell {
         this.arg = arg.split(' ')
         this.start();
     }
-    start(customize = null) {
+    async start(customize = null) {
         var isFound = false
         var firstArg = this.arg[0]
 
@@ -127,11 +127,13 @@ class Shell {
                 })
             })
             this.exit()
+            return
         }
         if (['-v', '--version'].indexOf(firstArg) !== -1) {
             isFound = true
             this.log(this.version)
             this.exit()
+            return
         } else {
             if (this.arg.length >= 3) {
                 if (this.arg[2].indexOf('=') !== -1) {
@@ -182,46 +184,37 @@ class Shell {
                             errorArg(action.maxArg)
                             this.cli()
                         } else {
-                            (async() => {
-                                await action.action(this.arg.slice(2))
-                                this.cli()
-                            })()
+                            await action.action(this.arg.slice(2))
+                            this.cli()
                         }
                     }
                 }
             } else {
-                var handle = () => {
-                    if ((this.startcli || this.customize) && !isFound) {
-                        const checkIndex = (text, arg1, arg2) => {
-                            return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
+                if ((this.startcli || this.customize) && !isFound) {
+                    const checkIndex = (text, arg1, arg2) => {
+                        return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
+                    }
+                    const running = ActionDefault.find(v => v.statement(this.arg) !== false)
+                    if (!running) {
+                        if (this.arg.length > 0 && !isFound) {
+                            isFound = true
+                            await this.subprocess(this.arg.join(' '), {
+                                close: () => {
+                                    this.cli()
+                                },
+                                hideLog: true
+                            })
                         }
-                        const running = ActionDefault.find(v => v.statement(this.arg) !== false)
-                        if (!running) {
-                            if (this.arg.length > 0 && !isFound) {
-                                const sub = async() => {
-                                    isFound = true
-                                    await this.subprocess(this.arg.join(' '), {
-                                        close: (res) => {
-                                            this.cli()
-                                        }
-                                    })
-                                }
-                                sub()
-                            }
+                    } else {
+                        if (running.maxArg && this.arg.length < running.maxArg) {
+                            errorArg(running.maxArg)
+                            this.cli()
                         } else {
-                            if (running.maxArg && this.arg.length < running.maxArg) {
-                                errorArg(running.maxArg)
-                                this.cli()
-                            } else {
-                                (async() => {
-                                    isFound = true
-                                    await running.action(this, ROOT)
-                                })()
-                            }
+                            isFound = true
+                            await running.action(this, ROOT)
                         }
                     }
                 }
-                handle()
             }
         }
     }
@@ -236,33 +229,32 @@ class Shell {
         close: Function
     }) {
         const util = require('util');
-        const exec = util.promisify(require('child_process').exec)
-        const controller = new AbortController();
-        const {
-            signal
-        } = controller;
-        if (!action.hideLog) {
-            this.log(run.underline.blue)
+        const exec = util.promisify(require('child_process').exec);
+        (() => {
+            if (!action.hideLog) {
+                this.log(run.underline.blue)
+            }
+        })();
+        if (!action.notSync) {
+            const {
+                stdout,
+                stderr
+            } = await exec(run);
+            if (stderr) {
+                this.log(stderr)
+                action.close(stderr)
+                return;
+            }
+            await new Promise((res) => {
+                setTimeout(() => res(true), 500)
+            })
+            if (stdout && !action.hide) {
+                process.stdout.write(stdout)
+            }
+            action.close(stdout)
+        } else {
+            exec(run)
         }
-        const {
-            stdout,
-            stderr
-        } = await exec(run, {
-            signal
-        });
-        if (stderr) {
-            this.log(stderr)
-            action.close(stderr)
-            return;
-        }
-        await new Promise((res) => {
-            setTimeout(() => res(true), 500)
-        })
-        if (stdout && !action.hide) {
-            process.stdout.write(stdout)
-        }
-        action.close(stdout)
-        controller.abort();
     }
     generateStyle(caseName, typeSelect, format) {
         var type = format
@@ -410,7 +402,20 @@ class Shell {
             action: (arg, options) => {
                 core.createModelFirestore(this.parse().removeFormat(arg[0]))
             }
-        }, ]
+        }, {
+            name: 'run:server',
+            console: {
+                name: 'run:server',
+                description: 'Run the server application on the background',
+                tab: 5
+            },
+            action: async() => {
+                const ls = this.subprocess('cd ' + this.root + ' && npm run dev', {
+                    close: () => {},
+                    notSync: true
+                })
+            }
+        }]
     }
     parse() {
         return {

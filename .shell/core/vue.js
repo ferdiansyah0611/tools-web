@@ -18,6 +18,7 @@ const Vue = function(sh) {
 		}),
 		{
 			name: 'make:component',
+			maxArg: 1,
 			console: {
 				name: 'make:component [file]',
 				description: 'Generate component',
@@ -33,6 +34,7 @@ const Vue = function(sh) {
 		},
 		{
 			name: 'make:route',
+			maxArg: 2,
 			console: {
 				name: 'make:route [file] [/url]',
 				description: 'Generate route pages',
@@ -54,6 +56,7 @@ const Vue = function(sh) {
 		},
 		{
 			name: 'make:store',
+			maxArg: 1,
 			console: {
 				name: 'make:store [file]',
 				description: 'Generate store',

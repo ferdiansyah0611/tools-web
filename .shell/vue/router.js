@@ -8,11 +8,11 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes
 })
 
-/*router.beforeEach((to, from, next) => {
+router.beforeEach((to, from, next) => {
   const requiresAuth = to.matched.some(x => x.meta.requiresAuth)
   // check user in here
   const isUser = true
@@ -21,6 +21,6 @@ const router = createRouter({
   } else {
     next()
   }
-})*/
+})
 
 export default router

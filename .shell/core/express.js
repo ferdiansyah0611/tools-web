@@ -1,7 +1,7 @@
 const Express = function(sh) {
     this.name = 'express'
     this.config = sh.config
-    this.config.rootShellApp = sh.config.rootShell + 'express/'
+    this.root = sh.config.rootShell + 'express/'
     this.parse = sh.parse()
     this.engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
     this.init = (arg) => {
@@ -44,7 +44,7 @@ const Express = function(sh) {
             var list = ['mongoose', 'sequelize']
             if (list.find(v => v == lib)) {
                 createDirRecursive(this.config.directory.model, name)
-                var code = read(this.config.rootShellApp + lib + '.js').toString()
+                var code = read(this.root + lib + '.js').toString()
                     .replaceAll('caseName', caseName)
                     .replaceAll('modelName', name);
                 write(this.config.directory.model + '/' + name, code)
@@ -94,7 +94,7 @@ const Express = function(sh) {
                 read
             } = sh.SystemFile
             var name = arg[0].toLowerCase()
-            copy(this.config.rootShellApp + 'api.js', this.config.directory.api + '/' + name)
+            copy(this.root + 'api.js', this.config.directory.api + '/' + name)
             var code = read(sh.env.root + '/app.js').toString()
             code = `const ${caseName}Router = require('./api/${name}');\n` + code
             code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/${caseName.toLowerCase()}', ${caseName}Router)`)
@@ -131,7 +131,7 @@ const Express = function(sh) {
                 )
                 await sh.subprocess(exec, {
                     close: () => {
-                        var rootapp = this.config.rootShellApp
+                        var rootapp = this.root
                         var code = read(rootapp + 'app.js').toString()
                         createDirRecursive(sh.env.root + '/service');
                         createDirRecursive(sh.env.root + '/api');

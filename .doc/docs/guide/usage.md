@@ -58,7 +58,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new route**
 	```bash
-	vue make:route About.vue
+	vue make:route About.vue /about
 	```
 - **Installation & configuration for tailwindcss**
 	```bash
@@ -84,7 +84,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new project**
 	```bash
-	express make:project ejs
+	express make:project ejs mongoose
 	```
 - **Create new api**
 	```bash

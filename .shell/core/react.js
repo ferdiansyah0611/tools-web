@@ -1,7 +1,7 @@
 const React = function(sh) {
 	this.name = 'react'
 	this.config = sh.config
-	this.config.rootShellApp = sh.config.rootShell + 'react/'
+	this.root = sh.config.rootShell + 'react/'
 	this.parse = sh.parse()
 	this.init = (arg) => {
 		const {createDirRecursive, read, write} = sh.SystemFile
@@ -26,7 +26,7 @@ const React = function(sh) {
 			action: async(arg) => {
 				const {createDirRecursive, read, write, core, fixName, caseName} = this.init(arg)
 				createDirRecursive(this.config.directory.component, fixName)
-				var code = read(this.config.rootShellApp + 'component.jsx').toString().replaceAll('caseName', caseName)
+				var code = read(this.root + 'component.jsx').toString().replaceAll('caseName', caseName)
 				if (arg[1]) {
 					var style = sh.generateStyle(caseName, 'component', arg[1])
 					if(style){
@@ -40,14 +40,16 @@ const React = function(sh) {
 		{
 			name: 'make:route',
 			console: {
-				name: 'make:route [file] [css|sass|scss]',
+				name: 'make:route [file] [css|sass|scss] [url]',
 				description: 'Generate route pages',
-				tab: 2
+				tab: 1
 			},
 			action: async(arg) => {
 				const {createDirRecursive, read, write, core, fixName, caseName} = this.init(arg)
+				const {append} = sh.SystemFile
+				const url = arg[2].toLowerCase()
 				createDirRecursive(this.config.directory.route, fixName)
-				var code = read(this.config.rootShellApp + 'route.jsx').toString().replaceAll('caseName', caseName)
+				var code = read(this.root + 'route.jsx').toString().replaceAll('caseName', caseName)
 				if (arg[1]) {
 					var style = sh.generateStyle(caseName, 'route', arg[1])
 					if(style){
@@ -55,6 +57,11 @@ const React = function(sh) {
 					}
 				}
 				write(this.config.directory.route + '/' + fixName, code)
+				append(this.config.directory.route + '/index.jsx', '', null, (text) => (
+					text.replace('// dont remove this comment 1', `// dont remove this comment 1\nimport ${caseName} from '@r/${caseName}'`)
+					.replace('{/*dont remove this comment 2*/}', `{/*dont remove this comment 2*/}\n\t\t\t\t\t<Route path="${url}" element={<${caseName}/>}/>`)
+					)
+				)
 				core.success()
 			}
 		},
@@ -75,20 +82,20 @@ const React = function(sh) {
 				var reducer = arg[1] && arg[1].toLowerCase() == 'reducer'
 				if(async){
 					var url = arg[2] || 'http://localhost:8000/api/user'
-					code = read(this.config.rootShellApp + 'store-crud.js')
+					code = read(this.root + 'store-crud.js')
 						.toString()
 						.replaceAll('caseName', caseName)
 						.replaceAll('BASEURL', url)
 				}else{
 					if(reducer){
-						var txt = read(this.config.rootShellApp + 'store-crud-reducer.js')
+						var txt = read(this.root + 'store-crud-reducer.js')
 						var firstCase = caseName[0].toUpperCase() + caseName.slice(1)
 						code = txt.toString().replaceAll('app', caseName)
 							.replaceAll('namestore', caseName)
 							.replaceAll('NameExport', firstCase)
 							.replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @s/${caseName}`)
 					}else{
-						code = read(this.config.rootShellApp + 'store.js').toString()
+						code = read(this.root + 'store.js').toString()
 							.replaceAll('appSlice', caseName + 'Slice')
 							.replaceAll('namestore', caseName)
 					}
@@ -113,17 +120,17 @@ const React = function(sh) {
 				fullDir = this.config.directory.route + '/' + store + '/' + upperName
 				if(store){
 					var generateCreateoredit = () => {
-						var code = read(this.config.rootShellApp + 'crud/createoredit.jsx').toString()
+						var code = read(this.root + 'crud/createoredit.jsx').toString()
 							.replaceAll('storename', store)
 						write(fullDir + 'createoredit.jsx', code)
 					}
 					var generateShow = () => {
-						var code = read(this.config.rootShellApp + 'crud/show.jsx').toString()
+						var code = read(this.root + 'crud/show.jsx').toString()
 							.replaceAll('storename', store)
 						write(fullDir + 'show.jsx', code)
 					}
 					var generateTable = () => {
-						var code = read(this.config.rootShellApp + 'crud/table.jsx').toString()
+						var code = read(this.root + 'crud/table.jsx').toString()
 							.replaceAll('storename', store)
 							.replaceAll('nameTable', upperName + 'table')
 						write(fullDir + 'table.jsx', code)
@@ -148,7 +155,7 @@ const React = function(sh) {
 				let {createDirRecursive, core} = this.init([''])
 				let {copy} = sh.SystemFile
 				await core.createProject('react', async () => {
-					var rootapp = this.config.rootShellApp,
+					var rootapp = this.root,
 					exec = 'cd ' + sh.env.root + ' && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios'
 					createDirRecursive(this.config.directory.service);
 					createDirRecursive(this.config.directory.style);
@@ -180,9 +187,9 @@ const React = function(sh) {
 			action: async() => {
 				await sh.subprocess('cd ' + sh.root + ' && npm install @mui/material @emotion/react @emotion/styled', {
 					close : () => {
-						copy(this.config.rootShellApp + 'store/theme', this.config.directory.store + '/theme.js', () => {})
-						copy(this.config.rootShellApp + 'mui.jsx', this.env.root + '/src/mui.jsx', () => {})
-						copy(this.config.rootShellApp + 'service/color.js', this.config.directory.service + '/color.js', () => {})
+						copy(this.root + 'store/theme', this.config.directory.store + '/theme.js', () => {})
+						copy(this.root + 'mui.jsx', this.env.root + '/src/mui.jsx', () => {})
+						copy(this.root + 'service/color.js', this.config.directory.service + '/color.js', () => {})
 						core.success()
 					}
 				})

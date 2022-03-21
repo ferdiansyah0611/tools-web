@@ -18,7 +18,7 @@ module.exports = [{
     statement: (arg) => arg[0] == 'exit',
     console: {
         name: 'exit',
-        description: 'Exit the command. Not recommend if you run server on the background',
+        description: 'Exit the command. Not recommend if you run server on the background (CTRL+BREAK)',
         tab: 6
     },
     action: async($this) => {
