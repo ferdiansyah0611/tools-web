@@ -126,14 +126,13 @@ class Shell {
                     showHelper(v.action, v.name)
                 })
             })
-            this.exit()
-            return
+            return this.exit()
         }
         if (['-v', '--version'].indexOf(firstArg) !== -1) {
             isFound = true
-            this.log(this.version)
-            this.exit()
-            return
+            var file = JSON.parse(this.SystemFile.read(ROOT + '/package.json'))
+            this.log('v' + file.version)
+            return this.exit()
         } else {
             if (this.arg.length >= 3) {
                 if (this.arg[2].indexOf('=') !== -1) {
