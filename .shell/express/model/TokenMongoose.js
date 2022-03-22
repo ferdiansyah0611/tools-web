@@ -6,8 +6,8 @@ const Token = new Schema({
         type: Schema.ObjectId,
         ref: 'User'
     },
-	token: String,
-	expiredAt: Number,
+    token: String,
+    expiredAt: Number,
 })
 
 var models = mongoose.model('Token', Token)

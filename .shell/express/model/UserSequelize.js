@@ -1,6 +1,10 @@
-var {Model, DataTypes} = require('sequelize')
+const {
+    Model,
+    DataTypes
+} = require('sequelize')
+const db = require('../db')
 
-class User extends Model{}
+class User extends Model {}
 
 User.init({
     name: DataTypes.STRING,
@@ -8,6 +12,10 @@ User.init({
     password: DataTypes.STRING,
     updatedAt: DataTypes.DATE,
     createdAt: DataTypes.DATE,
-}, {sequelize: db, modelName: 'users', timestamps: false})
+}, {
+    sequelize: db,
+    modelName: 'users',
+    timestamps: false
+})
 
 module.exports = User

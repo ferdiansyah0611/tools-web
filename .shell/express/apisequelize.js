@@ -15,7 +15,10 @@ const valid = {
 router.get('/', async(req, res) => {
     try {
         var page = Number(req.query.page) || 1
-        var value = await Model.find().limit(limit * 1).skip((page - 1) * limit).exec()
+        var value = await Model.find({
+            limit: limit,
+            offset: (page - 1) * limit,
+        })
         res.json({
             data: value,
             currentPage: page
@@ -32,7 +35,7 @@ router.get('/:id', async(req, res) => {
             where: {
                 id: req.params.id
             }
-        }).exec()
+        })
         res.json({
             data: value,
         })

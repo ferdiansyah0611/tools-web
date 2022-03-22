@@ -153,7 +153,7 @@ const Express = function(sh) {
                 var folder = sh.env.root
                 var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
                     sh.isProduction ?
-                    ' && cd ' + folder + ' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose' :
+                    ' && cd ' + folder + ' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose dotenv' :
                     ''
                 )
                 await sh.subprocess(exec, {
@@ -165,6 +165,7 @@ const Express = function(sh) {
                         createDirRecursive(sh.env.root + '/api');
                         createDirRecursive(sh.env.root + '/test');
                         createDirRecursive(this.config.directory.model);
+                        copy(rootapp + `env`, sh.env.root + '/.env')
                         copy(rootapp + `jwt${db}.js`, sh.env.root + '/service' + '/auth.js')
                         copy(rootapp + `api/authenticate${dbparse}.js`, sh.env.root + '/api' + '/authenticate.js')
                         copy(rootapp + `model/Token${dbparse}.js`, sh.env.root + '/model' + '/Token.js')
@@ -173,6 +174,22 @@ const Express = function(sh) {
                         code = `const authenticate = require('./api/authenticate');\n` + code
                         code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)`)
                             .replace("'view engine', 'jade'", `'view engine', '${lib}'`)
+
+                        if (db == 'sequelize') {
+                            copy(rootapp + `db${db}.js`, sh.env.root + '/db.js')
+                            var connectdb = ''
+                            connectdb += '// connect database\n'
+                            connectdb += '(async() => {\n'
+                            connectdb += '\ttry {\n'
+                            connectdb += '\t\tawait db.authenticate();\n'
+                            connectdb += `\t\tconsole.log('Connection has been established successfully.');\n`
+                            connectdb += '\t} catch (error) {\n'
+                            connectdb += `\t\tconsole.error('Unable to connect to the database:', error.message);\n`
+                            connectdb += '\t}\n'
+                            connectdb += '})();\n'
+                            code = code.replace('const app = express();', `const app = express();\n` + connectdb)
+                            code = code.replace(`const cors = require('cors');`, `const cors = require('cors');\nconst db = require('./db');`)
+                        }
                         write(sh.env.root + '/app.js', code)
                         core.success()
                     },
