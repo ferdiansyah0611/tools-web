@@ -156,3 +156,10 @@ Call this function if end of execute.
 ```javascript
 core.success()
 ```
+## parse()
+return function parse.
+```javascript
+const parse = sh.parse()
+parse.toUpper('helloworld.js') // return Helloworld.js
+parse.removeFormat('helloworld.js') // return helloworld
+```

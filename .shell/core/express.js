@@ -24,9 +24,9 @@ const Express = function(sh) {
     }
     this.action = [{
         name: 'make:model',
-        maxArg: 2,
+        maxArg: 3,
         console: {
-            name: 'make:model [file] [mongoose|sequelize]',
+            name: 'make:model [file] [mongoose|sequelize] [col]',
             description: 'Generate model',
             tab: 1
         },
@@ -40,13 +40,26 @@ const Express = function(sh) {
             } = this.init(arg)
             var name = arg[0].toLowerCase()
             var lib = arg[1].toLowerCase()
+            var col = arg[2].indexOf(',') !== -1 ? arg[2] : []
+            var column = ''
             var caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
             var list = ['mongoose', 'sequelize']
-            if (list.find(v => v == lib)) {
+            var choose = list.find(v => v == lib)
+            if (choose) {
+                var split = col.split(',')
                 createDirRecursive(this.config.directory.model, name)
+                split.forEach((v, i) => {
+                    if (choose == 'mongoose') {
+                        column += `\t${v}: String,` + (i === split.length - 1 ? '': '\n')
+                    } else {
+                        column += `\t${v}: DataTypes.STRING,` + (i === split.length - 1 ? '': '\n')
+                    }
+                })
+                var onreplace = choose == 'mongoose' ? 'new Schema({' : '.init({'
                 var code = read(this.root + lib + '.js').toString()
                     .replaceAll('caseName', caseName)
-                    .replaceAll('modelName', name);
+                    .replaceAll('models', caseName.toLowerCase())
+                    .replace(onreplace, onreplace + '\n' + column)
                 write(this.config.directory.model + '/' + name, code)
                 core.success()
             } else {

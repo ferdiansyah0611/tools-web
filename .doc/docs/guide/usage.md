@@ -100,7 +100,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new model**
 	```bash
-	express make:model User.js mongoose
+	express make:model User.js mongoose name,email,phone
 	```
 - **Generate google-cloud-storage & storage route API**
 	```bash

@@ -22,7 +22,6 @@ class Shell {
             }
         })
         this.root = this.env.root
-        this.version = 'v1.0'
         this.framework = null
         this.LIST = []
         this.arg = []
