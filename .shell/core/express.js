@@ -4,6 +4,7 @@ const Express = function(sh) {
     this.root = sh.config.rootShell + 'express/'
     this.parse = sh.parse()
     this.engine = ['dust', 'ejs', 'hbs', 'hjs', 'jade', 'pug', 'twig']
+    this.lib = ['mongoose', 'sequelize']
     this.init = (arg) => {
         const {
             createDirRecursive,
@@ -43,16 +44,15 @@ const Express = function(sh) {
             var col = arg[2].indexOf(',') !== -1 ? arg[2] : []
             var column = ''
             var caseName = name[0].toUpperCase() + name.slice(1, name.indexOf('.'))
-            var list = ['mongoose', 'sequelize']
-            var choose = list.find(v => v == lib)
+            var choose = this.lib.find(v => v == lib)
             if (choose) {
                 var split = col.split(',')
                 createDirRecursive(this.config.directory.model, name)
                 split.forEach((v, i) => {
                     if (choose == 'mongoose') {
-                        column += `\t${v}: String,` + (i === split.length - 1 ? '': '\n')
+                        column += `\t${v}: String,` + (i === split.length - 1 ? '' : '\n')
                     } else {
-                        column += `\t${v}: DataTypes.STRING,` + (i === split.length - 1 ? '': '\n')
+                        column += `\t${v}: DataTypes.STRING,` + (i === split.length - 1 ? '' : '\n')
                     }
                 })
                 var onreplace = choose == 'mongoose' ? 'new Schema({' : '.init({'
@@ -63,7 +63,7 @@ const Express = function(sh) {
                 write(this.config.directory.model + '/' + name, code)
                 core.success()
             } else {
-                sh.log(lib.red, 'is not library.'.red, 'You can choose:', list.join(', ').underline)
+                sh.log(lib.red, 'is not library.'.red, 'You can choose:', this.lib.join(', ').underline)
                 core.success()
             }
         }
@@ -91,10 +91,11 @@ const Express = function(sh) {
         }
     }, {
         name: 'make:api',
+        maxArg: 3,
         console: {
-            name: 'make:api [file]',
-            description: 'Generate api',
-            tab: 4
+            name: 'make:api [file] [mongoose|sequelize] [col]',
+            description: 'Generate crud api, routes & validation',
+            tab: 1
         },
         action: async(arg) => {
             var {
@@ -107,7 +108,20 @@ const Express = function(sh) {
                 read
             } = sh.SystemFile
             var name = arg[0].toLowerCase()
-            copy(this.root + 'api.js', this.config.directory.api + '/' + name)
+            var lib = arg[1].toLowerCase()
+            var split = arg[2].toLowerCase().split(',')
+            var valid = '',
+                middleware = ''
+            var api = read(this.root + `api${lib}.js`).toString()
+            split.forEach((v, i) => {
+                valid += `\t${v}: body('${v}').not().isEmpty().trim().escape().withMessage('${v} is required'),` + (i === split.length - 1 ? '' : '\n')
+                middleware += `, valid.${v}`
+            })
+            api = api.replace('const valid = {', `const valid = {\n${valid}`)
+            api = api.replace(`router.post('/', validate`, `router.post('/', validate${middleware}`)
+            api = api.replace(`router.patch('/:id', validate`, `router.patch('/:id', validate${middleware}`)
+            write(sh.env.root + `/api/${caseName.toLowerCase()}.js`, api)
+
             var code = read(sh.env.root + '/app.js').toString()
             code = `const ${caseName}Router = require('./api/${name}');\n` + code
             code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/${caseName.toLowerCase()}', ${caseName}Router)`)
@@ -135,7 +149,7 @@ const Express = function(sh) {
             var lib = arg[0].toLowerCase()
             var engine = this.engine
             var db = arg[1]
-            if (engine.find(v => v == lib.toLowerCase()) && ['mongoose', 'sequelize'].find(v => v == db.toLowerCase())) {
+            if (engine.find(v => v == lib.toLowerCase()) && ['mongoose', 'sequelize'].find(v => v == db)) {
                 var folder = sh.env.root
                 var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
                     sh.isProduction ?
@@ -146,15 +160,16 @@ const Express = function(sh) {
                     close: () => {
                         var rootapp = this.root
                         var code = read(rootapp + 'app.js').toString()
+                        var dbparse = this.parse.toUpper(db)
                         createDirRecursive(sh.env.root + '/service');
                         createDirRecursive(sh.env.root + '/api');
                         createDirRecursive(sh.env.root + '/test');
                         createDirRecursive(this.config.directory.model);
-                        copy(rootapp + 'jwt.js', sh.env.root + '/service' + '/auth.js')
-                        copy(rootapp + 'api/authenticate.js', sh.env.root + '/api' + '/authenticate.js')
-                        copy(rootapp + 'model/Token.js', sh.env.root + '/model' + '/Token.js')
-                        copy(rootapp + 'model/User.js', sh.env.root + '/model' + '/User.js')
-                        copy(rootapp + 'test/api.js', sh.env.root + '/test' + '/api.js')
+                        copy(rootapp + `jwt${db}.js`, sh.env.root + '/service' + '/auth.js')
+                        copy(rootapp + `api/authenticate${dbparse}.js`, sh.env.root + '/api' + '/authenticate.js')
+                        copy(rootapp + `model/Token${dbparse}.js`, sh.env.root + '/model' + '/Token.js')
+                        copy(rootapp + `model/User${dbparse}.js`, sh.env.root + '/model' + '/User.js')
+                        copy(rootapp + `test/api.js`, sh.env.root + '/test' + '/api.js')
                         code = `const authenticate = require('./api/authenticate');\n` + code
                         code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)`)
                             .replace("'view engine', 'jade'", `'view engine', '${lib}'`)

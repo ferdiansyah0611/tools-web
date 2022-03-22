@@ -1,11 +1,13 @@
-var bcrypt = require('bcrypt')
-var jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const { v4 } = require('uuid')
-var User = require('../model/User')
-var saltRounds = 10
+const User = require('../model/User')
+const Token = require('../model/Token')
 
-var exported = {}
+const saltRounds = 10
+const exported = {}
 
+// generate token
 exported.generateToken = (user, expiresIn = "4h") => jwt.sign({user}, process.env.JWT_KEY, {
 	expiresIn: expiresIn,
 })
@@ -30,8 +32,11 @@ exported.generateAccessToken = async (user, tokenOld = null) => {
 		expiredAt: expiredAt
 	}
 }
+
+// jwt verify
 exported.verify = (token) => jwt.verify(token, process.env.JWT_KEY);
 
+// login
 exported.signin = async (body) => {
 	var response = {}
 	var data = await User.findOne({email: body.email}).exec()
@@ -72,10 +77,11 @@ exported.signin = async (body) => {
 	}
 	return response
 }
+
+// registration
 exported.signup = async (body) => {
 	var response = {}
 	var data = await User.findOne({email: body.email}).exec()
-	// console.log(data)
 	if(!data){
 		var hash = await bcrypt.hash(String(body.password), saltRounds)
 		if(hash){
@@ -100,6 +106,8 @@ exported.signup = async (body) => {
 	}
 	return response
 }
+
+// middleware
 exported.validate = (req, res, next) => {
 	const token = req.body.token || req.query.token || req.headers["x-access-token"]
 	try {

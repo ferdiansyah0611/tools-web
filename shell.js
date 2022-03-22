@@ -194,7 +194,7 @@ class Shell {
                     }
                     const running = ActionDefault.find(v => v.statement(this.arg) !== false)
                     if (!running) {
-                        if (this.arg.length > 0 && !isFound) {
+                        if (this.arg.length > 0 && this.arg[0] !== '' && !isFound) {
                             isFound = true
                             await this.subprocess(this.arg.join(' '), {
                                 close: () => {
@@ -202,6 +202,8 @@ class Shell {
                                 },
                                 hideLog: true
                             })
+                        } else {
+                            this.exit()
                         }
                     } else {
                         if (running.maxArg && this.arg.length < running.maxArg) {

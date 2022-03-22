@@ -11,7 +11,6 @@ module.exports = [{
     },
     action: async($this) => {
         $this.history = []
-        $this.log('cleared history command')
         $this.cli()
     }
 }, {
@@ -54,7 +53,6 @@ module.exports = [{
         $this.env.root = name
         $this.root = $this.env.root
         $this._config()
-        $this.log('change default app to', name)
         $this.cli()
     }
 
@@ -75,7 +73,6 @@ module.exports = [{
             append(ROOT + '/index', '', null, (text) => text.replace(`'${$this.env.mode}'`, `'${name}'`))
             $this.env.mode = name
             $this.isProduction = $this.env.mode === 'production'
-            $this.log('change mode to', name)
             $this.cli()
         }
     }
