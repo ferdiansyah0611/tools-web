@@ -172,7 +172,7 @@ const Express = function(sh) {
                         copy(rootapp + `model/User${dbparse}.js`, sh.env.root + '/model' + '/User.js')
                         copy(rootapp + `test/api.js`, sh.env.root + '/test' + '/api.js')
                         code = `const authenticate = require('./api/authenticate');\n` + code
-                        code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/auth', authenticate)`)
+                        code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('/api/auth', authenticate)`)
                             .replace("'view engine', 'jade'", `'view engine', '${lib}'`)
 
                         if (db == 'sequelize') {

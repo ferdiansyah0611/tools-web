@@ -74,7 +74,7 @@ router.post('/signin', valid.email, valid.password, async(req, res) => {
         });
     }
     var services = await signin(req.body)
-    res.status(services ? .error ? 400 : 200).json(services)
+    res.status(services.error ? 400 : 200).json(services)
 })
 router.post('/logout', validate, async(req, res) => {
     await Token.destroy({
@@ -94,7 +94,7 @@ router.post('/signup', valid.email, valid.password, valid.name, async(req, res) 
         });
     }
     var services = await signup(req.body)
-    res.status(services ? .error ? 400 : 200).json(services)
+    res.status(services.error ? 400 : 200).json(services)
 })
 
 module.exports = router;
