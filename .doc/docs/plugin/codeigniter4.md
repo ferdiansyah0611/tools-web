@@ -20,6 +20,7 @@ This plugin has several features such as create new project, UserController, CRU
 # Usage CLI
 Here are some uses of the cli Codeigniter 4 on tools-web.
 ```bash
+ci4 install:datatable
 ci4 make:auth
 ci4 make:user
 ci4 make:crud MyController MyModel user_id,product_id,payment

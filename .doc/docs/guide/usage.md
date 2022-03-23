@@ -96,7 +96,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new api**
 	```bash
-	express make:api user.js
+	express make:api user.js mongoose name,email,phone
 	```
 - **Create new model**
 	```bash
