@@ -300,22 +300,22 @@ class Shell {
             append
         } = this.SystemFile
         return {
-            createProject: async(name, end = Function) => {
+            createProject: async (name, end = Function) => {
                 var exec = 'npm create vite@latest ' + this.env.root + ' -- --template ' + name
-                this.log('create new project...')
                 await this.subprocess(exec, {
                     close: () => {
                         var core = this.core()
                         var code = read(this.config.rootShell + 'vite.config.js').toString()
                         code = code.replace("plugin-react", "plugin-" + name)
                         write(this.env.root + '/vite.config.js', code)
+                        write(this.env.root + '/vercel.json', '{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }')
                         end()
                     },
                     hide: true,
                     hideLog: true
                 })
             },
-            createTailwind: async(type) => {
+            createTailwind: async (type) => {
                 var exec = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
                 await this.subprocess(exec, {
                     close: () => {
@@ -331,8 +331,6 @@ class Shell {
             createFirebaseStorage: () => {
                 createDirRecursive(this.config.directory.service)
                 var code = read(this.config.rootShell + 'firebase/storage.js').toString()
-                this.log('copy if you want to import!')
-                this.log(`import {storage, upload, remove} from '@service/firebase-storage.js'`)
                 write(this.config.directory.service + '/firebase-storage.js', code)
                 var core = this.core()
                 core.success()
@@ -368,7 +366,7 @@ class Shell {
                 description: 'Installation & configuration for tailwindcss',
                 tab: 4
             },
-            action: async(arg, options) => {
+            action: async (arg, options) => {
                 core.createTailwind(options.framework)
             }
         }, {
@@ -378,7 +376,7 @@ class Shell {
                 description: 'Generate service firebase-storage for upload & remove (v8)',
                 tab: 5
             },
-            action: async(arg, options) => {
+            action: async (arg, options) => {
                 core.createFirebaseStorage()
             }
         }, {
@@ -409,7 +407,7 @@ class Shell {
                 description: 'Run the server application on the background',
                 tab: 5
             },
-            action: async() => {
+            action: async () => {
                 this.subprocess('cd ' + this.root + ' && npm run dev', {
                     close: () => {},
                     notSync: true

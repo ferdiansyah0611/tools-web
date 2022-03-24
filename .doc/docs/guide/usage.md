@@ -21,7 +21,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```
 - **Create new route**
 	```bash
-	react make:route About.jsx sass
+	react make:route About.jsx sass about
 	```
 - **Installation & configuration for tailwindcss**
 	```bash
@@ -34,6 +34,11 @@ Did you know that tools-web can integrate other tools made by developers?
 - **Generate config firebase (v9)**
 	```bash
 	react make:firebase
+	```
+- **Generate store redux toolkit**
+	```bash
+	react make:store users.js async http://localhost:8000/api/users
+	react make:store users.js reducer
 	```
 - **Generate model firestore (v9)**
 	```bash
