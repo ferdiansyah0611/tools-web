@@ -153,7 +153,7 @@ const Express = function(sh) {
                 var folder = sh.env.root
                 var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
                     sh.isProduction ?
-                    ' && cd ' + folder + ' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose dotenv' :
+                    ' && cd ' + folder + ' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose && npm i dotenv --save' :
                     ''
                 )
                 await sh.subprocess(exec, {
