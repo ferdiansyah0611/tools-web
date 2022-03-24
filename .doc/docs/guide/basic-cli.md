@@ -68,3 +68,21 @@ schedule.map(v => {
 	sh.start(v)
 })
 ```
+
+<b>Using text file</b>
+
+- Run the cli
+```bash
+twb
+```
+- write my.txt
+```text
+ci4 make:user
+ci4 make:auth
+ci4 make:crud CustomerController Customer
+ci4 make:crud ProductController Product
+```
+- Command to run schedule
+```bash
+schedule my.txt
+```

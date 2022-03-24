@@ -3,15 +3,31 @@ const checkIndex = (text, arg1, arg2) => {
 }
 
 module.exports = [{
+    statement: (arg) => arg[0] == 'schedule',
+    maxArg: 2,
+    console: {
+        name: 'clear',
+        description: 'Clear history command',
+        tab: 6
+    },
+    action: async(sh) => {
+        var file = sh.SystemFile
+        var txt = file.read(sh.arg[1]).toString()
+        txt.split('\n').forEach(async(arg, i) => {
+            await sh.start(arg.split(' '))
+        })
+        sh.cli()
+    }
+}, {
     statement: (arg) => arg[0] == 'clear',
     console: {
         name: 'clear',
         description: 'Clear history command',
         tab: 6
     },
-    action: async($this) => {
-        $this.history = []
-        $this.cli()
+    action: async(sh) => {
+        sh.history = []
+        sh.cli()
     }
 }, {
     statement: (arg) => arg[0] == 'exit',
@@ -20,11 +36,11 @@ module.exports = [{
         description: 'Exit the command. Not recommend if you run server on the background (CTRL+BREAK)',
         tab: 6
     },
-    action: async($this) => {
-        $this.log('==> CREATED BY FERDIANSYAH0611 <=='.blue)
-        $this.log('Good Bye!'.green)
-        $this.startcli = false
-        $this.exit(true)
+    action: async(sh) => {
+        sh.log('==> CREATED BY FERDIANSYAH0611 <=='.blue)
+        sh.log('Good Bye!'.green)
+        sh.startcli = false
+        sh.exit(true)
     }
 }, {
     statement: (arg) => arg[0] == 'edit',
@@ -33,8 +49,8 @@ module.exports = [{
         description: 'Show how to edit cli using vim',
         tab: 6
     },
-    action: async($this, ROOT) => {
-        $this.log('please run:', ('cd ' + ROOT + ' && vim index').blue)
+    action: async(sh, ROOT) => {
+        sh.log('please run:', ('cd ' + ROOT + ' && vim index').blue)
     }
 }, {
     statement: (arg) => arg[0] == 'app',
@@ -44,16 +60,16 @@ module.exports = [{
         description: 'Change default app folder',
         tab: 5
     },
-    action: async($this, ROOT) => {
-        const name = $this.arg[1]
+    action: async(sh, ROOT) => {
+        const name = sh.arg[1]
         const {
             append
-        } = $this.SystemFile;
-        append(ROOT + '/index', '', null, (text) => text.replace(`'${$this.root}'`, `'${name}'`))
-        $this.env.root = name
-        $this.root = $this.env.root
-        $this._config()
-        $this.cli()
+        } = sh.SystemFile;
+        append(ROOT + '/index', '', null, (text) => text.replace(`'${sh.root}'`, `'${name}'`))
+        sh.env.root = name
+        sh.root = sh.env.root
+        sh._config()
+        sh.cli()
     }
 
 }, {
@@ -64,16 +80,16 @@ module.exports = [{
         description: 'Change mode command',
         tab: 3
     },
-    action: async($this, ROOT) => {
-        const name = $this.arg[1]
+    action: async(sh, ROOT) => {
+        const name = sh.arg[1]
         if (['production', 'development'].find(v => v == name)) {
             const {
                 append
-            } = $this.SystemFile;
-            append(ROOT + '/index', '', null, (text) => text.replace(`'${$this.env.mode}'`, `'${name}'`))
-            $this.env.mode = name
-            $this.isProduction = $this.env.mode === 'production'
-            $this.cli()
+            } = sh.SystemFile;
+            append(ROOT + '/index', '', null, (text) => text.replace(`'${sh.env.mode}'`, `'${name}'`))
+            sh.env.mode = name
+            sh.isProduction = sh.env.mode === 'production'
+            sh.cli()
         }
     }
 }, {
@@ -84,15 +100,15 @@ module.exports = [{
         description: 'Install the plugin and the plugin must be publish on npm',
         tab: 3
     },
-    action: async($this, ROOT) => {
-        const name = $this.arg[1]
-        const plugin = $this.arg[2]
-        const parse = $this.parse().toUpper(name)
+    action: async(sh, ROOT) => {
+        const name = sh.arg[1]
+        const plugin = sh.arg[2]
+        const parse = sh.parse().toUpper(name)
         const {
             append
-        } = $this.SystemFile;
+        } = sh.SystemFile;
         (async() => {
-            await $this.subprocess('cd ' + ROOT + ' && npm i ' + plugin, {
+            await sh.subprocess('cd ' + ROOT + ' && npm i ' + plugin, {
                 close: () => {
                     const file = ROOT + '/index'
                     append(file, ``, null, (text) => (
@@ -100,7 +116,7 @@ module.exports = [{
                         .replace('#!/usr/bin/env node', `#!/usr/bin/env node\nconst ${parse} = require('${plugin}')`)
                         .trim()
                     ))
-                    $this.log('restart now!')
+                    sh.log('restart now!')
                 },
                 hide: true
             })
@@ -114,10 +130,10 @@ module.exports = [{
         description: 'Update the package',
         tab: 5
     },
-    action: async($this, ROOT) => {
-        await $this.subprocess('cd ' + ROOT + ' && npm update', {
+    action: async(sh, ROOT) => {
+        await sh.subprocess('cd ' + ROOT + ' && npm update', {
             close: () => {
-                $this.log('restart now!')
+                sh.log('restart now!')
             },
             hide: true,
             hideLog: true
@@ -131,23 +147,23 @@ module.exports = [{
         description: 'Uninstall the plugin',
         tab: 3
     },
-    action: async($this, ROOT) => {
-        const name = $this.arg[1]
-        const plugin = $this.arg[2]
-        const parse = $this.parse().toUpper(name)
+    action: async(sh, ROOT) => {
+        const name = sh.arg[1]
+        const plugin = sh.arg[2]
+        const parse = sh.parse().toUpper(name)
         const {
             read,
             write
-        } = $this.SystemFile;
+        } = sh.SystemFile;
         (async() => {
-            await $this.subprocess('cd ' + ROOT + ' && npm uninstall ' + plugin, {
+            await sh.subprocess('cd ' + ROOT + ' && npm uninstall ' + plugin, {
                 close: () => {
                     const file = ROOT + '/index'
                     var code = read(file).toString()
                         .replace(`const ${parse} = require('${plugin}')`, ``)
                         .replace(`sh.use(${parse})`, '')
                     write(file, code.trim())
-                    $this.log('restart now!')
+                    sh.log('restart now!')
                 },
                 hide: true
             })
@@ -161,13 +177,13 @@ module.exports = [{
         description: 'Run previous command',
         tab: 6
     },
-    action: async($this, ROOT) => {
-        var arg = $this.history[$this.history.length - 2]
+    action: async(sh, ROOT) => {
+        var arg = sh.history[sh.history.length - 2]
         if (arg) {
-            $this.arg = arg
-            $this.start()
+            sh.arg = arg
+            sh.start()
         } else {
-            $this.cli()
+            sh.cli()
         }
     }
 }]
