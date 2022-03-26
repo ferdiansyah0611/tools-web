@@ -32,6 +32,10 @@ Get version of tools-web.
 ```bash
 -v
 ```
+Show value of variable in the class.
+```bash
+show env
+```
 ## Edit file
 ```bash
 edit

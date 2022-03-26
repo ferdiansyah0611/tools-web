@@ -3,12 +3,26 @@ const checkIndex = (text, arg1, arg2) => {
 }
 
 module.exports = [{
+    statement: (arg) => arg[0] == 'show',
+    maxArg: 2,
+    console: {
+        name: 'show [name]',
+        description: 'Show value of variable in the class',
+        tab: 5
+    },
+    action: async(sh) => {
+        if (sh.arg[1] && sh.arg[1] in sh) {
+            sh.log(sh[sh.arg[1]])
+        }
+        sh.cli()
+    }
+}, {
     statement: (arg) => arg[0] == 'schedule',
     maxArg: 2,
     console: {
-        name: 'clear',
-        description: 'Clear history command',
-        tab: 6
+        name: 'schedule [my.txt]',
+        description: 'Run multiple command with file',
+        tab: 4
     },
     action: async(sh) => {
         var file = sh.SystemFile
