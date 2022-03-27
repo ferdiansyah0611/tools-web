@@ -316,7 +316,7 @@ class Shell {
                 })
             },
             createTailwind: async (type) => {
-                var exec = this.env.mode === 'production' ? 'npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
+                var exec = this.env.mode === 'production' ? 'cd ' + this.env.root + ' && npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p' : 'ls'
                 await this.subprocess(exec, {
                     close: () => {
                         copy(this.config.rootShell + 'tailwind.sass', this.env.root + '/src/tailwind.sass')
@@ -358,7 +358,7 @@ class Shell {
             }
         }
     }
-    coreFeatureDefault(core) {
+    coreFeatureDefault(core, options) {
         return [{
             name: 'install:tailwindcss',
             console: {
@@ -366,7 +366,7 @@ class Shell {
                 description: 'Installation & configuration for tailwindcss',
                 tab: 4
             },
-            action: async (arg, options) => {
+            action: async (arg) => {
                 core.createTailwind(options.framework)
             }
         }, {
@@ -376,7 +376,7 @@ class Shell {
                 description: 'Generate service firebase-storage for upload & remove (v8)',
                 tab: 5
             },
-            action: async (arg, options) => {
+            action: async (arg) => {
                 core.createFirebaseStorage()
             }
         }, {
@@ -386,7 +386,7 @@ class Shell {
                 description: 'Generate config firebase (v9)',
                 tab: 5
             },
-            action: (arg, options) => {
+            action: (arg) => {
                 core.initializeFirebase()
             }
         }, {
@@ -397,7 +397,7 @@ class Shell {
                 description: 'Generate model firestore (v9)',
                 tab: 3
             },
-            action: (arg, options) => {
+            action: (arg) => {
                 core.createModelFirestore(this.parse().removeFormat(arg[0]))
             }
         }, {
