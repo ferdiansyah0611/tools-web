@@ -108,16 +108,14 @@ module.exports = [{
     }
 }, {
     statement: (arg) => arg[0] == 'install',
-    maxArg: 3,
+    maxArg: 2,
     console: {
-        name: 'install [name] [npm_name]',
+        name: 'install [name]',
         description: 'Install the plugin and the plugin must be publish on npm',
-        tab: 3
+        tab: 4
     },
     action: async(sh, ROOT) => {
-        const name = sh.arg[1]
-        const plugin = sh.arg[2]
-        const parse = sh.parse().toUpper(name)
+        const plugin = sh.arg[1]
         const {
             append
         } = sh.SystemFile;
@@ -126,13 +124,16 @@ module.exports = [{
                 close: () => {
                     const file = ROOT + '/index'
                     append(file, ``, null, (text) => (
-                        text.replace("// don't remove this comment", "// don't remove this comment\nsh.use(" + parse + ")")
-                        .replace('#!/usr/bin/env node', `#!/usr/bin/env node\nconst ${parse} = require('${plugin}')`)
+                        text.replace(
+                            "// don't remove this comment",
+                            `// don't remove this comment\nsh.use(require('${plugin}'))`
+                        )
                         .trim()
                     ))
                     sh.log('restart now!')
                 },
-                hide: true
+                hide: true,
+                hideLog: true,
             })
         })()
     }
@@ -155,16 +156,14 @@ module.exports = [{
     }
 }, {
     statement: (arg) => arg[0] == 'uninstall',
-    maxArg: 3,
+    maxArg: 2,
     console: {
-        name: 'uninstall [name] [npm_name]',
+        name: 'uninstall [name]',
         description: 'Uninstall the plugin',
-        tab: 3
+        tab: 4
     },
     action: async(sh, ROOT) => {
-        const name = sh.arg[1]
-        const plugin = sh.arg[2]
-        const parse = sh.parse().toUpper(name)
+        const plugin = sh.arg[1]
         const {
             read,
             write
@@ -174,12 +173,12 @@ module.exports = [{
                 close: () => {
                     const file = ROOT + '/index'
                     var code = read(file).toString()
-                        .replace(`const ${parse} = require('${plugin}')`, ``)
-                        .replace(`sh.use(${parse})`, '')
+                        .replace(`sh.use(require('${plugin}'))`, '')
                     write(file, code.trim())
                     sh.log('restart now!')
                 },
-                hide: true
+                hide: true,
+                hideLog: true,
             })
         })()
     }

@@ -45,10 +45,10 @@ edit
 ## Install the plugin
 You can install another plugin or uninstall it.
 ```bash
-install ci4 tools-web.codeigniter4
+install tools-web.codeigniter4
 ```
 ```bash
-uninstall ci4 tools-web.codeigniter4
+uninstall tools-web.codeigniter4
 ```
 Update the package
 ```bash
