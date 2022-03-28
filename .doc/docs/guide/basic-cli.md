@@ -90,3 +90,7 @@ ci4 make:crud ProductController Product
 ```bash
 schedule my.txt
 ```
+Form Generator Bootstrap
+```bash
+make:form id,name,email,password,phone,born hidden,text,email,password,number,date
+```

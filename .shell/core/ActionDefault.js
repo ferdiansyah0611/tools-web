@@ -3,6 +3,57 @@ const checkIndex = (text, arg1, arg2) => {
 }
 
 module.exports = [{
+    statement: (arg) => arg[0] == 'make:form',
+    maxArg: 2,
+    console: {
+        name: 'make:form [name] [type]',
+        description: 'Create form boostrap',
+        tab: 3
+    },
+    action: async(sh) => {
+        if (sh.arg[1].indexOf(',') && sh.arg[2].indexOf(',')) {
+            var file = sh.SystemFile
+            var input = ''
+            var name = sh.arg[1].split(','), type = sh.arg[2].split(',')
+            var date = new Date()
+            var parse = sh.parse()
+
+            input += '<form action="" method="">\n\t<div className="row">\n'
+            file.createDirRecursive(sh.root + '/form')
+
+            for (var i = 0; i < name.length; i++) {
+                var id = `${name[i]}_${i}`;
+                var defaults = ['text', 'email', 'number', 'password', 'date', 'datetime-local'];
+                (() => {
+                    if (type[i] !== 'hidden') {
+                        input += '\t\t<div className="col-auto mb-3">\n';
+                        input += `\t\t\t<label class="form-label" for="${id}">${parse.toUpper(name[i])}</label>\n`
+                    }
+                })();
+                if (defaults.find(v => v == type[i])) {
+                    input += `\t\t\t<input class="form-control" type="${type[i]}" name="${name[i]}" placeholder="Required" id="${id}" required />\n`
+                }
+                else if (type[i] == 'select') {
+                    input += `\t\t\t<select class="form-control" name="${name[i]}" id="${id}" required><option value="">-- ${name[i]} --</option></select>\n`
+                }
+                else if (type[i] == 'textarea') {
+                    input += `\t\t\t<textarea rows="3" class="form-control" name="${name[i]}" id="${id}" required></textarea>\n`
+                }
+                else if (type[i] == 'hidden') {
+                    input += `\t\t<input type="hidden" name="${name[i]}" id="${id}"/>\n`
+                }
+                (() => {
+                    if (type[i] !== 'hidden') {
+                        input += '\t\t</div>\n'
+                    }
+                })();
+            }
+            input += '\t</div>\n</form>'
+            file.write(sh.root + '/form/form_' + date.getFullYear() + date.getDay() + date.getMinutes() + date.getSeconds() + '.html', input)
+        }
+        sh.cli()
+    }
+}, {
     statement: (arg) => arg[0] == 'show',
     maxArg: 2,
     console: {
