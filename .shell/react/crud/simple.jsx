@@ -31,7 +31,7 @@ export default function caseName() {
         let data = [...STORE.data], name = page.sort.name;
         const value = search.toLowerCase()
         const lower = (v) => v.toLowerCase()
-        const filter = (v) => v.id === value
+        const filter = (v) => v.id === parseInt(value)
 
         if(page.sort.order == 'asc'){
             data = data.sort((a, b) => String(a[name]).localeCompare(String(b[name])))

@@ -101,7 +101,7 @@ const React = function(sh) {
                         .replaceAll('caseName', caseName)
                         .replace('{/*table*/}', `{/*table*/}\n` + allcolhead)
                         .replace('<td>{v.id}</td>', `<td>{v.id}</td>\n` + allcolitem)
-                        .replace('const filter = (v) => v.id === value', `const filter = (v) => v.id === value` + statementSearch)
+                        .replace('const filter = (v) => v.id === parseInt(value)', `const filter = (v) => v.id === parseInt(value)` + statementSearch)
                         .replaceAll('STORE', store)
                         .replaceAll('colSpan="4"', `colSpan="${columnTable.length + 2}"`)
                         .replaceAll('createUser', `create${storeName}`)
