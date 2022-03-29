@@ -23,7 +23,7 @@ module.exports = [{
 
             for (var i = 0; i < name.length; i++) {
                 var id = `${name[i]}_${i}`;
-                var defaults = ['text', 'email', 'number', 'password', 'date', 'datetime-local'];
+                var defaults = ['text', 'email', 'number', 'password', 'date', 'datetime-local', 'radio', 'checkbox', 'tel', 'submit', 'range', 'button', 'color', 'file', 'month', 'url', 'week'];
                 (() => {
                     if (type[i] !== 'hidden') {
                         input += '\t\t<div className="col-auto mb-3">\n';

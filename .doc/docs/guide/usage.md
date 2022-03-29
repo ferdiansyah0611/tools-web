@@ -48,6 +48,10 @@ Did you know that tools-web can integrate other tools made by developers?
 	```bash
 	react make:route:crud users
 	```
+- **Generate simple crud using redux, include table and form**
+	```bash
+	react make:crud:simple User.jsx user sass name,email,password,phone,place,company text,email,password,number,text,text name,email,company,place
+	```
 - **Run the server on the background**
 	```bash
 	react run:server

@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom'
 import {storenameShow} from '@s/storename'
 
-export default function storenameShow() {
+export default function storenameShows() {
 	const {id} = useParams()
 	const to = useNavigate()
 	const dispatch = useDispatch()
@@ -16,7 +16,7 @@ export default function storenameShow() {
 	const data = useMemo(() => {
 		var find = store.find((value) => value.id === id)
 		if(!find){
-			(asyn() => {
+			(async() => {
 				find = await dispatch(storenameShow(id))
 				find = find.payload
 			})()

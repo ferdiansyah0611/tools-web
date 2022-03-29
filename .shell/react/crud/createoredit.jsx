@@ -42,7 +42,7 @@ export default function nameCreateOrEdit(props) {
 	// input change
 	const change = (e) => setinput({...input, [e.target.name]: e.target.value})
 	// submit form
-	const submit = (e) => {
+	const submit = async(e) => {
 		e.preventDefault()
 		try{
 			setonsubmit(true)

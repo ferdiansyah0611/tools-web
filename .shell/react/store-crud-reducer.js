@@ -18,9 +18,10 @@ export const appSlice = createSlice({
             paginateNameExport(state, action) {
                 const {
                     offset,
-                    limit
+                    limit,
+                    data
                 } = action.payload
-                state.paginate = state.data.slice((offset - 1) * limit, offset * limit)
+                state.paginate = (data || state.data).slice((offset - 1) * limit, offset * limit)
             },
             handleNameExport(state, action) {
                 state[action.payload.name] = action.payload.value
