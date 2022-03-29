@@ -108,9 +108,9 @@ export default function caseName() {
 					<table>
 				        <thead>
 					       <tr>
-					           <th className="cursor-pointer asc" onClick={sort('id')}>ID</th>
-					           {/*table*/}
-					           <th style={{minWidth: 150}}>ACTION</th>
+                                <th className="cursor-pointer asc" onClick={sort('id')}>ID</th>
+                                {/*table*/}
+                                <th style={{minWidth: 150}}>ACTION</th>
 					       </tr>
 				        </thead>
 					  <tbody>

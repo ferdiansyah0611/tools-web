@@ -55,7 +55,7 @@ const React = function(sh) {
                     var allcolitem = ''
                     var statementSearch = ''
 
-                    const disableNewlineOnLast = (i, length) => i === (length - 1) ? '': '\n'
+                    const disableNewlineOnLast = (i, length) => i === (length - 1) ? '' : '\n'
 
                     createDirRecursive(this.config.directory.route)
                     var code = read(this.root + 'crud/simple.jsx').toString()
@@ -77,7 +77,7 @@ const React = function(sh) {
                         if (defaults.find(v => v == type[i])) {
                             allinput += `${'\t'.repeat(6)}<input value={state.${name[i]}} onChange={handle} type="${type[i]}" name="${name[i]}" placeholder="Required" id="${id}" required />\n`
                         } else if (type[i] == 'select') {
-                            allinput += `${'\t'.repeat(6)}<select value={state.${name[i]}} onChange={handle} name="${name[i]}" id="${id}" required><option value="">-- ${name[i]} --</option></select>\n`
+                            allinput += `${'\t'.repeat(6)}<select value={state.${name[i]}} onChange={handle} name="${name[i]}" id="${id}" required><option value="">-- SELECT --</option></select>\n`
                         } else if (type[i] == 'textarea') {
                             allinput += `${'\t'.repeat(6)}<textarea value={state.${name[i]}} onChange={handle} rows="3" name="${name[i]}" id="${id}" required></textarea>\n`
                         } else if (type[i] == 'hidden') {
@@ -91,13 +91,14 @@ const React = function(sh) {
                     }
 
                     for (var i = 0; i < columnTable.length; i++) {
-                        allcolhead += `${'\t'.repeat(7)}<th className="cursor-pointer asc" onClick={sort('${columnTable[i]}')}>${columnTable[i].toUpperCase()}</th>` + disableNewlineOnLast(i, columnTable.length)
+                        allcolhead += `${'\t'.repeat(8)}<th className="cursor-pointer asc" onClick={sort('${columnTable[i]}')}>${columnTable[i].toUpperCase()}</th>` + disableNewlineOnLast(i, columnTable.length)
                         allcolitem += `${'\t'.repeat(8)}<td>{v.${columnTable[i]}}</td>` + disableNewlineOnLast(i, columnTable.length)
                         statementSearch += ` || lower(v.${columnTable[i]}).indexOf(value) !== -1`
                     }
                     const storeName = parse.toUpper(store)
                     code = code.replace('{/*input*/}', `{/*input*/}\n` + allinput)
                         .replaceAll('sassClass', store)
+                        .replaceAll('caseName', caseName)
                         .replace('{/*table*/}', `{/*table*/}\n` + allcolhead)
                         .replace('<td>{v.id}</td>', `<td>{v.id}</td>\n` + allcolitem)
                         .replace('const filter = (v) => v.id === value', `const filter = (v) => v.id === value` + statementSearch)
@@ -212,9 +213,10 @@ const React = function(sh) {
                     fixName,
                     caseName
                 } = this.init(arg)
+                const {append} = sh.SystemFile
                 fixName = fixName.toLowerCase()
                 caseName = caseName.toLowerCase()
-                createDirRecursive(this.config.directory.store, fixName)
+                createDirRecursive(this.config.directory.store)
                 var code
                 var async = arg[1] && arg[1].toLowerCase() == 'async'
                 var reducer = arg[1] && arg[1].toLowerCase() == 'reducer'
@@ -238,8 +240,19 @@ const React = function(sh) {
                             .replaceAll('namestore', caseName)
                     }
                 }
-                write(this.config.directory.store + '/' + fixName, code)
-                core.success()
+                (() => {
+                    var storeIndex = this.config.directory.store + '/index.js',
+                        imported = `import ${caseName.toLowerCase()}Reducer from './${caseName.toLowerCase()}'`
+                    write(this.config.directory.store + '/' + fixName, code);
+                    var check = read(storeIndex).toString().indexOf(imported) === -1
+                    if (check) {
+                        append(storeIndex, '', null, (text) => (
+                            text.replace('// dont remove this comment 1', `// dont remove this comment 1\n${imported}`)
+                            .replace('reducer: {', `reducer: {\n\t\t${caseName.toLowerCase()}: ${caseName.toLowerCase()}Reducer,`)
+                        ))
+                    }
+                })();
+                core.success();
             }
         }, {
             name: 'make:route:crud',
