@@ -79,7 +79,7 @@ const React = function(sh) {
                         } else if (type[i] == 'select') {
                             allinput += `${'\t'.repeat(6)}<select value={state.${name[i]}} onChange={handle} name="${name[i]}" id="${id}" required><option value="">-- SELECT --</option></select>\n`
                         } else if (type[i] == 'textarea') {
-                            allinput += `${'\t'.repeat(6)}<textarea value={state.${name[i]}} onChange={handle} rows="3" name="${name[i]}" id="${id}" required></textarea>\n`
+                            allinput += `${'\t'.repeat(6)}<textarea value={state.${name[i]}} onChange={handle} rows="1" name="${name[i]}" placeholder="Required" id="${id}" required></textarea>\n`
                         } else if (type[i] == 'hidden') {
                             allinput += `${'\t'.repeat(5)}<input value={state.${name[i]}} onChange={handle} type="hidden" name="${name[i]}" id="${id}"/>\n`
                         }
