@@ -204,27 +204,22 @@ module.exports = [{
             read,
             append
         } = sh.SystemFile
-        await sh.subprocess('cd ' + ROOT + ' && npm i -g tools-web', {
-            close: () => {
-                var package = read(ROOT + '/package.twb').toString().trim().split('\n')
-                if (package.length >= 1) {
-                    (async() => {
-                        await sh.subprocess('cd ' + ROOT + ' && npm i ' + package.join(' '), {
-                            close() {
-                                for (var i = 0; i < package.length; i++) {
-                                    addRequireIndex(ROOT, append, package[i])
-                                }
-                                sh.log('restart now!')
-                            },
-                            hide: true,
-                            hideLog: true
-                        })
-                    })();
-
-                } else {
-                    sh.log('restart now!')
+        var exec = 'npm i -g tools-web'
+        var package = read(ROOT + '/package.twb').toString().trim().split('\n')
+        var ended
+        if (package.length >= 1) {
+            exec += ' && cd ' + ROOT + ' && npm i ' + package.join(' ')
+            ended = () => {
+                for (var i = 0; i < package.length; i++) {
+                    addRequireIndex(ROOT, append, package[i])
                 }
-            },
+                sh.log('restart now!')
+            }
+        } else {
+            ended = () => sh.log('restart now!')
+        }
+        await sh.subprocess(exec, {
+            close: ended,
             hide: true,
             hideLog: true
         })
