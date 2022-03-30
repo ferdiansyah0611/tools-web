@@ -1,6 +1,16 @@
 const checkIndex = (text, arg1, arg2) => {
     return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
 }
+const addRequireIndex = (ROOT, append, plugin) => {
+    const file = ROOT + '/index'
+    append(file, ``, null, (text) => (
+        text.replace(
+            "// don't remove this comment",
+            `// don't remove this comment\nsh.use(require('${plugin}'))`
+        )
+        .trim()
+    ))
+}
 
 module.exports = [{
     statement: (arg) => arg[0] == 'make:form',
@@ -14,7 +24,8 @@ module.exports = [{
         if (sh.arg[1].indexOf(',') && sh.arg[2].indexOf(',')) {
             var file = sh.SystemFile
             var input = ''
-            var name = sh.arg[1].split(','), type = sh.arg[2].split(',')
+            var name = sh.arg[1].split(','),
+                type = sh.arg[2].split(',')
             var date = new Date()
             var parse = sh.parse()
 
@@ -32,14 +43,11 @@ module.exports = [{
                 })();
                 if (defaults.find(v => v == type[i])) {
                     input += `\t\t\t<input class="form-control" type="${type[i]}" name="${name[i]}" placeholder="Required" id="${id}" required />\n`
-                }
-                else if (type[i] == 'select') {
+                } else if (type[i] == 'select') {
                     input += `\t\t\t<select class="form-control" name="${name[i]}" id="${id}" required><option value="">-- ${name[i]} --</option></select>\n`
-                }
-                else if (type[i] == 'textarea') {
+                } else if (type[i] == 'textarea') {
                     input += `\t\t\t<textarea rows="3" class="form-control" name="${name[i]}" id="${id}" required></textarea>\n`
-                }
-                else if (type[i] == 'hidden') {
+                } else if (type[i] == 'hidden') {
                     input += `\t\t<input type="hidden" name="${name[i]}" id="${id}"/>\n`
                 }
                 (() => {
@@ -71,7 +79,7 @@ module.exports = [{
     statement: (arg) => arg[0] == 'schedule',
     maxArg: 2,
     console: {
-        name: 'schedule [my.txt]',
+        name: 'schedule [file]',
         description: 'Run multiple command with file',
         tab: 4
     },
@@ -174,13 +182,8 @@ module.exports = [{
             await sh.subprocess('cd ' + ROOT + ' && npm i ' + plugin, {
                 close: () => {
                     const file = ROOT + '/index'
-                    append(file, ``, null, (text) => (
-                        text.replace(
-                            "// don't remove this comment",
-                            `// don't remove this comment\nsh.use(require('${plugin}'))`
-                        )
-                        .trim()
-                    ))
+                    addRequireIndex(ROOT, append, plugin)
+                    append(ROOT + '/package.twb', plugin + '\n', null, null)
                     sh.log('restart now!')
                 },
                 hide: true,
@@ -197,9 +200,30 @@ module.exports = [{
         tab: 5
     },
     action: async(sh, ROOT) => {
-        await sh.subprocess('cd ' + ROOT + ' && npm update', {
+        const {
+            read,
+            append
+        } = sh.SystemFile
+        await sh.subprocess('cd ' + ROOT + ' && npm i -g tools-web', {
             close: () => {
-                sh.log('restart now!')
+                var package = read(ROOT + '/package.twb').toString().trim().split('\n')
+                if (package.length >= 1) {
+                    (async() => {
+                        await sh.subprocess('cd ' + ROOT + ' && npm i ' + package.join(' '), {
+                            close() {
+                                for (var i = 0; i < package.length; i++) {
+                                    addRequireIndex(ROOT, append, package[i])
+                                }
+                                sh.log('restart now!')
+                            },
+                            hide: true,
+                            hideLog: true
+                        })
+                    })();
+
+                } else {
+                    sh.log('restart now!')
+                }
             },
             hide: true,
             hideLog: true
@@ -217,7 +241,8 @@ module.exports = [{
         const plugin = sh.arg[1]
         const {
             read,
-            write
+            write,
+            append
         } = sh.SystemFile;
         (async() => {
             await sh.subprocess('cd ' + ROOT + ' && npm uninstall ' + plugin, {
@@ -226,6 +251,7 @@ module.exports = [{
                     var code = read(file).toString()
                         .replace(`sh.use(require('${plugin}'))`, '')
                     write(file, code.trim())
+                    append(ROOT + '/package.twb', '', null, (text) => text.replace(plugin, '').trim())
                     sh.log('restart now!')
                 },
                 hide: true,

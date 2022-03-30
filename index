@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const Shell = require('./shell')
 const sh = new Shell({
-	mode: 'development',
+	mode: 'production',
 	root: 'myapp',
 })
 // don't remove this comment
