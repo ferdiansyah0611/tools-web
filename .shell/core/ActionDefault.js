@@ -13,6 +13,19 @@ const addRequireIndex = (ROOT, append, plugin) => {
 }
 
 module.exports = [{
+    statement: (arg) => arg[0] == 'test:api',
+    maxArg: 1,
+    console: {
+        name: 'test:api [file]',
+        description: 'Create testing API http using deno',
+        tab: 4
+    },
+    action: async(sh) => {
+        const file = sh.SystemFile
+        file.createDirRecursive(sh.root + '/test')
+        file.copy(sh.config.rootShell + 'test/api.js', sh.env.root + '/test/' + sh.arg[1])
+    }
+}, {
     statement: (arg) => arg[0] == 'make:form',
     maxArg: 2,
     console: {

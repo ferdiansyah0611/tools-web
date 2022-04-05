@@ -90,7 +90,54 @@ ci4 make:crud ProductController Product
 ```bash
 schedule my.txt
 ```
-Form Generator Bootstrap
+::: warning
+Not recommendation if you want to install project using this schedule.
+:::
+
+## Form Generator Bootstrap
+Create form generator with bootstrap framework.
 ```bash
 make:form id,name,email,password,phone,born hidden,text,email,password,number,date
+```
+## Testing API
+Creating testing api using deno with CRUD method and can customize.
+```bash
+test:api user.js
+```
+After generate code, you can run like this
+```bash
+deno run --allow-net test/api.js user.get
+deno run --allow-net test/api.js user.add
+deno run --allow-net test/api.js user.update yourid
+deno run --allow-net test/api.js user.remove yourid
+deno run --allow-net test/api.js user.id yourid
+```
+Customize your input data or add API and anything.
+```javascript {5,6,10,11,14-25}
+run([
+	...crud('user','http://localhost:3000/api/users', {
+		// data on add
+		add: {
+			name: 'ferdiansyah',
+			password: 'ferdi123',
+		},
+		// data on update
+		update: {
+			name: 'ferdiansyah',
+			password: 'ferdi12345'
+		}
+	}),
+	...crud('blog','http://localhost:3000/api/blog', {
+		// data on add
+		add: {
+			title: 'hello world',
+			description: 'hi, I am ferdiansyah',
+		},
+		// data on update
+		update: {
+			title: 'hello world',
+			description: 'hi, I am safina sahda',
+		}
+	}),
+])
 ```
