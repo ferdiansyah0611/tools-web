@@ -1,98 +1,111 @@
 import axiod from "https://deno.land/x/axiod/mod.ts";
 
-const arg = Deno.args
 const headers = {
-	'Content-Type': 'application/json',
+    'Content-Type': 'application/json',
 }
+
+// headers['x-access-token'] = 'token'
 
 // method
 const get = (url) => axiod.get(url, {
-	headers,
+    headers: headers
 })
-const add = (url, data) => axiod.post(url, {
-	headers,
-	data: string(data)
+const add = (url, data) => axiod.post(url, data, {
+	headers: headers
 })
-const update = (url, data) => axiod.patch(url, {
-	headers,
-	data: string(data)
+const update = (url, data) => axiod.patch(url, data, {
+	headers: headers
 })
 const remove = (url) => axiod.delete(url, {
-	headers,
+	headers: headers
 })
 
 // CRUD API
-const crud = (path, baseURL, option) => {
-	return[
-		{
-			path: path + '.get',
-			action: () => {
-				return get(baseURL)
-			}
-		},
-		{
-			path: path + '.add',
-			action: () => {
-				return add(baseURL, option.add)
-			}
-		},
-		{
-			path: path + '.update',
-			action: () => {
-				return update(baseURL + '/' + arg[1], option.update)
-			}
-		},
-		{
-			path: path + '.remove',
-			action: () => {
-				return remove(baseURL + '/' + arg[1])
-			}
-		},
-		{
-			path: path + '.id',
-			action: () => {
-				return get(baseURL + '/' + arg[1])
-			}
-		}
-	]
+const crud = (path, baseURL) => {
+    return [{
+        path: path + '.get',
+        action: () => {
+            return get(baseURL)
+        }
+    }, {
+        path: path + '.add',
+        action: (arg) => {
+            return add(baseURL, arg[0])
+        }
+    }, {
+        path: path + '.update',
+        action: (arg) => {
+            return update(baseURL + '/' + arg[0], arg[1])
+        }
+    }, {
+        path: path + '.remove',
+        action: (arg) => {
+            return remove(baseURL + '/' + arg[0])
+        }
+    }, {
+        path: path + '.id',
+        action: (arg) => {
+            return get(baseURL + '/' + arg[0])
+        }
+    }]
 }
 
-const run = (action) => {
-	var response
-	arg.map(async(value) => {
-		try{
-			var find = action.find((v) => v.path === value)
-			if(find){
-				console.log('PATH :', value)
-				response = await find.action(value)
-				console.log('RESPONSE :')
-				console.log(response.data)
-			}
-		} catch(err) {
-			console.log("ERROR :", err.message)
-		}
-	})
+const Api = function() {
+    this.arg = []
+    this.add = (data) => {
+    	this.arg.push(data)
+    	return this
+    }
+    this.run = (action) => {
+        Promise.all(this.arg.map(async(value) => {
+                var find = action.find((v) => v.path === value[0])
+                if (find) {
+                    var response = await find.action(value.slice(1))
+                    return {
+                    	data: response.data,
+                    	arg: value
+                    }
+                }
+            })).then(val => {
+                val.forEach(v => {
+                    console.log('_'.repeat(40))
+                    console.log('>', v.arg[0])
+                    console.log(v.data)
+                })
+            }).catch(err => {
+            	if(err?.response?.status){
+                	console.log("STATUS", "\t".repeat(2), " :", err.response.statusText)
+                	console.log("CODE", "\t".repeat(2), " :", err.response.status)
+                	console.log("RESPONSE", "\t".repeat(1), " :", err.response.data)
+                	console.log("URL", "\t".repeat(2), " :", err.config.url)
+            	}
+            	else {
+                	console.log("ERROR", "\t".repeat(2), " :", err.message)
+            	}
+                console.log('_'.repeat(40))
+            })
+        return this
+    }
 }
 
 /*
 	Example:
-	deno run --allow-net test/api.js user.get
-	deno run --allow-net test/api.js user.add
-	deno run --allow-net test/api.js user.update yourid
-	deno run --allow-net test/api.js user.remove yourid
-	deno run --allow-net test/api.js user.id yourid
+	deno run --allow-net test/api.js
 */
 
 // register api in here
-run([
-	...crud('user','http://localhost:3000/api/users', {
-		// data on add
-		add: {
-
-		},
-		// data on update
-		update: {
-
-		}
-	})
+const api = new Api()
+.add(['user.get'])
+.add(['user.post', {
+	username: 'ferdiansyah',
+	password: 'helloworld',
+}])
+.add(['user.update', 1, {
+	username: 'ferdiansyah',
+	password: 'helloworld2',
+}])
+.add(['user.id', 1])
+.add(['user.remove', 1])
+.run([
+    ...crud('user', 'http://localhost:3000/api/users')
 ])
