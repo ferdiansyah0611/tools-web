@@ -9,7 +9,7 @@ This section will help you use plugin Codeigniter 4 from scratch.
 	```
 - **Step 1:** Install the plugin
 	```bash
-	install ci4 tools-web.codeigniter4
+	install tools-web.codeigniter4
 	```
 - **step 2:** Run your shell
 	```bash
