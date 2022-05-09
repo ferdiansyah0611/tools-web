@@ -9,9 +9,9 @@ const {
     verify,
     generateAccessToken,
     validate
-} = require('../service/auth')
-const Token = require('../model/Token')
-const User = require('../model/User')
+} = require('@service/auth')
+const Token = require('@model/Token')
+const User = require('@model/User')
 
 const valid = {
     email: body('email').isEmail().withMessage('email must be valid email').normalizeEmail(),

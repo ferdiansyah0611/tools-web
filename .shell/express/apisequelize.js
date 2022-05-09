@@ -6,7 +6,7 @@ var {
 } = require('express-validator')
 var {
     validate
-} = require('../../service/auth')
+} = require('@service/auth')
 
 const limit = 20
 const valid = {

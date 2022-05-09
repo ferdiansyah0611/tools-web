@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer')
 const sharp = require('sharp');
 const router = express.Router();
-const {uploaded, getURL, removed, getFiles} = require('../service/storage')
+const {uploaded, getURL, removed, getFiles} = require('@service/storage')
 
 const multerStorage = multer.memoryStorage();
 

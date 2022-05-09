@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const { v4 } = require('uuid')
-const User = require('../model/User')
-const Token = require('../model/Token')
+const User = require('@model/User')
+const Token = require('@model/Token')
 
 const saltRounds = 10
 const exported = {}

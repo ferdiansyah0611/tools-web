@@ -114,7 +114,7 @@ const Express = function(sh) {
                 middleware = ''
             var api = read(this.root + `api${lib}.js`).toString()
             split.forEach((v, i) => {
-                valid += `\t${v}: body('${v}').not().isEmpty().trim().escape().withMessage('${v} is required'),` + (i === split.length - 1 ? '' : '\n')
+                valid += `\t${v}: body('${v}').not().isEmpty().withMessage('${v} is required'),` + (i === split.length - 1 ? '' : '\n')
                 middleware += `, valid.${v}`
             })
             api = api.replace('const valid = {', `const valid = {\n${valid}`)
@@ -123,7 +123,7 @@ const Express = function(sh) {
             write(sh.env.root + `/api/${caseName.toLowerCase()}.js`, api)
 
             var code = read(sh.env.root + '/app.js').toString()
-            code = `const ${caseName}Router = require('./api/${name}');\n` + code
+            code = `const ${caseName}Router = require('@api/${name}');\n` + code
             code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('api/${caseName.toLowerCase()}', ${caseName}Router)`)
             write(sh.env.root + '/app.js', code)
             core.success()
@@ -154,7 +154,7 @@ const Express = function(sh) {
                 var folder = sh.env.root
                 var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
                     sh.isProduction ?
-                    ' && cd ' + folder + ` && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid ${db} && npm i dotenv --save && npm i mocha supertest -D` :
+                    ' && cd ' + folder + ` && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias ${db} && npm i dotenv --save && npm i mocha supertest -D` :
                     ''
                 )
                 await sh.subprocess(exec, {
@@ -174,7 +174,7 @@ const Express = function(sh) {
                         copy(rootapp + `model/Token${dbparse}.js`, sh.env.root + '/model' + '/Token.js')
                         copy(rootapp + `model/User${dbparse}.js`, sh.env.root + '/model' + '/User.js')
                         copy(rootapp + `test/testing.js`, sh.env.root + '/test' + '/testing.js')
-                        code = `const authenticate = require('./api/authenticate');\n` + code
+                        code = `const authenticate = require('@api/authenticate');\n` + code
                         code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('/api/auth', authenticate)`)
                             .replace("'view engine', 'jade'", `'view engine', '${lib}'`)
 
