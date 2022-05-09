@@ -99,7 +99,7 @@ Did you know that tools-web can integrate other tools made by developers?
 	```bash
 	express -h
 	```
-- **Create new project**
+- **Create new project (include unit test)**
 	```bash
 	express make:project ejs mongoose
 	```
