@@ -218,9 +218,10 @@ module.exports = [{
             append
         } = sh.SystemFile
         var exec = 'npm i -g tools-web'
-        var package = read(ROOT + '/package.twb').toString().trim().split('\n')
+        var package = read(ROOT + '/package.twb').toString()
         var ended
-        if (package.length >= 1) {
+        if (package.length) {
+            package = package.trim().split('\n')
             exec += ' && cd ' + ROOT + ' && npm i ' + package.join(' ')
             ended = () => {
                 for (var i = 0; i < package.length; i++) {
