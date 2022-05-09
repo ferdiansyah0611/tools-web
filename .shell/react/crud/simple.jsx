@@ -6,7 +6,7 @@ import {
     useDispatch,
 } from 'react-redux'
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { createUser, paginateUser, removeUser, updateUser } from '@s/STORE'
+import { createUser, paginateUser, removeUser, updateUser } from '@store/STORE'
 
 export default function caseName() {
     // state

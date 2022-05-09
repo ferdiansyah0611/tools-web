@@ -48,7 +48,7 @@ const Vue = function(sh) {
 				var code = read(this.root + 'component.vue').toString().replaceAll('caseName', caseName)
 				write(this.config.directory.route + '/' + fixName, code)
 				append(this.config.directory.route + '/index.js', '', null, (text) => (
-					text.replace('// dont remove [1]', `// dont remove [1]\nimport ${caseName} from '@r/${caseName}.vue'`)
+					text.replace('// dont remove [1]', `// dont remove [1]\nimport ${caseName} from '@route/${caseName}.vue'`)
 					.replace('// dont remove [2]', `// dont remove [2]\n\t{ path: '${url}', name: '${caseName}', component: ${caseName} },`)
 				))
 				core.success()

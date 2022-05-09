@@ -5,7 +5,7 @@ import {
 import {
 	useNavigate, Link, useParams, useLocation
 } from 'react-router-dom'
-import {storenameAdd, storenameUpdate, storenameShow} from '@s/storename'
+import {storenameAdd, storenameUpdate, storenameShow} from '@store/storename'
 
 export default function nameCreateOrEdit(props) {
 	const to = useNavigate()

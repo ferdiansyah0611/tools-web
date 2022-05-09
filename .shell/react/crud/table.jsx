@@ -5,7 +5,7 @@ import {
 import {
 	useNavigate, useParams, Navigate, Link
 } from 'react-router-dom'
-import {storenameShow, storenameDelete} from '@s/storename'
+import {storenameShow, storenameDelete} from '@store/storename'
 
 export default function nameTable() {
 	const to = useNavigate()

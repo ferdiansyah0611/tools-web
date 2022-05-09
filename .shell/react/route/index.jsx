@@ -1,7 +1,7 @@
 import {
 	BrowserRouter, Routes, Route, Outlet
 } from 'react-router-dom'
-import Template from '@c/template'
+import Template from '@component/template'
 // dont remove this comment 1
 import Home from './Home'
 import About from './About'

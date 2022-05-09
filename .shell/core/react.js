@@ -116,7 +116,7 @@ const React = function(sh) {
                     }
                     write(this.config.directory.route + '/' + fixName, code)
                     write(this.config.directory.style + '/route/' + caseName + '.' + styleType, styledefault)
-                    var _import = `import ${caseName} from '@r/${caseName}'`,
+                    var _import = `import ${caseName} from '@route/${caseName}'`,
                         routeIndex = this.config.directory.route + '/index.jsx',
                         check = read(routeIndex).toString().indexOf(_import) === -1;
                     if (check) {
@@ -186,7 +186,7 @@ const React = function(sh) {
                     }
                 }
                 write(this.config.directory.route + '/' + fixName, code)
-                var _import = `import ${caseName} from '@r/${caseName}'`,
+                var _import = `import ${caseName} from '@route/${caseName}'`,
                     routeIndex = this.config.directory.route + '/index.jsx',
                     check = read(routeIndex).toString().indexOf(_import) === -1;
                 if (check) {
@@ -233,7 +233,7 @@ const React = function(sh) {
                         code = txt.toString().replaceAll('app', caseName)
                             .replaceAll('namestore', caseName)
                             .replaceAll('NameExport', firstCase)
-                            .replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @s/${caseName}`)
+                            .replaceAll('// import', `// import {handle${firstCase}, reset${firstCase}, create${firstCase}, findOne${firstCase}, update${firstCase}, remove${firstCase}} from @store/${caseName}`)
                     } else {
                         code = read(this.root + 'store.js').toString()
                             .replaceAll('appSlice', caseName + 'Slice')
@@ -298,7 +298,7 @@ const React = function(sh) {
                     generateShow()
                     generateTable()
                 }
-                var dirImport = '@r/' + store + '/' + upperName
+                var dirImport = '@route/' + store + '/' + upperName
                 var code = '',
                     routeList = '';
                 var _import = `import ${upperName}createoredit from '${dirImport}createoredit'\n`,
