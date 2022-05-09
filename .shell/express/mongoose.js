@@ -5,6 +5,6 @@ const caseName = new Schema({
 	createdAt: { type: Date, default: Date.now }
 })
 
-var models = mongoose.model('caseName', caseName)
+var models = mongoose.models.caseName || mongoose.model('caseName', caseName)
 
 module.exports = models

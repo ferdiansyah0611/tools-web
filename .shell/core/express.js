@@ -144,7 +144,8 @@ const Express = function(sh) {
                 copy,
                 write,
                 read,
-                createDirRecursive
+                createDirRecursive,
+                append
             } = sh.SystemFile
             var lib = arg[0].toLowerCase()
             var engine = this.engine
@@ -153,7 +154,7 @@ const Express = function(sh) {
                 var folder = sh.env.root
                 var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
                     sh.isProduction ?
-                    ' && cd ' + folder + ' && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid mongoose && npm i dotenv --save' :
+                    ' && cd ' + folder + ` && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid ${db} && npm i dotenv --save && npm i mocha supertest -D` :
                     ''
                 )
                 await sh.subprocess(exec, {
@@ -166,11 +167,13 @@ const Express = function(sh) {
                         createDirRecursive(sh.env.root + '/test');
                         createDirRecursive(this.config.directory.model);
                         copy(rootapp + `env`, sh.env.root + '/.env')
+                        copy(rootapp + `env`, sh.env.root + '/.env.dev')
+                        copy(rootapp + `env`, sh.env.root + '/.env.test')
                         copy(rootapp + `jwt${db}.js`, sh.env.root + '/service' + '/auth.js')
                         copy(rootapp + `api/authenticate${dbparse}.js`, sh.env.root + '/api' + '/authenticate.js')
                         copy(rootapp + `model/Token${dbparse}.js`, sh.env.root + '/model' + '/Token.js')
                         copy(rootapp + `model/User${dbparse}.js`, sh.env.root + '/model' + '/User.js')
-                        copy(rootapp + `test/api.js`, sh.env.root + '/test' + '/api.js')
+                        copy(rootapp + `test/testing.js`, sh.env.root + '/test' + '/testing.js')
                         code = `const authenticate = require('./api/authenticate');\n` + code
                         code = code.replace('// catch 404 and forward to error handler', `// catch 404 and forward to error handler\napp.use('/api/auth', authenticate)`)
                             .replace("'view engine', 'jade'", `'view engine', '${lib}'`)
@@ -191,6 +194,11 @@ const Express = function(sh) {
                             code = code.replace(`const cors = require('cors');`, `const cors = require('cors');\nconst db = require('./db');`)
                         }
                         write(sh.env.root + '/app.js', code)
+                        append(sh.env.root + '/package.json', '', null, (text) => {
+                            text = text.replace('"scripts": {', `"scripts": {\n\t\t"dev": "SET DEBUG=${sh.env.root}:* && npx nodemon ./bin/www --ignore public/* --ignore testing.js",`)
+                            text = text.replace('"scripts": {', `"scripts": {\n\t\t"test": "mocha test/*.js --watch --timeout 10000",`)
+                            return text
+                        })
                         core.success()
                     },
                     hide: true,

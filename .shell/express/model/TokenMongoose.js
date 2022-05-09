@@ -10,6 +10,6 @@ const Token = new Schema({
     expiredAt: Number,
 })
 
-var models = mongoose.model('Token', Token)
+var models = mongoose.models.Token || mongoose.model('Token', Token)
 
 module.exports = models
