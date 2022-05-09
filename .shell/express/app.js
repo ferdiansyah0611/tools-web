@@ -1,13 +1,6 @@
 require('dotenv').config({
     path: __dirname + (process.env.NODE_ENV === 'production' ? '/.env' : !process.env.NODE_ENV ? '/.env.test' : '/.env.dev')
 })
-require('module-alias').addAliases({
-  '@root'  : __dirname,
-  '@routes': __dirname + '/routes',
-  '@model': __dirname + '/model',
-  '@service': __dirname + '/service',
-  '@api': __dirname + '/api',
-})
 const cors = require('cors')
 const createError = require('http-errors')
 const express = require('express')

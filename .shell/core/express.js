@@ -154,7 +154,7 @@ const Express = function(sh) {
                 var folder = sh.env.root
                 var exec = 'npx express-generator ' + folder + ' --view=' + lib + (
                     sh.isProduction ?
-                    ' && cd ' + folder + ` && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias ${db} && npm i dotenv --save && npm i mocha supertest -D` :
+                    ' && cd ' + folder + ` && npm i && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias ${db} && npm i dotenv --save && npm i mocha supertest -D` + (db == 'sequelize' ? ' && npm i mysql2' : '') :
                     ''
                 )
                 await sh.subprocess(exec, {
@@ -193,6 +193,17 @@ const Express = function(sh) {
                             code = code.replace('const app = express();', `const app = express();\n` + connectdb)
                             code = code.replace(`const cors = require('cors');`, `const cors = require('cors');\nconst db = require('./db');`)
                         }
+                        // alias import
+                        var alias = ''
+                        alias += "require('module-alias').addAliases({\n"
+                        alias += "\t'@root'  : __dirname,\n"
+                        alias += "\t'@routes': __dirname + '/routes',\n"
+                        alias += "\t'@model': __dirname + '/model',\n"
+                        alias += "\t'@service': __dirname + '/service',\n"
+                        alias += "\t'@api': __dirname + '/api'\n"
+                        alias += "})\n"
+                        code = code.replace('const authenticate', alias + 'const authenticate')
+
                         write(sh.env.root + '/app.js', code)
                         append(sh.env.root + '/package.json', '', null, (text) => {
                             text = text.replace('"scripts": {', `"scripts": {\n\t\t"dev": "SET DEBUG=${sh.env.root}:* && npx nodemon ./bin/www --ignore public/* --ignore testing.js",`)

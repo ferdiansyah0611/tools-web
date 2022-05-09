@@ -36,7 +36,7 @@ router.post('/refresh-token', async(req, res) => {
         if (check) {
             var user = await User.findOne({
                 where: {
-                    check.user_id
+                    id: check.user_id
                 }
             })
             var create = await generateAccessToken({
