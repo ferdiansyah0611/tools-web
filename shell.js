@@ -78,145 +78,158 @@ class Shell {
         this.start();
     }
     async start(customize = null) {
-        var isFound = false
-        var firstArg = this.arg[0]
+        return await new Promise(async(resolve) => {
+            var isFound = false
+            var firstArg = this.arg[0]
 
-        const init = () => {
-            if (!this.startcli) {
-                this.arg = process.argv.slice(2)
-                firstArg = this.arg[0]
-            }
-            if (Array.isArray(customize)) {
-                this.customize = true
-                this.arg = customize
-                firstArg = this.arg[0]
-            }
-            if (this.arg.length === 0) {
-                firstArg = '-h'
-            }
+            const init = () => {
+                if (!this.startcli) {
+                    this.arg = process.argv.slice(2)
+                    firstArg = this.arg[0]
+                }
+                if (Array.isArray(customize)) {
+                    this.customize = true
+                    this.arg = customize
+                    firstArg = this.arg[0]
+                }
+                if (this.arg.length === 0) {
+                    firstArg = '-h'
+                }
 
-            this.framework = firstArg
-            this.history.push(this.arg)
-        }
-        const showConsole = (v) => console.log('\t', (v.console.name), '\t'.repeat(v.console.tab), v.console.description)
-        const showTitle = (title) => console.log('\n\t', this.parse().toUpper(title).cyan, 'Commands'.cyan)
-        const showHelper = (arr, title = null) => {
-            if (title) {
-                showTitle(title)
+                this.framework = firstArg
+                this.history.push(this.arg)
             }
-            arr.sort((a, b) => (a.name > b.name) - (a.name < b.name)).forEach(v => {
-                showConsole(v)
-            })
-        }
-        const errorArg = (maxArg) => this.log((`Error: must be ${maxArg} argument`).red)
-        init()
-
-        if (['-h', '--help'].indexOf(firstArg) !== -1) {
-            isFound = true
-            this.consoleHelper(() => {
-                console.log('\t', '-h --help', 'Show help command')
-            })
-            this.consoleHelper(() => {
-                showTitle('Core')
-                ActionDefault.sort((a, b) => (a.console.name > b.console.name) - (a.console.name < b.console.name)).map(v => {
+            const showConsole = (v) => console.log('\t', (v.console.name), '\t'.repeat(v.console.tab), v.console.description)
+            const showTitle = (title) => console.log('\n\t', this.parse().toUpper(title).cyan, 'Commands'.cyan)
+            const showHelper = (arr, title = null) => {
+                if (title) {
+                    showTitle(title)
+                }
+                arr.sort((a, b) => (a.name > b.name) - (a.name < b.name)).forEach(v => {
                     showConsole(v)
                 })
-                this.plugin.sort((a, b) => (a.name > b.name) - (a.name < b.name)).map(v => {
-                    showHelper(v.action, v.name)
-                })
-            })
-            return this.exit()
-        }
-        if (['-v', '--version'].indexOf(firstArg) !== -1) {
-            isFound = true
-            var file = JSON.parse(this.SystemFile.read(ROOT + '/package.json'))
-            this.log('v' + file.version)
-            return this.exit()
-        } else {
-            if (this.arg.length >= 3) {
-                if (this.arg[2].indexOf('=') !== -1) {
-                    var options = this.arg[2].split('=')
-                    this.options = {
-                        dir: this.arg[1],
-                        choose: options[0].split('--')[1],
-                        name: options[1]
-                    }
-                } else {
-                    var options = this.arg[1].indexOf('--') !== -1 ? this.arg[1].split('--') : this.arg[1]
-                    this.options = {
-                        dir: null,
-                        choose: Array.isArray(options) ? options[1] : options,
-                        name: ''
-                    }
-                }
             }
-            if (this.arg.length === 2) {
-                if (this.arg[1].indexOf('=') !== -1) {
-                    var options = this.arg[1].split('=')
-                    this.options = {
-                        dir: null,
-                        choose: options[0].split('--')[1],
-                        name: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/;\S+/), '') : options[1],
-                        lib: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/\S+;/), '') : null
-                    }
-                } else {
-                    var options = this.arg[1].indexOf('--') !== -1 ? this.arg[1].split('--') : this.arg[1]
-                    this.options = {
-                        dir: null,
-                        choose: Array.isArray(options) ? options[1] : options,
-                        name: null,
-                        lib: null
-                    }
-                }
-            }
-            var plugin = this.plugin.find(v => v.name == this.framework)
-            if (plugin) {
+            const errorArg = (maxArg) => this.log((`Error: must be ${maxArg} argument`).red)
+            init()
+
+            if (['-h', '--help'].indexOf(firstArg) !== -1) {
                 isFound = true
-                if (['-h', '--help'].indexOf(this.arg[1]) !== -1) {
-                    this.consoleHelper(() => showHelper(plugin.action))
-                    this.exit()
-                } else {
-                    var action = plugin.action.find(v => v.name === this.options.choose)
-                    if (action) {
-                        if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
-                            errorArg(action.maxArg)
-                            this.cli()
-                        } else {
-                            await action.action(this.arg.slice(2))
-                            this.cli()
-                        }
-                    }
-                }
+                this.consoleHelper(() => {
+                    console.log('\t', '-h --help', 'Show help command')
+                })
+                this.consoleHelper(() => {
+                    showTitle('Core')
+                    ActionDefault.sort((a, b) => (a.console.name > b.console.name) - (a.console.name < b.console.name)).map(v => {
+                        showConsole(v)
+                        resolve(true)
+                    })
+                    this.plugin.sort((a, b) => (a.name > b.name) - (a.name < b.name)).map(v => {
+                        showHelper(v.action, v.name)
+                        resolve(true)
+                    })
+                })
+                return this.exit()
+            }
+            if (['-v', '--version'].indexOf(firstArg) !== -1) {
+                isFound = true
+                var file = JSON.parse(this.SystemFile.read(ROOT + '/package.json'))
+                this.log('v' + file.version)
+                resolve(true)
+                return this.exit()
             } else {
-                if ((this.startcli || this.customize) && !isFound) {
-                    const checkIndex = (text, arg1, arg2) => {
-                        return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
-                    }
-                    const running = ActionDefault.find(v => v.statement(this.arg) !== false)
-                    if (!running) {
-                        if (this.arg.length > 0 && this.arg[0] !== '' && !isFound) {
-                            isFound = true
-                            await this.subprocess(this.arg.join(' '), {
-                                close: () => {
-                                    this.cli()
-                                },
-                                hideLog: true
-                            })
-                        } else {
-                            this.exit()
+                if (this.arg.length >= 3) {
+                    if (this.arg[2].indexOf('=') !== -1) {
+                        var options = this.arg[2].split('=')
+                        this.options = {
+                            dir: this.arg[1],
+                            choose: options[0].split('--')[1],
+                            name: options[1]
                         }
                     } else {
-                        if (running.maxArg && this.arg.length < running.maxArg) {
-                            errorArg(running.maxArg)
-                            this.cli()
+                        var options = this.arg[1].indexOf('--') !== -1 ? this.arg[1].split('--') : this.arg[1]
+                        this.options = {
+                            dir: null,
+                            choose: Array.isArray(options) ? options[1] : options,
+                            name: ''
+                        }
+                    }
+                }
+                if (this.arg.length === 2) {
+                    if (this.arg[1].indexOf('=') !== -1) {
+                        var options = this.arg[1].split('=')
+                        this.options = {
+                            dir: null,
+                            choose: options[0].split('--')[1],
+                            name: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/;\S+/), '') : options[1],
+                            lib: String(options[1]).indexOf(';') !== -1 ? options[1].replace(new RegExp(/\S+;/), '') : null
+                        }
+                    } else {
+                        var options = this.arg[1].indexOf('--') !== -1 ? this.arg[1].split('--') : this.arg[1]
+                        this.options = {
+                            dir: null,
+                            choose: Array.isArray(options) ? options[1] : options,
+                            name: null,
+                            lib: null
+                        }
+                    }
+                }
+                var plugin = this.plugin.find(v => v.name == this.framework)
+                if (plugin) {
+                    isFound = true
+                    if (['-h', '--help'].indexOf(this.arg[1]) !== -1) {
+                        this.consoleHelper(() => showHelper(plugin.action))
+                        resolve(true)
+                        this.exit()
+                    } else {
+                        var action = plugin.action.find(v => v.name === this.options.choose)
+                        if (action) {
+                            if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
+                                errorArg(action.maxArg)
+                                resolve(true)
+                                this.cli()
+                            } else {
+                                var a = await action.action(this.arg.slice(2))
+                                resolve(true)
+                                this.cli()
+                            }
+                        }
+                    }
+                } else {
+                    if ((this.startcli || this.customize) && !isFound) {
+                        const checkIndex = (text, arg1, arg2) => {
+                            return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1
+                        }
+                        const running = ActionDefault.find(v => v.statement(this.arg) !== false)
+                        if (!running) {
+                            if (this.arg.length > 0 && this.arg[0] !== '' && !isFound) {
+                                isFound = true
+                                await this.subprocess(this.arg.join(' '), {
+                                    close: () => {
+                                        resolve(true)
+                                        this.cli()
+                                    },
+                                    hideLog: true
+                                })
+                            } else {
+                                resolve(true)
+                                this.exit()
+                            }
                         } else {
-                            isFound = true
-                            await running.action(this, ROOT)
+                            if (running.maxArg && this.arg.length < running.maxArg) {
+                                errorArg(running.maxArg)
+                                resolve(true)
+                                this.cli()
+                            } else {
+                                isFound = true
+                                await running.action(this, ROOT)
+                                resolve(true)
+                            }
                         }
                     }
                 }
             }
-        }
+
+        })
     }
     consoleHelper(options = Function) {
         console.log('')

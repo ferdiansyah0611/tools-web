@@ -97,12 +97,19 @@ module.exports = [{
         tab: 4
     },
     action: async(sh) => {
-        var file = sh.SystemFile
-        var txt = file.read(sh.arg[1]).toString()
-        txt.split('\n').forEach(async(arg, i) => {
-            await sh.start(arg.split(' '))
+        return new Promise((res) => {
+            try{
+                var file = sh.SystemFile
+                var txt = file.read(sh.arg[1]).toString()
+                txt.split('\n').forEach(async(arg, i) => {
+                    var a = await sh.start(arg.split(' '))
+                })
+            }catch(e){
+                console.log(e.message)
+            }finally{
+                res(true)
+            }
         })
-        sh.cli()
     }
 }, {
     statement: (arg) => arg[0] == 'clear',
