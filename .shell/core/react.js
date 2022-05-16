@@ -365,6 +365,12 @@ const React = function(sh) {
                 tab: 5
             },
             action: async() => {
+                let {
+                    core
+                } = this.init([''])
+                let {
+                    copy
+                } = sh.SystemFile
                 await sh.subprocess('cd ' + sh.root + ' && npm install @mui/material @emotion/react @emotion/styled', {
                     close: () => {
                         copy(this.root + 'store/theme', this.config.directory.store + '/theme.js', () => {})
