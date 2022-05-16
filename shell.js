@@ -77,8 +77,8 @@ class Shell {
         this.arg = arg.split(' ')
         this.start();
     }
-    async start(customize = null) {
-        return await new Promise(async(resolve) => {
+    start(customize = null) {
+        return new Promise(async(resolve) => {
             var isFound = false
             var firstArg = this.arg[0]
 
@@ -188,7 +188,7 @@ class Shell {
                                 resolve(true)
                                 this.cli()
                             } else {
-                                var a = await action.action(this.arg.slice(2))
+                                await action.action(this.arg.slice(2))
                                 resolve(true)
                                 this.cli()
                             }

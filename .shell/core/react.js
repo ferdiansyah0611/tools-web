@@ -371,10 +371,10 @@ const React = function(sh) {
                 let {
                     copy
                 } = sh.SystemFile
-                await sh.subprocess('cd ' + sh.root + ' && npm install @mui/material @emotion/react @emotion/styled', {
+                await sh.subprocess(sh.env.mode === 'production' ? ('cd ' + sh.root + ' && npm install @mui/material @emotion/react @emotion/styled'): 'echo 1', {
                     close: () => {
                         copy(this.root + 'store/theme', this.config.directory.store + '/theme.js', () => {})
-                        copy(this.root + 'mui.jsx', this.env.root + '/src/mui.jsx', () => {})
+                        copy(this.root + 'mui.jsx', sh.env.root + '/src/mui.jsx', () => {})
                         copy(this.root + 'service/color.js', this.config.directory.service + '/color.js', () => {})
                         core.success()
                     }
