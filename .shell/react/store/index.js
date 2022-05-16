@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-// reducer
+// dont remove this comment 1
 import appReducer from './app'
 
 var store = configureStore({

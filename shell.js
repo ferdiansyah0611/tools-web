@@ -281,7 +281,7 @@ class Shell {
             var name = type.toLowerCase();
             ['css', 'sass', 'scss'].find((value) => {
                 if (name === value) {
-                    caseName += '.' + value
+                    caseName += '.module.' + value
                 }
             })
             this.SystemFile.write(`${this.env.root}/src/style/${typeSelect}/${caseName}`, `/*${caseName}*/`)

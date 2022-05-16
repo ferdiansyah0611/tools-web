@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles'
 import { CssBaseline } from '@mui/material'
 import palette from '@service/color'
 
-function mui(props){
+function Mui(props){
 	const stateTheme = useSelector(state => state.theme)
 
 	const theme = useMemo(() => {
@@ -19,3 +19,5 @@ function mui(props){
     </>
 	)
 }
+
+export default Mui
