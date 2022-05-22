@@ -1,22 +1,20 @@
-import {
-	useNavigate
-} from 'react-router-dom'
-import { useState } from 'react'
-import logo from '@/logo.svg'
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import logo from "@/logo.svg";
 
-export default function Home(){
-  const [count, setCount] = useState(0)
-  const to = useNavigate()
-	return(
-		<div>
-			<header className="App-header">
+export default function Home() {
+  const [count, setCount] = useState(0);
+  const to = useNavigate();
+  return (
+    <div>
+      <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React + React Router Dom + Redux Toolkit!</p>
         <p>
           <button type="button" onClick={() => setCount((count) => count + 1)}>
             count is: {count}
           </button>
-          <button onClick={() => to('about')}>Go About</button>
+          <button onClick={() => to("about")}>Go About</button>
         </p>
         <p>
           Edit <code>App.jsx</code> and save to test HMR updates.
@@ -30,7 +28,7 @@ export default function Home(){
           >
             Learn React
           </a>
-          {' | '}
+          {" | "}
           <a
             className="App-link"
             href="https://vitejs.dev/guide/features.html"
@@ -41,6 +39,6 @@ export default function Home(){
           </a>
         </p>
       </header>
-		</div>
-	)
+    </div>
+  );
 }

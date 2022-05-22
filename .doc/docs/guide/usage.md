@@ -1,130 +1,137 @@
 ---
 title: Usage
 ---
+
 # Usage
+
 Here are some uses of the cli on tools-web.
 ::: tip
 Did you know that tools-web can integrate other tools made by developers?
 :::
+
 ## React
+
 - **Start command**
-	```bash
-	react -h
-	```
+  ```bash
+  react -h
+  ```
 - **Create new project**
-	```bash
-	react make:project
-	```
+  ```bash
+  react make:project
+  ```
 - **Create new component**
-	```bash
-	react make:component Button.jsx sass
-	```
+  ```bash
+  react make:component Button.jsx sass
+  ```
 - **Create new route**
-	```bash
-	react make:route About.jsx sass about
-	```
+  ```bash
+  react make:route About.jsx sass about
+  ```
 - **Installation & configuration for tailwindcss**
-	```bash
-	react install:tailwindcss
-	```
+  ```bash
+  react install:tailwindcss
+  ```
 - **Generate service firebase-storage for upload & remove (v8)**
-	```bash
-	react make:gcs
-	```
+  ```bash
+  react make:gcs
+  ```
 - **Generate config firebase (v9)**
-	```bash
-	react make:firebase
-	```
+  ```bash
+  react make:firebase
+  ```
 - **Generate store redux toolkit**
-	```bash
-	react make:store users.js async http://localhost:8000/api/users
-	react make:store users.js reducer
-	```
+  ```bash
+  react make:store users.js async http://localhost:8000/api/users
+  react make:store users.js reducer
+  ```
 - **Generate model firestore (v9)**
-	```bash
-	react make:model:firestore user.js
-	```
+  ```bash
+  react make:model:firestore user.js
+  ```
 - **Generate route crud for store**
-	```bash
-	react make:route:crud users
-	```
+  ```bash
+  react make:route:crud users
+  ```
 - **Generate simple crud using redux, include table and form**
-	```bash
-	react make:crud:simple User.jsx user sass name,email,password,phone,place,company text,email,password,number,text,text name,email,company,place
-	```
+  ```bash
+  react make:crud:simple User.jsx user sass name,email,password,phone,place,company text,email,password,number,text,text name,email,company,place
+  ```
 - **Run the server on the background**
-	```bash
-	react run:server
-	```
+  ```bash
+  react run:server
+  ```
+
 ## Vue
+
 - **Start command**
-	```bash
-	vue -h
-	```
+  ```bash
+  vue -h
+  ```
 - **Create new project**
-	```bash
-	vue make:project
-	```
+  ```bash
+  vue make:project
+  ```
 - **Create new component**
-	```bash
-	vue make:component Button.vue
-	```
+  ```bash
+  vue make:component Button.vue
+  ```
 - **Create new route**
-	```bash
-	vue make:route About.vue /about
-	```
+  ```bash
+  vue make:route About.vue /about
+  ```
 - **Installation & configuration for tailwindcss**
-	```bash
-	vue install:tailwindcss
-	```
+  ```bash
+  vue install:tailwindcss
+  ```
 - **Generate service firebase-storage for upload & remove (v8)**
-	```bash
-	vue make:gcs
-	```
+  ```bash
+  vue make:gcs
+  ```
 - **Generate config firebase (v9)**
-	```bash
-	vue make:firebase
-	```
+  ```bash
+  vue make:firebase
+  ```
 - **Generate model firestore (v9)**
-	```bash
-	vue make:model:firestore user.js
-	```
+  ```bash
+  vue make:model:firestore user.js
+  ```
 - **Run the server on the background**
-	```bash
-	react run:server
-	```
+  ```bash
+  react run:server
+  ```
 
 ## Express
+
 - **Start command**
-	```bash
-	express -h
-	```
+  ```bash
+  express -h
+  ```
 - **Create new project (include unit test)**
-	```bash
-	express make:project ejs mongoose
-	```
+  ```bash
+  express make:project ejs mongoose
+  ```
 - **Create new api**
-	```bash
-	express make:api user.js mongoose name,email,phone
-	```
+  ```bash
+  express make:api user.js mongoose name,email,phone
+  ```
 - **Create new model**
-	```bash
-	express make:model User.js mongoose name,email,phone
-	```
+  ```bash
+  express make:model User.js mongoose name,email,phone
+  ```
 - **Generate google-cloud-storage & storage route API**
-	```bash
-	express make:gcp
-	```
+  ```bash
+  express make:gcp
+  ```
 - **Run the server on the background**
-	```bash
-	react run:server
-	```
-::: warning
-don't be remove on this line at app.js
-```javascript {1}
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-```
-:::
+  `bash react run:server `
+  ::: warning
+  don't be remove on this line at app.js
+
+  ```javascript {1}
+  // catch 404 and forward to error handler
+  app.use(function (req, res, next) {
+    next(createError(404));
+  });
+  ```
+
+  :::

@@ -1,26 +1,26 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 // dont remove [1]
-import Home from '@route/Home.vue'
+import Home from "@route/Home.vue";
 
 const routes = [
-  { path: '/', name: 'Home', component: Home },
+  { path: "/", name: "Home", component: Home },
   // dont remove [2]
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
-})
+  routes,
+});
 
 router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(x => x.meta.requiresAuth)
+  const requiresAuth = to.matched.some((x) => x.meta.requiresAuth);
   // check user in here
-  const isUser = true
-  if(requiresAuth && !isUser) {
-    next('/login')
+  const isUser = true;
+  if (requiresAuth && !isUser) {
+    next("/login");
   } else {
-    next()
+    next();
   }
-})
+});
 
-export default router
+export default router;

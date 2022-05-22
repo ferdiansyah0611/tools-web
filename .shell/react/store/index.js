@@ -1,12 +1,12 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore } from "@reduxjs/toolkit";
 // dont remove this comment 1
-import appReducer from './app'
+import appReducer from "./app";
 
 var store = configureStore({
-	reducer: {
-		app: appReducer
-	},
-	middleware: (getDefaultMiddleware) =>
+  reducer: {
+    app: appReducer,
+  },
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
@@ -17,6 +17,6 @@ var store = configureStore({
         // ignoredPaths: ['items.dates'],
       },
     }),
-})
+});
 
-export default store
+export default store;

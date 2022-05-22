@@ -1,16 +1,22 @@
-require('dotenv').config({
-    path: __dirname + (process.env.NODE_ENV === 'production' ? '/.env' : !process.env.NODE_ENV ? '/.env.test' : '/.env.dev')
-})
-const cors = require('cors')
-const createError = require('http-errors')
-const express = require('express')
-const session = require('express-session')
-const path = require('path')
-const cookieParser = require('cookie-parser')
-const logger = require('morgan')
+require("dotenv").config({
+  path:
+    __dirname +
+    (process.env.NODE_ENV === "production"
+      ? "/.env"
+      : !process.env.NODE_ENV
+      ? "/.env.test"
+      : "/.env.dev"),
+});
+const cors = require("cors");
+const createError = require("http-errors");
+const express = require("express");
+const session = require("express-session");
+const path = require("path");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
 
-const indexRouter = require('./routes/index')
-const usersRouter = require('./routes/users')
+const indexRouter = require("./routes/index");
+const usersRouter = require("./routes/users");
 
 // session store
 // const MySQLStore = require('express-mysql-session')(session)
@@ -22,77 +28,79 @@ const usersRouter = require('./routes/users')
 //   database: process.env.DB_NAME
 // })
 
-const app = express()
+const app = express();
 
 // view engine setup
-const isProduction = app.get('env') === 'production'
-const allowed = []
-const corsOptionsAction = async function(req, callback) {
-    var options = {
-        origin: false
+const isProduction = app.get("env") === "production";
+const allowed = [];
+const corsOptionsAction = async function (req, callback) {
+  var options = {
+    origin: false,
+  };
+  var canAccess = false;
+  if (!isProduction) {
+    canAccess = true;
+  } else if (allowed.indexOf(req.header("Origin")) !== -1) {
+    canAccess = true;
+  }
+  () => {
+    if (canAccess) {
+      options = {
+        origin: true,
+      };
+    } else {
+      options = {
+        origin: false,
+      };
     }
-    var canAccess = false
-    if (!isProduction) {
-        canAccess = true
-    } else if (allowed.indexOf(req.header('Origin')) !== -1) {
-        canAccess = true
-    }
-    (() => {
-        if (canAccess) {
-            options = {
-                origin: true
-            }
-        } else {
-            options = {
-                origin: false
-            }
-        }
-    })
-    callback(null, options)
-}
+  };
+  callback(null, options);
+};
 const configSession = {
-    secret: 'myappexpress',
-    saveUninitialized: false,
-    resave: false,
-    // store: sessionStore,
-    cookie: {
-        maxAge: 600000
-    }
-}
+  secret: "myappexpress",
+  saveUninitialized: false,
+  resave: false,
+  // store: sessionStore,
+  cookie: {
+    maxAge: 600000,
+  },
+};
 if (isProduction) {
-    app.set('trust proxy', 1)
-    configSession.cookie.secure = true
+  app.set("trust proxy", 1);
+  configSession.cookie.secure = true;
 }
-app.use(session(configSession))
-app.use(cors(corsOptionsAction))
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'jade')
+app.use(session(configSession));
+app.use(cors(corsOptionsAction));
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "jade");
 
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({
-    extended: false
-}))
-app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(logger("dev"));
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: false,
+  })
+);
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter)
-app.use('/users', usersRouter)
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-    next(createError(404))
-})
+app.use(function (req, res, next) {
+  next(createError(404));
+});
 
 // error handler
-app.use(function(err, req, res, next) {
-    // set locals, only providing error in development
-    res.locals.message = err.message
-    res.locals.error = req.app.get('env') === 'development' ? err : {}
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
-    // render the error page
-    res.status(err.status || 500)
-    res.render('error')
-})
+  // render the error page
+  res.status(err.status || 500);
+  res.render("error");
+});
 
-module.exports = app
+module.exports = app;
