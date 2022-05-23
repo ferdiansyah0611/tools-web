@@ -30,12 +30,6 @@ Change mode env.
 mode production
 ```
 
-Run previous command.
-
-```bash
--1
-```
-
 Clear the history command.
 
 ```bash

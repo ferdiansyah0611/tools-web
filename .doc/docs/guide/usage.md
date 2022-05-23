@@ -123,7 +123,9 @@ Did you know that tools-web can integrate other tools made by developers?
   express make:gcp
   ```
 - **Run the server on the background**
-  `bash react run:server `
+  ```bash
+  react run:server
+  ```
   ::: warning
   don't be remove on this line at app.js
 

@@ -166,14 +166,26 @@ module.exports = [
     console: {
       name: "exit",
       description:
-        "Exit the command. Not recommend if you run server on the background (CTRL+BREAK)",
+        "Exit the current command",
       tab: 6,
     },
     action: async (sh) => {
-      sh.log("==> CREATED BY FERDIANSYAH0611 <==".blue);
-      sh.log("Good Bye!".green);
-      sh.startcli = false;
-      sh.exit(true);
+      sh.pid.forEach((v, i) => {
+        try{
+          process.kill(v, 'SIGTERM')
+        }catch(e){
+          // e
+        }finally{
+          // sh.log('terminated', v)
+          if(i === sh.pid.length - 1) {
+            sh.log("==> CREATED BY FERDIANSYAH0611 <==".blue);
+            sh.log("Good Bye!".green);
+            sh.startcli = false;
+            process.kill(process.pid, 'SIGTERM')
+            sh.exit(true);
+          }
+        }
+      })
     },
   },
   {
@@ -312,23 +324,6 @@ module.exports = [
           hideLog: true,
         });
       })();
-    },
-  },
-  {
-    statement: (arg) => parseInt(arg[0]) === -1,
-    console: {
-      name: "-1",
-      description: "Run previous command",
-      tab: 6,
-    },
-    action: async (sh, ROOT) => {
-      var arg = sh.history[sh.history.length - 2];
-      if (arg) {
-        sh.arg = arg;
-        sh.start();
-      } else {
-        sh.cli();
-      }
     },
   },
   {

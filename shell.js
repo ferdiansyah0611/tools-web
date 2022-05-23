@@ -27,6 +27,7 @@ class Shell {
     this.framework = null;
     this.LIST = [];
     this.arg = [];
+    this.pid = [];
     this.history = [];
     this.options = {
       dir: null,
@@ -300,22 +301,23 @@ class Shell {
         this.log(run.underline.blue);
       }
     })();
+    let runExecute = exec(run);
+    this.pid.push(runExecute.child.pid)
+    
     if (!action.notSync) {
-      const { stdout, stderr } = await exec(run);
-      if (stderr) {
-        this.log(stderr);
-        action.close(stderr);
+      runExecute = await runExecute
+      if (runExecute.stderr) {
+        this.log(runExecute.stderr);
+        action.close(runExecute.stderr);
         return;
       }
       await new Promise((res) => {
         setTimeout(() => res(true), 500);
       });
-      if (stdout && !action.hide) {
-        process.stdout.write(stdout);
+      if (runExecute.stdout && !action.hide) {
+        process.stdout.write(runExecute.stdout);
       }
-      action.close(stdout);
-    } else {
-      exec(run);
+      action.close(runExecute.stdout);
     }
   }
   generateStyle(caseName, typeSelect, format) {
