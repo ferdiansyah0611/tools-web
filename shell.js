@@ -169,7 +169,7 @@ class Shell {
       if (["-v", "--version"].indexOf(firstArg) !== -1) {
         isFound = true;
         var file = JSON.parse(this.SystemFile.read(ROOT + "/package.json"));
-        this.log("v" + file.version);
+        console.log(this.time(), '>', "v" + file.version);
         resolve(true);
         return this.exit();
       } else {
