@@ -11,7 +11,7 @@ class SystemFile {
   }
   createDirRecursive(dir) {
     if (!fs.existsSync(dir)) {
-      this.app.log("create directory".green, dir.green);
+      this.app.log(`create directory ${dir}`.green);
       return fs.mkdirSync(dir, {
         recursive: true,
       });
@@ -33,11 +33,11 @@ class SystemFile {
       });
     }
     fs.copyFile(copy, dir, callback);
-    return this.app.log("writing".green, dir.green);
+    return this.app.log(`writing ${dir}`.green);
   }
   write(dir, val) {
     fs.writeFileSync(dir, val);
-    return this.app.log("writing".green, dir.green);
+    return this.app.log(`writing ${dir}`.green);
   }
   read(dir) {
     return fs.readFileSync(dir, "utf8");

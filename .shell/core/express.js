@@ -60,9 +60,9 @@ const Express = function (sh) {
           core.success();
         } else {
           sh.log(
-            lib.red,
-            "is not library.".red,
-            "You can choose:",
+            lib.red + ' ' +
+            "is not library.".red + ' ' +
+            "You can choose:"  + ' ' +
             this.lib.join(", ").underline
           );
           core.success();

@@ -120,7 +120,7 @@ module.exports = [
     },
     action: async (sh) => {
       if (sh.arg[1] && sh.arg[1] in sh) {
-        sh.log(sh[sh.arg[1]]);
+        console.log(sh[sh.arg[1]]);
       }
       sh.cli();
     },
@@ -178,8 +178,8 @@ module.exports = [
         }finally{
           // sh.log('terminated', v)
           if(i === sh.pid.length - 1) {
-            sh.log("==> CREATED BY FERDIANSYAH0611 <==".blue);
-            sh.log("Good Bye!".green);
+            console.log(sh.time(), "==> CREATED BY FERDIANSYAH0611 <==".blue);
+            console.log(sh.time(), "Good Bye!".green);
             sh.startcli = false;
             process.kill(process.pid, 'SIGTERM')
             sh.exit(true);
@@ -196,7 +196,7 @@ module.exports = [
       tab: 6,
     },
     action: async (sh, ROOT) => {
-      sh.log("please run:", ("cd " + ROOT + " && vim index").blue);
+      sh.log(`please run: ${`cd ${ROOT} && vim index`.blue}`);
     },
   },
   {

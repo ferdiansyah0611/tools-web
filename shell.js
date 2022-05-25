@@ -2,6 +2,7 @@ const fs = require("fs");
 const prompt = require("prompt-sync")({
   sigint: true,
 });
+const readline = require("readline");
 const ROOT = require("path").dirname(require.main.filename);
 const colors = require("colors");
 const SystemFile = require("./.shell/core/SystemFile");
@@ -138,7 +139,7 @@ class Shell {
           });
       };
       const errorArg = (maxArg) =>
-        this.log(`Error: must be ${maxArg} argument`.red);
+        this.log(`Error: must be ${maxArg} argument`.red + ` *${this.customize ? this.arg.reduce((a,b) => a  + ' ' + b):this.arg.split(',').join(' ')}`);
       init();
 
       if (["-h", "--help"].indexOf(firstArg) !== -1) {
@@ -235,10 +236,12 @@ class Shell {
               if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
                 errorArg(action.maxArg);
                 resolve(true);
+                console.log('')
                 this.cli();
               } else {
                 await action.action(this.arg.slice(2));
                 resolve(true);
+                console.log("");
                 this.cli();
               }
             }
@@ -294,30 +297,43 @@ class Shell {
       close: Function,
     }
   ) {
-    const util = require("util");
-    const exec = util.promisify(require("child_process").exec);
-    (() => {
-      if (!action.hideLog) {
-        this.log(run.underline.blue);
+    try {
+      const util = require("util");
+      const exec = util.promisify(require("child_process").exec);
+      (() => {
+        if (!action.hideLog) {
+          this.log(run.underline.blue);
+        }
+      })();
+      let runExecute = exec(run);
+      this.pid.push(runExecute.child.pid);
+
+      if (!action.notSync) {
+        runExecute = await runExecute;
+        if (runExecute.stderr) {
+          this.log(runExecute.stderr);
+          action.close(runExecute.stderr);
+          return;
+        }
+        await new Promise((res) => {
+          setTimeout(() => res(true), 500);
+        });
+        if (runExecute.stdout && !action.hide) {
+          runExecute.stdout.split("\n").map((v) => {
+            if (v) {
+              console.log(this.time(), v);
+            }
+          });
+        }
+        action.close(runExecute.stdout);
       }
-    })();
-    let runExecute = exec(run);
-    this.pid.push(runExecute.child.pid)
-    
-    if (!action.notSync) {
-      runExecute = await runExecute
-      if (runExecute.stderr) {
-        this.log(runExecute.stderr);
-        action.close(runExecute.stderr);
-        return;
-      }
-      await new Promise((res) => {
-        setTimeout(() => res(true), 500);
+    } catch (e) {
+      e.message.split("\n").map((v) => {
+        if (v) {
+          console.log(this.time(), v.red);
+        }
       });
-      if (runExecute.stdout && !action.hide) {
-        process.stdout.write(runExecute.stdout);
-      }
-      action.close(runExecute.stdout);
+      this.core().success(false);
     }
   }
   generateStyle(caseName, typeSelect, format) {
@@ -342,8 +358,11 @@ class Shell {
       return caseName;
     }
   }
-  log(...log) {
-    console.log(this.time(), ...log);
+  log(log) {
+    // console.log(`${this.time()} ${log}`)
+    readline.clearLine(process.stdout, 0);
+    readline.cursorTo(process.stdout, 0);
+    process.stdout.write(`${this.time()} ${log}\r`);
   }
   exit(skip = false) {
     if (this.startcli) {
@@ -441,7 +460,10 @@ class Shell {
         var core = this.core();
         core.success();
       },
-      success: () => {
+      success: (newline = true) => {
+        if (newline) {
+          process.stdout.write("\n");
+        }
         this.exit();
       },
     };

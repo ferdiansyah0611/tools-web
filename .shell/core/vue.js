@@ -132,7 +132,7 @@ const Vue = function (sh) {
             "cd " +
             sh.env.root +
             " && npm i && npm i vuex@next vue-router@next");
-          sh.log("please run:", exec.underline);
+          sh.log("please run: " + exec.underline);
           core.success();
         });
       },

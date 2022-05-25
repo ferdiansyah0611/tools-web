@@ -216,7 +216,6 @@ const React = function (sh) {
             }
           }
           write(this.config.directory.component + "/" + fixName, code);
-          core.success();
           resolve(true);
         });
       },
