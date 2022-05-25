@@ -120,7 +120,8 @@ module.exports = [
     },
     action: async (sh) => {
       if (sh.arg[1] && sh.arg[1] in sh) {
-        console.log(sh[sh.arg[1]]);
+        sh.log(JSON.stringify(sh[sh.arg[1]]));
+        console.log('')
       }
       sh.cli();
     },

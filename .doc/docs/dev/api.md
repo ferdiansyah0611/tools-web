@@ -18,7 +18,15 @@ const sh = new Shell({
 list of argument cli
 
 ```javascript
-this.log(sh.arg);
+sh.log(sh.arg);
+```
+
+## options: Array
+
+list of options cli
+
+```javascript
+sh.log(sh.options);
 ```
 
 ## env: Object
@@ -26,7 +34,7 @@ this.log(sh.arg);
 config on parameter.
 
 ```javascript
-this.log(sh.env.mode, sh.env.root, sh.env.engine);
+sh.log(sh.env.mode, sh.env.root, sh.env.engine);
 ```
 
 ## root: String
@@ -34,7 +42,7 @@ this.log(sh.env.mode, sh.env.root, sh.env.engine);
 default root app
 
 ```javascript
-this.log(sh.root);
+sh.log(sh.root);
 ```
 
 ## plugin: Array
@@ -42,7 +50,7 @@ this.log(sh.root);
 list of plugin registered.
 
 ```javascript
-this.log(sh.plugin);
+sh.log(sh.plugin);
 ```
 
 ## framework: Array
@@ -50,7 +58,7 @@ this.log(sh.plugin);
 selected of framework or library.
 
 ```javascript
-this.log(sh.framework);
+sh.log(sh.framework);
 ```
 
 ## use(funct)

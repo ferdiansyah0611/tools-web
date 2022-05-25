@@ -30,11 +30,7 @@ class Shell {
     this.arg = [];
     this.pid = [];
     this.history = [];
-    this.options = {
-      dir: null,
-      choose: "",
-      name: "",
-    };
+    this.options = [];
     this.isProduction = this.env.mode === "production";
     this.customize = false;
     this.startcli = false;
@@ -117,7 +113,7 @@ class Shell {
         }
 
         this.framework = firstArg;
-        this.history.push(this.arg);
+        this.history = [this.arg, ...this.history];
       };
       const showConsole = (v) =>
         console.log(
@@ -138,8 +134,12 @@ class Shell {
             showConsole(v);
           });
       };
-      const errorArg = (maxArg) =>
-        this.log(`Error: must be ${maxArg} argument`.red + ` *${this.customize ? this.arg.reduce((a,b) => a  + ' ' + b):this.arg.split(',').join(' ')}`);
+      const errorArg = (action) =>
+        console.log(
+          `${this.time()}` +
+            ` Error: must be ${action.maxArg} argument`.red +
+            ` *${action.console.name}`
+        );
       init();
 
       if (["-h", "--help"].indexOf(firstArg) !== -1) {
@@ -173,54 +173,42 @@ class Shell {
         resolve(true);
         return this.exit();
       } else {
-        if (this.arg.length >= 3) {
-          if (this.arg[2].indexOf("=") !== -1) {
-            var options = this.arg[2].split("=");
-            this.options = {
-              dir: this.arg[1],
-              choose: options[0].split("--")[1],
-              name: options[1],
-            };
-          } else {
-            var options =
-              this.arg[1].indexOf("--") !== -1
-                ? this.arg[1].split("--")
-                : this.arg[1];
-            this.options = {
-              dir: null,
-              choose: Array.isArray(options) ? options[1] : options,
-              name: "",
-            };
+        const parseOption = () => {
+          if (Array.isArray(this.arg)) {
+            let data = this.arg.map((item) => {
+              if (item.indexOf("--") === 0) {
+                if (item.indexOf("=") !== -1) {
+                  return {
+                    name: item.slice(2, item.indexOf("=")),
+                    value: item.slice(item.indexOf("=") + 1),
+                  };
+                } else {
+                  return item.slice(2);
+                }
+              }
+            });
+            let lastOption = 0;
+            let cleanup = data.filter((item, key) => {
+              if (item !== undefined) {
+                if (typeof item === "string" && item !== "help") {
+                  if (!lastOption) {
+                    lastOption = key;
+                  }
+                  return item;
+                }
+                if (typeof item === "object" && item.name !== "help") {
+                  if (!lastOption) {
+                    lastOption = key;
+                  }
+                  return item;
+                }
+              }
+            });
+            this.options = cleanup;
+            this.arg = lastOption ? this.arg.slice(0, lastOption) : this.arg;
           }
-        }
-        if (this.arg.length === 2) {
-          if (this.arg[1].indexOf("=") !== -1) {
-            var options = this.arg[1].split("=");
-            this.options = {
-              dir: null,
-              choose: options[0].split("--")[1],
-              name:
-                String(options[1]).indexOf(";") !== -1
-                  ? options[1].replace(new RegExp(/;\S+/), "")
-                  : options[1],
-              lib:
-                String(options[1]).indexOf(";") !== -1
-                  ? options[1].replace(new RegExp(/\S+;/), "")
-                  : null,
-            };
-          } else {
-            var options =
-              this.arg[1].indexOf("--") !== -1
-                ? this.arg[1].split("--")
-                : this.arg[1];
-            this.options = {
-              dir: null,
-              choose: Array.isArray(options) ? options[1] : options,
-              name: null,
-              lib: null,
-            };
-          }
-        }
+        };
+        parseOption();
         var plugin = this.plugin.find((v) => v.name == this.framework);
         if (plugin) {
           isFound = true;
@@ -229,14 +217,12 @@ class Shell {
             resolve(true);
             this.exit();
           } else {
-            var action = plugin.action.find(
-              (v) => v.name === this.options.choose
-            );
+            var action = plugin.action.find((v) => v.name === this.arg[1]);
             if (action) {
               if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
-                errorArg(action.maxArg);
+                errorArg(action);
                 resolve(true);
-                console.log('')
+                console.log("");
                 this.cli();
               } else {
                 await action.action(this.arg.slice(2));
@@ -270,7 +256,7 @@ class Shell {
               }
             } else {
               if (running.maxArg && this.arg.length < running.maxArg) {
-                errorArg(running.maxArg);
+                errorArg(running);
                 resolve(true);
                 this.cli();
               } else {
@@ -359,7 +345,6 @@ class Shell {
     }
   }
   log(log) {
-    // console.log(`${this.time()} ${log}`)
     readline.clearLine(process.stdout, 0);
     readline.cursorTo(process.stdout, 0);
     process.stdout.write(`${this.time()} ${log}\r`);

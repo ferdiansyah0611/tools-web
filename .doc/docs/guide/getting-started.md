@@ -40,7 +40,9 @@ This section will help you use tools-web from scratch.
   node index
   ```
 - **Step 5:** Show help command
-  `bash --help `
+  ```bash
+  --help
+  ```
   ::: info
   Run your Command Line Interface with administration to prevent error.
   :::
