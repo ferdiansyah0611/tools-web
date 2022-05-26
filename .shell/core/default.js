@@ -13,7 +13,95 @@ const addRequireIndex = (ROOT, append, plugin) => {
   );
 };
 
-module.exports = [
+const CORE = (sh) => {
+  const { createDirRecursive, copy, read, write, append } = sh.SystemFile;
+  return {
+    createProject: async (name, end = Function) => {
+      var exec =
+        "npm create vite@latest " + sh.env.root + " -- --template " + name;
+      await sh.subprocess(exec, {
+        close: () => {
+          var core = sh.core();
+          var code = read(sh.config.rootShell + "vite.config.js").toString();
+          code = code.replace("plugin-react", "plugin-" + name);
+          write(sh.env.root + "/vite.config.js", code);
+          write(
+            sh.env.root + "/vercel.json",
+            '{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }'
+          );
+          end();
+        },
+        hide: true,
+        hideLog: true,
+      });
+    },
+    createTailwind: async (type) => {
+      var exec =
+        sh.env.mode === "production"
+          ? "cd " +
+            sh.env.root +
+            " && npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p"
+          : "ls";
+      await sh.subprocess(exec, {
+        close: () => {
+          copy(
+            sh.config.rootShell + "tailwind.sass",
+            sh.env.root + "/src/tailwind.sass"
+          );
+          copy(
+            sh.config.rootShell + "tailwind.config.js",
+            sh.env.root + "/tailwind.config.js"
+          );
+          var dir =
+            sh.env.root +
+            (type == "react" ? "/src/main.jsx" : "/src/main.js");
+          var code = read(dir).toString();
+          write(dir, "import './tailwind.sass'\n" + code);
+          sh.log("successfuly setup & install tailwindcss!");
+        },
+      });
+    },
+    createFirebaseStorage: () => {
+      createDirRecursive(sh.config.directory.service);
+      var code = read(sh.config.rootShell + "firebase/storage.js").toString();
+      write(sh.config.directory.service + "/firebase-storage.js", code);
+      var core = sh.core();
+      core.success();
+    },
+    initializeFirebase: () => {
+      createDirRecursive(sh.env.root + "/src");
+      createDirRecursive(sh.env.root + "/src/service");
+      copy(
+        sh.config.rootShell + "firebase/firebase.js",
+        sh.env.root + "/src/firebase.js"
+      );
+      copy(
+        sh.config.rootShell + "firebase/validate.js",
+        sh.env.root + "/src/service/validate-auth.js"
+      );
+      var core = sh.core();
+      core.success();
+    },
+    createModelFirestore: (caseName) => {
+      caseName = String(caseName).toLowerCase();
+      createDirRecursive(sh.env.root + "/src/model");
+      var code = read(sh.config.rootShell + "firebase/model.js")
+        .toString()
+        .replaceAll("model", caseName);
+      write(sh.env.root + "/src/model/" + caseName + ".js", code);
+      var core = sh.core();
+      core.success();
+    },
+    success: (newline = true) => {
+      if (newline) {
+        process.stdout.write("\n");
+      }
+      sh.exit();
+    },
+  };
+};
+
+const defaultImport = [
   {
     statement: (arg) => arg[0] == "test:api",
     maxArg: 1,
@@ -121,7 +209,7 @@ module.exports = [
     action: async (sh) => {
       if (sh.arg[1] && sh.arg[1] in sh) {
         sh.log(JSON.stringify(sh[sh.arg[1]]));
-        console.log('')
+        console.log("");
       }
       sh.cli();
     },
@@ -166,27 +254,31 @@ module.exports = [
     statement: (arg) => arg[0] == "exit",
     console: {
       name: "exit",
-      description:
-        "Exit the current command",
+      description: "Exit the current command",
       tab: 6,
     },
     action: async (sh) => {
-      sh.pid.forEach((v, i) => {
-        try{
-          process.kill(v, 'SIGTERM')
-        }catch(e){
-          // e
-        }finally{
-          // sh.log('terminated', v)
-          if(i === sh.pid.length - 1) {
-            console.log(sh.time(), "==> CREATED BY FERDIANSYAH0611 <==".blue);
-            console.log(sh.time(), "Good Bye!".green);
-            sh.startcli = false;
-            process.kill(process.pid, 'SIGTERM')
-            sh.exit(true);
+      sh.startcli = false;
+      let bye = () => {
+        sh.console("==> CREATED BY FERDIANSYAH0611 <==".blue);
+        sh.console("Good Bye!".green);
+        sh.exit(true);
+      };
+      if (sh.pid.length) {
+        sh.pid.forEach((v, i) => {
+          try {
+            process.kill(v, "SIGTERM");
+          } catch (e) {
+            // e
+          } finally {
+            if (i === sh.pid.length - 1) {
+              bye();
+            }
           }
-        }
-      })
+        });
+      } else {
+        bye();
+      }
     },
   },
   {
@@ -336,10 +428,15 @@ module.exports = [
     },
     action(sh) {
       sh.subprocess(`cd ${sh.env.root} && npx prettier --write .`, {
-        close(){
+        close() {
           sh.cli();
-        }
+        },
       });
     },
   },
 ];
+
+module.exports = {
+  DEFAULTS: defaultImport,
+  CORE
+}

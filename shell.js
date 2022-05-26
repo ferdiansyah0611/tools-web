@@ -2,11 +2,12 @@ const fs = require("fs");
 const readline = require("readline");
 const ROOT = require("path").dirname(require.main.filename);
 const colors = require("colors");
-const SystemFile = require("./.shell/core/SystemFile");
-const ActionDefault = require("./.shell/core/ActionDefault");
+const SystemFile = require("./.shell/core/file");
+const { DEFAULTS, CORE } = require("./.shell/core/default");
 
-const input = process.stdin, output = process.stdout;
-const rl = readline.createInterface({ input, output  });
+const input = process.stdin,
+	output = process.stdout;
+const rl = readline.createInterface({ input, output });
 
 class Shell {
 	constructor(
@@ -36,7 +37,6 @@ class Shell {
 		this.startcli = false;
 		this.exit = this.exit.bind(this);
 		this.plugin = [];
-		this.core = this.core.bind(this);
 		this.use = this.use.bind(this);
 		this.start = this.start.bind(this);
 		this.SystemFile = new SystemFile(this);
@@ -44,6 +44,7 @@ class Shell {
 		this.coreFeatureDefault = this.coreFeatureDefault.bind(this);
 		this.cli = this.cli.bind(this);
 		this._config = this._config.bind(this);
+		this.core = () => CORE(this)
 		this._config();
 	}
 	_config() {
@@ -63,9 +64,9 @@ class Shell {
 	quest(msg) {
 		return new Promise((resolve) => {
 			rl.question(msg, (answer) => {
-				resolve(answer)
+				resolve(answer);
 			});
-		})
+		});
 	}
 	use(Class) {
 		var plugin = new Class(this);
@@ -111,16 +112,20 @@ class Shell {
 					v.console.description
 				);
 			const showTitle = (title) =>
-				console.log("\n\t", this.parse().toUpper(title).cyan, "Commands".cyan);
+				console.log(
+					"\n\t",
+					this.parse().toUpper(title).cyan,
+					"Commands".cyan
+				);
 			const showHelper = (arr, title = null) => {
 				if (title) {
 					showTitle(title);
 				}
-				arr
-					.sort((a, b) => (a.name > b.name) - (a.name < b.name))
-					.forEach((v) => {
-						showConsole(v);
-					});
+				arr.sort(
+					(a, b) => (a.name > b.name) - (a.name < b.name)
+				).forEach((v) => {
+					showConsole(v);
+				});
 			};
 			const errorArg = (action) =>
 				this.console(
@@ -129,14 +134,14 @@ class Shell {
 				);
 			init();
 
-			if (["-h", "--help"].indexOf(firstArg) !== -1) {
+			if (["-h", "--help"].indexOf(firstArg.toLowerCase()) !== -1) {
 				isFound = true;
 				this.consoleHelper(() => {
 					console.log("\t", "-h --help", "Show help command");
 				});
 				this.consoleHelper(() => {
 					showTitle("Core");
-					ActionDefault.sort(
+					DEFAULTS.sort(
 						(a, b) =>
 							(a.console.name > b.console.name) -
 							(a.console.name < b.console.name)
@@ -153,9 +158,11 @@ class Shell {
 				});
 				return this.exit();
 			}
-			if (["-v", "--version"].indexOf(firstArg) !== -1) {
+			if (["-v", "--version"].indexOf(firstArg.toLowerCase()) !== -1) {
 				isFound = true;
-				var file = JSON.parse(this.SystemFile.read(ROOT + "/package.json"));
+				var file = JSON.parse(
+					this.SystemFile.read(ROOT + "/package.json")
+				);
 				console.log(this.time(), ">", "v" + file.version);
 				resolve(true);
 				return this.exit();
@@ -167,7 +174,9 @@ class Shell {
 								if (item.indexOf("=") !== -1) {
 									return {
 										name: item.slice(2, item.indexOf("=")),
-										value: item.slice(item.indexOf("=") + 1),
+										value: item.slice(
+											item.indexOf("=") + 1
+										),
 									};
 								} else {
 									return item.slice(2);
@@ -177,13 +186,19 @@ class Shell {
 						let lastOption = 0;
 						let cleanup = data.filter((item, key) => {
 							if (item !== undefined) {
-								if (typeof item === "string" && item !== "help") {
+								if (
+									typeof item === "string" &&
+									item !== "help"
+								) {
 									if (!lastOption) {
 										lastOption = key;
 									}
 									return item;
 								}
-								if (typeof item === "object" && item.name !== "help") {
+								if (
+									typeof item === "object" &&
+									item.name !== "help"
+								) {
 									if (!lastOption) {
 										lastOption = key;
 									}
@@ -192,7 +207,9 @@ class Shell {
 							}
 						});
 						this.options = cleanup;
-						this.arg = lastOption ? this.arg.slice(0, lastOption) : this.arg;
+						this.arg = lastOption
+							? this.arg.slice(0, lastOption)
+							: this.arg;
 					}
 				};
 				parseOption();
@@ -204,9 +221,14 @@ class Shell {
 						resolve(true);
 						this.exit();
 					} else {
-						var action = plugin.action.find((v) => v.name === this.arg[1]);
+						var action = plugin.action.find(
+							(v) => v.name === this.arg[1]
+						);
 						if (action) {
-							if (action.maxArg && this.arg.slice(2).length < action.maxArg) {
+							if (
+								action.maxArg &&
+								this.arg.slice(2).length < action.maxArg
+							) {
 								errorArg(action);
 								resolve(true);
 								console.log("");
@@ -222,13 +244,20 @@ class Shell {
 				} else {
 					if ((this.startcli || this.customize) && !isFound) {
 						const checkIndex = (text, arg1, arg2) => {
-							return text.indexOf(arg1) !== -1 && text.indexOf(arg2) !== -1;
+							return (
+								text.indexOf(arg1) !== -1 &&
+								text.indexOf(arg2) !== -1
+							);
 						};
-						const running = ActionDefault.find(
+						const running = DEFAULTS.find(
 							(v) => v.statement(this.arg) !== false
 						);
 						if (!running) {
-							if (this.arg.length > 0 && this.arg[0] !== "" && !isFound) {
+							if (
+								this.arg.length > 0 &&
+								this.arg[0] !== "" &&
+								!isFound
+							) {
 								isFound = true;
 								await this.subprocess(this.arg.join(" "), {
 									close: () => {
@@ -242,7 +271,10 @@ class Shell {
 								this.exit();
 							}
 						} else {
-							if (running.maxArg && this.arg.length < running.maxArg) {
+							if (
+								running.maxArg &&
+								this.arg.length < running.maxArg
+							) {
 								errorArg(running);
 								resolve(true);
 								this.cli();
@@ -353,97 +385,6 @@ class Shell {
 		var date = new Date();
 		return `[${date.getHours()}:${date.getMinutes()}]`;
 	}
-	core() {
-		const { createDirRecursive, copy, read, write, append } = this.SystemFile;
-		return {
-			createProject: async (name, end = Function) => {
-				var exec =
-					"npm create vite@latest " + this.env.root + " -- --template " + name;
-				await this.subprocess(exec, {
-					close: () => {
-						var core = this.core();
-						var code = read(
-							this.config.rootShell + "vite.config.js"
-						).toString();
-						code = code.replace("plugin-react", "plugin-" + name);
-						write(this.env.root + "/vite.config.js", code);
-						write(
-							this.env.root + "/vercel.json",
-							'{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }'
-						);
-						end();
-					},
-					hide: true,
-					hideLog: true,
-				});
-			},
-			createTailwind: async (type) => {
-				var exec =
-					this.env.mode === "production"
-						? "cd " +
-							this.env.root +
-							" && npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p"
-						: "ls";
-				await this.subprocess(exec, {
-					close: () => {
-						copy(
-							this.config.rootShell + "tailwind.sass",
-							this.env.root + "/src/tailwind.sass"
-						);
-						copy(
-							this.config.rootShell + "tailwind.config.js",
-							this.env.root + "/tailwind.config.js"
-						);
-						var dir =
-							this.env.root +
-							(type == "react" ? "/src/main.jsx" : "/src/main.js");
-						var code = read(dir).toString();
-						write(dir, "import './tailwind.sass'\n" + code);
-						this.log("successfuly setup & install tailwindcss!");
-					},
-				});
-			},
-			createFirebaseStorage: () => {
-				createDirRecursive(this.config.directory.service);
-				var code = read(
-					this.config.rootShell + "firebase/storage.js"
-				).toString();
-				write(this.config.directory.service + "/firebase-storage.js", code);
-				var core = this.core();
-				core.success();
-			},
-			initializeFirebase: () => {
-				createDirRecursive(this.env.root + "/src");
-				createDirRecursive(this.env.root + "/src/service");
-				copy(
-					this.config.rootShell + "firebase/firebase.js",
-					this.env.root + "/src/firebase.js"
-				);
-				copy(
-					this.config.rootShell + "firebase/validate.js",
-					this.env.root + "/src/service/validate-auth.js"
-				);
-				var core = this.core();
-				core.success();
-			},
-			createModelFirestore: (caseName) => {
-				caseName = String(caseName).toLowerCase();
-				createDirRecursive(this.env.root + "/src/model");
-				var code = read(this.config.rootShell + "firebase/model.js")
-					.toString()
-					.replaceAll("model", caseName);
-				write(this.env.root + "/src/model/" + caseName + ".js", code);
-				var core = this.core();
-				core.success();
-			},
-			success: (newline = true) => {
-				if (newline) {
-					process.stdout.write("\n");
-				}
-				this.exit();
-			},
-		};
-	}
 	coreFeatureDefault(core, options) {
 		return [
 			{
@@ -489,7 +430,9 @@ class Shell {
 					tab: 3,
 				},
 				action: (arg) => {
-					core.createModelFirestore(this.parse().removeFormat(arg[0]));
+					core.createModelFirestore(
+						this.parse().removeFormat(arg[0])
+					);
 				},
 			},
 			{
@@ -510,9 +453,12 @@ class Shell {
 	}
 	parse() {
 		return {
-			toUpper: (text) => (text ? text[0].toUpperCase() + text.slice(1) : null),
+			toUpper: (text) =>
+				text ? text[0].toUpperCase() + text.slice(1) : null,
 			removeFormat: (text) =>
-				text ? text[0].toUpperCase() + text.slice(1, text.indexOf(".")) : null,
+				text
+					? text[0].toUpperCase() + text.slice(1, text.indexOf("."))
+					: null,
 		};
 	}
 }
