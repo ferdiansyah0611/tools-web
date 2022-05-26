@@ -1,6 +1,6 @@
 {
   "name": "tools-web",
-  "version": "1.1.42",
+  "version": "1.1.43",
   "description": "tools-web is a tool to speed up developing a website using the cli. Such as making new project, components, state management, routes, model, and others.",
   "main": "index",
   "scripts": {},
@@ -18,8 +18,6 @@
     "twb": "./index"
   },
   "dependencies": {
-    "colors": "^1.4.0",
-    "prompt-sync": "^4.1.6",
-    "prompt-sync-history": "^1.0.1"
+    "colors": "^1.4.0"
   }
 }

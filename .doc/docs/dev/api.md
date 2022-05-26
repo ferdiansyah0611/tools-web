@@ -93,12 +93,20 @@ onclose the tools-web.
 sh.exit();
 ```
 
-## log(...arg)
+## log(arg)
 
 logger the tools-web.
 
 ```javascript
 sh.log("running");
+```
+
+## console(arg)
+
+console.log with timer.
+
+```javascript
+sh.console("running");
 ```
 
 ## SystemFile: class SystemFile
