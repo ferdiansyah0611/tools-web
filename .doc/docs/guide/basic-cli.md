@@ -53,10 +53,6 @@ Run prettier in the current project
 prettier all
 ```
 
-:::info
-You can use completion with tabs key!
-:::
-
 ## Edit file
 
 ```bash

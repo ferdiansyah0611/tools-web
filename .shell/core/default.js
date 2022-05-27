@@ -23,7 +23,7 @@ const CORE = (sh) => {
         close: () => {
           var core = sh.core();
           var code = read(sh.config.rootShell + "vite.config.js").toString();
-          code = code.replace("plugin-react", "plugin-" + name);
+          code = code.replace("react", name);
           write(sh.env.root + "/vite.config.js", code);
           write(
             sh.env.root + "/vercel.json",

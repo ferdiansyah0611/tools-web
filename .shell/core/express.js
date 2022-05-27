@@ -38,6 +38,9 @@ const Express = function (sh) {
         var caseName = name[0].toUpperCase() + name.slice(1, name.indexOf("."));
         var choose = this.lib.find((v) => v == lib);
         if (choose) {
+          if(!col.length) {
+            throw Error('must be 2 column or more!')
+          }
           var split = col.split(",");
           createDirRecursive(this.config.directory.model, name);
           split.forEach((v, i) => {

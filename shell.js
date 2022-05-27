@@ -14,7 +14,8 @@ class Shell {
 		env = {
 			mode: "production",
 			root: "myapp",
-		}
+		},
+		db = {}
 	) {
 		this.env = new Proxy(env, {
 			get(obj, prop) {
@@ -25,6 +26,7 @@ class Shell {
 				return true;
 			},
 		});
+		this.db = db
 		this.root = this.env.root;
 		this.framework = null;
 		this.LIST = [];
@@ -234,10 +236,15 @@ class Shell {
 								console.log("");
 								this.cli();
 							} else {
-								await action.action(this.arg.slice(2));
-								resolve(true);
-								console.log("");
-								this.cli();
+								try{
+									await action.action(this.arg.slice(2));
+									resolve(true);
+									console.log("");
+									this.cli();
+								} catch(e) {
+									this.console(e.message.red)
+									this.cli()
+								}
 							}
 						}
 					}
@@ -382,8 +389,11 @@ class Shell {
 		console.log(`${this.time()}`, log);
 	}
 	time() {
-		var date = new Date();
-		return `[${date.getHours()}:${date.getMinutes()}]`;
+		var date = new Date(),
+			minutes = date.getMinutes(),
+			hours = date.getHours();
+
+		return `[${hours}:${String(minutes).length === 1 ? "0" + minutes : minutes}]`;
 	}
 	coreFeatureDefault(core, options) {
 		return [
