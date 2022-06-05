@@ -57,7 +57,7 @@ module.exports = function prototype(Shell) {
 		this.plugin.push(plugin);
 	};
 	Shell.prototype.cli = async function () {
-		if (process.argv.slice(2).find((item) => item === "--cli")) {
+		if (process.argv.find((item) => item === "--cli")) {
 			this.startcli = false;
 			this.arg = process.argv.slice(3);
 			if (this.hasRun) {
@@ -78,7 +78,7 @@ module.exports = function prototype(Shell) {
 		this.start();
 	};
 	// config directory
-	Shell.prototype.config = function () {
+	Shell.prototype.configure = function () {
 		this.config = {
 			rootShell: ROOT + "/.shell/",
 			directory: {
@@ -297,7 +297,7 @@ module.exports = function prototype(Shell) {
 			const exec = util.promisify(require("child_process").exec);
 			(() => {
 				if (!action.hideLog) {
-					this.log(run.underline.blue);
+					this.console(run.underline.blue);
 				}
 			})();
 			let runExecute = exec(run);

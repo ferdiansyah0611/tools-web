@@ -101,7 +101,8 @@ const Express = function (sh) {
       },
       action: async (arg) => {
         var { core, caseName } = this.init(arg);
-        const { copy, write, read } = sh.SystemFile;
+        const { copy, write, read, createDirRecursive } = sh.SystemFile;
+        createDirRecursive(sh.env.root + '/api')
         var name = arg[0].toLowerCase();
         var lib = arg[1].toLowerCase();
         var split = arg[2].toLowerCase().split(",");
@@ -129,7 +130,7 @@ const Express = function (sh) {
         code = `const ${caseName}Router = require('@api/${name}');\n` + code;
         code = code.replace(
           "// catch 404 and forward to error handler",
-          `// catch 404 and forward to error handler\napp.use('api/${caseName.toLowerCase()}', ${caseName}Router)`
+          `// catch 404 and forward to error handler\napp.use('/api/${caseName.toLowerCase()}', ${caseName}Router)`
         );
         write(sh.env.root + "/app.js", code);
         core.success();
@@ -179,23 +180,23 @@ const Express = function (sh) {
               copy(rootapp + `env`, sh.env.root + "/.env.test");
               copy(
                 rootapp + `jwt${db}.js`,
-                sh.env.root + "/service" + "/auth.js"
+                sh.env.root + "/service/auth.js"
               );
               copy(
-                rootapp + `api/authenticate${dbparse}.js`,
-                sh.env.root + "/api" + "/authenticate.js"
+                rootapp + `api/authenticate_${dbparse}.js`,
+                sh.env.root + "/api/authenticate.js"
               );
               copy(
                 rootapp + `model/Token${dbparse}.js`,
-                sh.env.root + "/model" + "/Token.js"
+                sh.env.root + "/model/Token.js"
               );
               copy(
                 rootapp + `model/User${dbparse}.js`,
-                sh.env.root + "/model" + "/User.js"
+                sh.env.root + "/model/User.js"
               );
               copy(
                 rootapp + `test/testing.js`,
-                sh.env.root + "/test" + "/testing.js"
+                sh.env.root + "/test/testing.js"
               );
               code =
                 `const authenticate = require('@api/authenticate');\n` + code;
@@ -240,7 +241,6 @@ const Express = function (sh) {
                 "const authenticate",
                 alias + "const authenticate"
               );
-
               write(sh.env.root + "/app.js", code);
               append(sh.env.root + "/package.json", "", null, (text) => {
                 text = text.replace(

@@ -190,7 +190,7 @@ const defaultImport = [
       );
       sh.env.root = name;
       sh.root = sh.env.root;
-      sh.config();
+      sh.configure();
       sh.cli();
     },
   },

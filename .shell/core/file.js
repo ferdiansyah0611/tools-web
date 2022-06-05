@@ -25,7 +25,6 @@ class SystemFile {
     );
   }
   copy(copy, dir, callback = Function) {
-    this.createDirRecursiveRemoveFile(dir)
     fs.copyFile(copy, dir, callback);
     return this.app.log(`writing ${dir}`.green);
   }
