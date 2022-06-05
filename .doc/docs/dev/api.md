@@ -8,7 +8,7 @@ Prototype in class Shell
 
 ```javascript
 const sh = new Shell({
-  mode: "development",
+  mode: 1,
   root: "myapp",
 });
 ```

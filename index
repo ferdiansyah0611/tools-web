@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-const Shell = require('./shell')
+const Shell = require("./shell")
 const sh = new Shell({
-	mode: 'production',
-	root: 'myapp',
+	mode: 1,
+	root: "myapp",
 })
 // don't remove this comment
-sh.use(require('./.shell/core/react'))
-sh.use(require('./.shell/core/vue'))
-sh.use(require('./.shell/core/express'))
+sh.use(require("./.shell/core/react"))
+sh.use(require("./.shell/core/vue"))
+sh.use(require("./.shell/core/express"))
 sh.cli()

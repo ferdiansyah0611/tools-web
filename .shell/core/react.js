@@ -493,7 +493,7 @@ const React = function (sh) {
         let { copy } = sh.SystemFile;
         return new Promise(async (resolve) => {
           await sh.subprocess(
-            sh.env.mode === "production"
+            sh.env.mode === 1
               ? "cd " +
                   sh.root +
                   " && npm install @mui/material @emotion/react @emotion/styled @mui/icons-material"

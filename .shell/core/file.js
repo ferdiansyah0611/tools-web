@@ -25,13 +25,7 @@ class SystemFile {
     );
   }
   copy(copy, dir, callback = Function) {
-    if (!fs.existsSync(dir)) {
-      var folder = dir.split("/");
-      folder = folder.slice(0, folder.length - 1).join("/");
-      fs.mkdirSync(folder, {
-        recursive: true,
-      });
-    }
+    this.createDirRecursiveRemoveFile(dir)
     fs.copyFile(copy, dir, callback);
     return this.app.log(`writing ${dir}`.green);
   }
@@ -41,6 +35,10 @@ class SystemFile {
   }
   read(dir) {
     return fs.readFileSync(dir, "utf8");
+  }
+  createDirRecursiveRemoveFile(dir){
+    let split = dir.split('/');
+    this.createDirRecursive(split.slice(0, split.length - 2).join('/'));
   }
 }
 

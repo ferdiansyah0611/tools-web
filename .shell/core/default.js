@@ -37,7 +37,7 @@ const CORE = (sh) => {
     },
     createTailwind: async (type) => {
       var exec =
-        sh.env.mode === "production"
+        sh.env.mode === 1
           ? "cd " +
             sh.env.root +
             " && npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p"
@@ -53,8 +53,7 @@ const CORE = (sh) => {
             sh.env.root + "/tailwind.config.js"
           );
           var dir =
-            sh.env.root +
-            (type == "react" ? "/src/main.jsx" : "/src/main.js");
+            sh.env.root + (type == "react" ? "/src/main.jsx" : "/src/main.js");
           var code = read(dir).toString();
           write(dir, "import './tailwind.sass'\n" + code);
           sh.log("successfuly setup & install tailwindcss!");
@@ -69,8 +68,6 @@ const CORE = (sh) => {
       core.success();
     },
     initializeFirebase: () => {
-      createDirRecursive(sh.env.root + "/src");
-      createDirRecursive(sh.env.root + "/src/service");
       copy(
         sh.config.rootShell + "firebase/firebase.js",
         sh.env.root + "/src/firebase.js"
@@ -120,85 +117,6 @@ const defaultImport = [
     },
   },
   {
-    statement: (arg) => arg[0] == "make:form",
-    maxArg: 2,
-    console: {
-      name: "make:form [name] [type]",
-      description: "Create form boostrap",
-      tab: 3,
-    },
-    action: async (sh) => {
-      if (sh.arg[1].indexOf(",") && sh.arg[2].indexOf(",")) {
-        var file = sh.SystemFile;
-        var input = "";
-        var name = sh.arg[1].split(","),
-          type = sh.arg[2].split(",");
-        var date = new Date();
-        var parse = sh.parse();
-
-        input += '<form action="" method="">\n\t<div className="row">\n';
-        file.createDirRecursive(sh.root + "/form");
-
-        for (var i = 0; i < name.length; i++) {
-          var id = `${name[i]}_${i}`;
-          var defaults = [
-            "text",
-            "email",
-            "number",
-            "password",
-            "date",
-            "datetime-local",
-            "radio",
-            "checkbox",
-            "tel",
-            "submit",
-            "range",
-            "button",
-            "color",
-            "file",
-            "month",
-            "url",
-            "week",
-          ];
-          (() => {
-            if (type[i] !== "hidden") {
-              input += '\t\t<div className="col-auto mb-3">\n';
-              input += `\t\t\t<label class="form-label" for="${id}">${parse.toUpper(
-                name[i]
-              )}</label>\n`;
-            }
-          })();
-          if (defaults.find((v) => v == type[i])) {
-            input += `\t\t\t<input class="form-control" type="${type[i]}" name="${name[i]}" placeholder="Required" id="${id}" required />\n`;
-          } else if (type[i] == "select") {
-            input += `\t\t\t<select class="form-control" name="${name[i]}" id="${id}" required><option value="">-- ${name[i]} --</option></select>\n`;
-          } else if (type[i] == "textarea") {
-            input += `\t\t\t<textarea rows="3" class="form-control" name="${name[i]}" id="${id}" required></textarea>\n`;
-          } else if (type[i] == "hidden") {
-            input += `\t\t<input type="hidden" name="${name[i]}" id="${id}"/>\n`;
-          }
-          (() => {
-            if (type[i] !== "hidden") {
-              input += "\t\t</div>\n";
-            }
-          })();
-        }
-        input += "\t</div>\n</form>";
-        file.write(
-          sh.root +
-            "/form/form_" +
-            date.getFullYear() +
-            date.getDay() +
-            date.getMinutes() +
-            date.getSeconds() +
-            ".html",
-          input
-        );
-      }
-      sh.cli();
-    },
-  },
-  {
     statement: (arg) => arg[0] == "show",
     maxArg: 2,
     console: {
@@ -211,42 +129,6 @@ const defaultImport = [
         sh.log(JSON.stringify(sh[sh.arg[1]]));
         console.log("");
       }
-      sh.cli();
-    },
-  },
-  {
-    statement: (arg) => arg[0] == "schedule",
-    maxArg: 2,
-    console: {
-      name: "schedule [file]",
-      description: "Run multiple command with file",
-      tab: 4,
-    },
-    action: async (sh) => {
-      return new Promise((res) => {
-        try {
-          var file = sh.SystemFile;
-          var txt = file.read(sh.arg[1]).toString();
-          txt.split("\n").forEach(async (arg, i) => {
-            var a = await sh.start(arg.split(" "));
-          });
-        } catch (e) {
-          console.log(e.message);
-        } finally {
-          res(true);
-        }
-      });
-    },
-  },
-  {
-    statement: (arg) => arg[0] == "clear",
-    console: {
-      name: "clear",
-      description: "Clear history command",
-      tab: 6,
-    },
-    action: async (sh) => {
-      sh.history = [];
       sh.cli();
     },
   },
@@ -308,7 +190,7 @@ const defaultImport = [
       );
       sh.env.root = name;
       sh.root = sh.env.root;
-      sh._config();
+      sh.config();
       sh.cli();
     },
   },
@@ -316,19 +198,19 @@ const defaultImport = [
     statement: (arg) => arg[0] == "mode",
     maxArg: 2,
     console: {
-      name: "mode [production|development]",
+      name: "mode [0,1]",
       description: "Change mode command",
       tab: 3,
     },
     action: async (sh, ROOT) => {
-      const name = sh.arg[1];
-      if (["production", "development"].find((v) => v == name)) {
+      const name = parseInt(sh.arg[1]);
+      if (name === 0 || name === 1) {
         const { append } = sh.SystemFile;
         append(ROOT + "/index", "", null, (text) =>
-          text.replace(`'${sh.env.mode}'`, `'${name}'`)
+          text.replace(`${sh.env.mode}`, `${name}`)
         );
         sh.env.mode = name;
-        sh.isProduction = sh.env.mode === "production";
+        sh.isProduction = sh.env.mode === 1;
         sh.cli();
       }
     },
@@ -438,5 +320,5 @@ const defaultImport = [
 
 module.exports = {
   DEFAULTS: defaultImport,
-  CORE
-}
+  CORE,
+};

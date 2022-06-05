@@ -27,13 +27,7 @@ app myapp
 Change mode env.
 
 ```bash
-mode production
-```
-
-Clear the history command.
-
-```bash
-clear
+mode 1
 ```
 
 Get version of tools-web.
@@ -49,6 +43,7 @@ show env
 ```
 
 Run prettier in the current project
+
 ```bash
 prettier all
 ```
@@ -79,62 +74,14 @@ Update the package
 update
 ```
 
-## Multiple Run
+## Multiple Command
 
-You can run multiple commands at once by passing them a parameter in the start function.
-Edit index using vim
-
-```bash
-edit
-```
-
-Add this code
-
-```javascript
-const schedule = [
-  ["ci4", "make:user"],
-  ["ci4", "make:auth"],
-  ["ci4", "make:crud", "CustomerController", "Customer"],
-  ["ci4", "make:crud", "ProductController", "Product"],
-];
-schedule.map((v) => {
-  sh.start(v);
-});
-```
-
-<b>Using text file</b>
-
-- Run the cli
+You can run multiple command with bash use option '--cli'
 
 ```bash
-twb
-```
-
-- write my.txt
-
-```text
-ci4 make:user
-ci4 make:auth
-ci4 make:crud CustomerController Customer
-ci4 make:crud ProductController Product
-```
-
-- Command to run schedule
-
-```bash
-schedule my.txt
-```
-
-::: warning
-Not recommendation if you want to install project using this schedule.
-:::
-
-## Form Generator Bootstrap
-
-Create form generator with bootstrap framework.
-
-```bash
-make:form id,name,email,password,phone,born hidden,text,email,password,number,date
+#!/usr/bin/env bash
+twb --cli react make:gcs
+twb --cli react make:firebase
 ```
 
 ## Testing API
