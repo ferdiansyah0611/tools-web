@@ -170,20 +170,28 @@ function to create directory recursive.
 sh.createDirRecursive("myapp", "test");
 ```
 
+## utils: Utils
+
+prototype utility.
+
+```javascript
+const utils = sh.utils;
+```
+
+### generateStyle(name, type)
+
+function to generate style.
+
+```javascript
+utils.generateStyle("myapp.scss", "component");
+```
+
 ## time()
 
 return datetime [hours:minutes].
 
 ```javascript
 sh.time();
-```
-
-## generateStyle(name, type)
-
-function to generate style.
-
-```javascript
-sh.generateStyle("myapp.scss", "component");
 ```
 
 ## subprocess(run, action)

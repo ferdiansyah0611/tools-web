@@ -152,7 +152,7 @@ const React = function (sh) {
               .replaceAll("paginateUser", `paginate${storeName}`)
               .replaceAll("removeUser", `remove${storeName}`)
               .replaceAll("updateUser", `update${storeName}`);
-            var style = sh.generateStyle(caseName, "route", styleType);
+            var style = sh.utils.generateStyle(caseName, "route", styleType);
             var styledefault = read(this.root("crud/simple.sass"))
               .toString()
               .replace("home", store);
@@ -210,7 +210,7 @@ const React = function (sh) {
             .toString()
             .replaceAll("caseName", caseName);
           if (arg[1]) {
-            var style = sh.generateStyle(caseName, "component", arg[1]);
+            var style = sh.utils.generateStyle(caseName, "component", arg[1]);
             if (style) {
               code = `import styled from '@style/component/${style}'\n` + code;
             }
@@ -239,7 +239,7 @@ const React = function (sh) {
             .toString()
             .replaceAll("caseName", caseName);
           if (arg[1]) {
-            var style = sh.generateStyle(caseName, "route", arg[1]);
+            var style = sh.utils.generateStyle(caseName, "route", arg[1]);
             if (style) {
               code = `import '@style/route/${style}'\n` + code;
             }

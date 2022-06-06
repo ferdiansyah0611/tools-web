@@ -4,8 +4,9 @@ module.exports = function prototype(Shell) {
 	const readline = require("readline");
 	const ROOT = require("path").dirname(require.main.filename);
 	const colors = require("colors");
-	const { DEFAULTS, CORE } = require("./default");
+	const System = require("./system");
 	const SystemFile = require("./file");
+	const Utils = require("./utils");
 	const input = process.stdin,
 		output = process.stdout,
 		rl = readline.createInterface({ input, output });
@@ -38,9 +39,10 @@ module.exports = function prototype(Shell) {
 		this.root = this.env.root;
 		this.isProduction = this.env.mode === 1;
 		this.SystemFile = new SystemFile(this);
+		this.utils = new Utils(this);
 	};
 	Shell.prototype.core = function () {
-		return CORE(this);
+		return this.utils.CORE();
 	};
 	// input cli
 	Shell.prototype.quest = function (msg) {
@@ -184,7 +186,7 @@ module.exports = function prototype(Shell) {
 				});
 				this.consoleHelper(() => {
 					showTitle("Core");
-					DEFAULTS.sort(
+					System.sort(
 						(a, b) =>
 							(a.console.name > b.console.name) -
 							(a.console.name < b.console.name)
@@ -235,6 +237,7 @@ module.exports = function prototype(Shell) {
 							try {
 								await action.action(this.arg.slice(2));
 								resolve(true);
+								console.log("")
 								this.cli();
 								return true;
 							} catch (e) {
@@ -244,10 +247,12 @@ module.exports = function prototype(Shell) {
 							}
 						}
 					}
+					resolve(true)
+					this.cli()
 				}
 			}
 			if (!isFound) {
-				const running = DEFAULTS.find(
+				const running = System.find(
 					(v) => v.statement(this.arg) !== false
 				);
 				if (!running) {
@@ -433,27 +438,5 @@ module.exports = function prototype(Shell) {
 		return `[${hours}:${
 			String(minutes).length === 1 ? "0" + minutes : minutes
 		}]`;
-	};
-	Shell.prototype.generateStyle = function (caseName, typeSelect, format) {
-		var type = format;
-		var dir = this.env.root + "/src/style" + "/" + typeSelect;
-		if (!fs.existsSync(dir)) {
-			fs.mkdirSync(dir, {
-				recursive: true,
-			});
-		}
-		if (type) {
-			var name = type.toLowerCase();
-			["css", "sass", "scss"].find((value) => {
-				if (name === value) {
-					caseName += ".module." + value;
-				}
-			});
-			this.SystemFile.write(
-				`${this.env.root}/src/style/${typeSelect}/${caseName}`,
-				`/*${caseName}*/`
-			);
-			return caseName;
-		}
 	};
 };
