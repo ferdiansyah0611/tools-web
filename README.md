@@ -45,10 +45,23 @@ This section will help you use tools-web from scratch.
   ```
 
 ### Before you use
+
 - You have to run the command before your project directory.
-Example your project in C:/Users/ferdi/project/myapp and you run 'cd C:/Users/ferdi/project'. Change default app 'app myapp'
+  Example your project in C:/Users/ferdi/project/myapp and you run 'cd C:/Users/ferdi/project'. Change default app 'app myapp'
 - Run your Command Line Interface with administration to prevent error.
 - Make sure your installation project is made by web-tools as well to prevent errors from occurring.
+
+## Developer
+
+Testing the command with bash.
+
+```bash
+sh test.sh all
+sh test.sh system
+sh test.sh react
+sh test.sh vue
+sh test.sh express
+```
 
 ## Contributing
 

@@ -1,6 +1,70 @@
 const fs = require("fs");
 
 module.exports = function (sh) {
+	this.parseOption = () => {
+		if (Array.isArray(sh.arg)) {
+			let data = sh.arg.map((item) => {
+				if (item.indexOf("--") === 0) {
+					if (item.indexOf("=") !== -1) {
+						return {
+							name: item.slice(2, item.indexOf("=")),
+							value: item.slice(item.indexOf("=") + 1),
+						};
+					} else {
+						return item.slice(2);
+					}
+				}
+			});
+			let lastOption = 0;
+			let cleanup = data.filter((item, key) => {
+				if (item !== undefined) {
+					if (typeof item === "string" && item !== "help") {
+						if (!lastOption) {
+							lastOption = key;
+						}
+						return item;
+					}
+					if (typeof item === "object" && item.name !== "help") {
+						if (!lastOption) {
+							lastOption = key;
+						}
+						return item;
+					}
+				}
+			});
+			sh.options = cleanup;
+			sh.arg = lastOption ? sh.arg.slice(0, lastOption) : sh.arg;
+		}
+	};
+	this.errorArg = (action) =>
+		sh.console(
+			`Error: must be ${action.maxArg} argument`.red +
+				` *${action.console.name}`
+		);
+	this.showConsole = (v) =>
+		console.log(
+			"\t",
+			v.console.name,
+			"\t".repeat(v.console.tab),
+			v.console.description
+		);
+	this.showTitle = (title) =>
+		console.log("\n\t", sh.parse().toUpper(title).cyan, "Commands".cyan);
+	this.showHelper = (arr, title = null) => {
+		if (title) {
+			this.showTitle(title);
+		}
+		arr.sort((a, b) => (a.name > b.name) - (a.name < b.name)).forEach(
+			(v) => {
+				this.showConsole(v);
+			}
+		);
+	};
+	this.errorArg = (action) =>
+		sh.console(
+			`Error: must be ${action.maxArg} argument`.red +
+				` *${action.console.name}`
+		);
 	this.generateStyle = (caseName, typeSelect, format) => {
 		var type = format;
 		var dir = sh.env.root + "/src/style" + "/" + typeSelect;

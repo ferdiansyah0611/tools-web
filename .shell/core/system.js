@@ -10,7 +10,91 @@ const addRequireIndex = (ROOT, append, plugin) => {
   );
 };
 
-const system = [
+const System = [
+  {
+    statement: (arg) => ["-v", "--version"].indexOf(arg[0].toLowerCase()) !== -1,
+    maxArg: 1,
+    console: {
+      name: "-v --version",
+      description: "Show version tools-web",
+      tab: 5,
+    },
+    action: async (sh, ROOT) => {
+      var file = JSON.parse(
+        sh.SystemFile.read(ROOT + "/package.json")
+      );
+      console.log(sh.time(), ">", "v" + file.version);
+      return sh.exit();
+    },
+  },
+  {
+    statement: (arg) => ["-h", "--help"].indexOf(arg[0].toLowerCase()) !== -1,
+    maxArg: 1,
+    console: {
+      name: "-h --help",
+      description: "Show help command",
+      tab: 5,
+    },
+    action: async (sh) => {
+      sh.consoleHelper(() => {
+        console.log("\t", "-h --help", "Show help command");
+      });
+      sh.consoleHelper(() => {
+        sh.utils.showTitle("Core");
+        System.sort(
+          (a, b) =>
+            (a.console.name > b.console.name) -
+            (a.console.name < b.console.name)
+        ).map((v) => {
+          sh.utils.showConsole(v);
+        });
+        sh.plugin
+          .sort((a, b) => (a.name > b.name) - (a.name < b.name))
+          .map((v) => {
+            sh.utils.showHelper(v.action, v.name);
+          });
+      });
+      return sh.exit();
+    },
+  },
+  {
+    statement: (arg) => arg[0] == "disable",
+    maxArg: 1,
+    console: {
+      name: "disable [package]",
+      description: "Disable the package",
+      tab: 4,
+    },
+    action: async (sh, ROOT) => {
+      let name = sh.arg[1]
+      let file = sh.SystemFile;
+      if(['vue', 'react', 'express'].find(v => v === name)) {
+        file.append(ROOT + "/index", "", null, (text) =>
+          text.replace(`sh.use(require("./.shell/core/${name}"))`, `// sh.use(require("./.shell/core/${name}"))`)
+        );
+
+      }
+    },
+  },
+  {
+    statement: (arg) => arg[0] == "enable",
+    maxArg: 1,
+    console: {
+      name: "enable [package]",
+      description: "Disable the package",
+      tab: 4,
+    },
+    action: async (sh, ROOT) => {
+      let name = sh.arg[1]
+      let file = sh.SystemFile;
+      if(['vue', 'react', 'express'].find(v => v === name)) {
+        file.append(ROOT + "/index", "", null, (text) =>
+          text.replace(`// sh.use(require("./.shell/core/${name}"))`, `sh.use(require("./.shell/core/${name}"))`)
+        );
+
+      }
+    },
+  },
   {
     statement: (arg) => arg[0] == "test:api",
     maxArg: 1,
@@ -83,7 +167,7 @@ const system = [
       tab: 6,
     },
     action: async (sh, ROOT) => {
-      sh.log(`please run: ${`cd ${ROOT} && vim index`.blue}`);
+      sh.console(`please run: ${`cd ${ROOT} && vim index`.blue}`);
     },
   },
   {
@@ -112,7 +196,7 @@ const system = [
     console: {
       name: "mode [0,1]",
       description: "Change mode command",
-      tab: 3,
+      tab: 5,
     },
     action: async (sh, ROOT) => {
       const name = parseInt(sh.arg[1]);
@@ -230,4 +314,4 @@ const system = [
   },
 ];
 
-module.exports = system
+module.exports = System

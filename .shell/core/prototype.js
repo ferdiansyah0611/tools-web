@@ -108,115 +108,16 @@ module.exports = function prototype(Shell) {
 				}
 				this.framework = firstArg;
 			};
-			const showConsole = (v) =>
-				console.log(
-					"\t",
-					v.console.name,
-					"\t".repeat(v.console.tab),
-					v.console.description
-				);
-			const showTitle = (title) =>
-				console.log(
-					"\n\t",
-					this.parse().toUpper(title).cyan,
-					"Commands".cyan
-				);
-			const showHelper = (arr, title = null) => {
-				if (title) {
-					showTitle(title);
-				}
-				arr.sort(
-					(a, b) => (a.name > b.name) - (a.name < b.name)
-				).forEach((v) => {
-					showConsole(v);
-				});
-			};
-			const errorArg = (action) =>
-				this.console(
-					`Error: must be ${action.maxArg} argument`.red +
-						` *${action.console.name}`
-				);
-			const parseOption = () => {
-				if (Array.isArray(this.arg)) {
-					let data = this.arg.map((item) => {
-						if (item.indexOf("--") === 0) {
-							if (item.indexOf("=") !== -1) {
-								return {
-									name: item.slice(2, item.indexOf("=")),
-									value: item.slice(item.indexOf("=") + 1),
-								};
-							} else {
-								return item.slice(2);
-							}
-						}
-					});
-					let lastOption = 0;
-					let cleanup = data.filter((item, key) => {
-						if (item !== undefined) {
-							if (typeof item === "string" && item !== "help") {
-								if (!lastOption) {
-									lastOption = key;
-								}
-								return item;
-							}
-							if (
-								typeof item === "object" &&
-								item.name !== "help"
-							) {
-								if (!lastOption) {
-									lastOption = key;
-								}
-								return item;
-							}
-						}
-					});
-					this.options = cleanup;
-					this.arg = lastOption
-						? this.arg.slice(0, lastOption)
-						: this.arg;
-				}
-			};
 			init();
-			parseOption();
+			this.utils.parseOption();
 			// logic
-			if (["-h", "--help"].indexOf(firstArg.toLowerCase()) !== -1) {
-				isFound = true;
-				this.consoleHelper(() => {
-					console.log("\t", "-h --help", "Show help command");
-				});
-				this.consoleHelper(() => {
-					showTitle("Core");
-					System.sort(
-						(a, b) =>
-							(a.console.name > b.console.name) -
-							(a.console.name < b.console.name)
-					).map((v) => {
-						showConsole(v);
-						resolve(true);
-					});
-					this.plugin
-						.sort((a, b) => (a.name > b.name) - (a.name < b.name))
-						.map((v) => {
-							showHelper(v.action, v.name);
-							resolve(true);
-						});
-				});
-				return this.exit();
-			}
-			if (["-v", "--version"].indexOf(firstArg.toLowerCase()) !== -1) {
-				isFound = true;
-				var file = JSON.parse(
-					this.SystemFile.read(ROOT + "/package.json")
-				);
-				console.log(this.time(), ">", "v" + file.version);
-				resolve(true);
-				return this.exit();
-			}
 			var plugin = this.plugin.find((v) => v.name == this.framework);
 			if (plugin) {
 				isFound = true;
 				if (["-h", "--help"].indexOf(this.arg[1]) !== -1) {
-					this.consoleHelper(() => showHelper(plugin.action));
+					this.consoleHelper(() =>
+						this.utils.showHelper(plugin.action)
+					);
 					resolve(true);
 					this.exit();
 					return true;
@@ -229,7 +130,7 @@ module.exports = function prototype(Shell) {
 							action.maxArg &&
 							this.arg.slice(2).length < action.maxArg
 						) {
-							errorArg(action);
+							this.utils.errorArg(action);
 							resolve(true);
 							this.cli();
 							return true;
@@ -237,7 +138,7 @@ module.exports = function prototype(Shell) {
 							try {
 								await action.action(this.arg.slice(2));
 								resolve(true);
-								console.log("")
+								console.log("");
 								this.cli();
 								return true;
 							} catch (e) {
@@ -247,8 +148,8 @@ module.exports = function prototype(Shell) {
 							}
 						}
 					}
-					resolve(true)
-					this.cli()
+					resolve(true);
+					this.cli();
 				}
 			}
 			if (!isFound) {
@@ -271,7 +172,7 @@ module.exports = function prototype(Shell) {
 					}
 				} else {
 					if (running.maxArg && this.arg.length < running.maxArg) {
-						errorArg(running);
+						this.utils.errorArg(running);
 						resolve(true);
 						this.cli();
 					} else {
