@@ -7,6 +7,8 @@ system(){
 	restart "> Sytem Test"
 	node test.js --cli app myapp
 	node test.js --cli edit
+	node test.js --cli disable react
+	node test.js --cli enable react
 	node test.js --cli show env
 	node test.js --cli prettier
 }

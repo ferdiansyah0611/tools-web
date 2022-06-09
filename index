@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const Shell = require("./shell")
+const Shell = require("./.shell")
 const sh = new Shell({
 	mode: 1,
 	root: "myapp",

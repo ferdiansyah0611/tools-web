@@ -4,7 +4,6 @@ module.exports = function prototype(Shell) {
 	const readline = require("readline");
 	const ROOT = require("path").dirname(require.main.filename);
 	const colors = require("colors");
-	const System = require("./system");
 	const SystemFile = require("./file");
 	const Utils = require("./utils");
 	const input = process.stdin,
@@ -36,6 +35,7 @@ module.exports = function prototype(Shell) {
 				return true;
 			},
 		});
+		this.use(require('./system'))
 		this.root = this.env.root;
 		this.isProduction = this.env.mode === 1;
 		this.SystemFile = new SystemFile(this);
@@ -57,6 +57,14 @@ module.exports = function prototype(Shell) {
 		var plugin = new Class(this);
 		this.LIST.push(Class.name.toLowerCase());
 		this.plugin.push(plugin);
+	};
+	Shell.prototype.add = function (name, action) {
+		this.plugin = this.plugin.map(item => {
+			if(item.name === name) {
+				item.action.push(action)
+			}
+			return item
+		})
 	};
 	Shell.prototype.cli = async function () {
 		if (process.argv.find((item) => item === "--cli")) {
@@ -115,13 +123,9 @@ module.exports = function prototype(Shell) {
 				}
 				this.framework = firstArg;
 			};
-			init();
-			this.utils.parseOption();
-			// logic
-			var plugin = this.plugin.find((v) => v.name == this.framework);
-			if (plugin) {
-				isFound = true;
+			const command = async (plugin, logic) => {
 				if (["-h", "--help"].indexOf(this.arg[1]) !== -1) {
+					isFound = true;
 					this.consoleHelper(() =>
 						this.utils.showHelper(plugin.action)
 					);
@@ -129,13 +133,12 @@ module.exports = function prototype(Shell) {
 					this.exit();
 					return true;
 				} else {
-					var action = plugin.action.find(
-						(v) => v.name === this.arg[1]
-					);
+					var action = plugin.action.find(logic);
 					if (action) {
+						isFound = true;
 						if (
 							action.maxArg &&
-							this.arg.slice(2).length < action.maxArg
+							this.arg.slice(plugin.name === 'system' ? 0 : 2).length < action.maxArg
 						) {
 							this.utils.errorArg(action);
 							resolve(true);
@@ -143,9 +146,11 @@ module.exports = function prototype(Shell) {
 							return true;
 						} else {
 							try {
-								await action.action(this.arg.slice(2));
-								resolve(true);
-								console.log("");
+								await action.action(this.arg.slice(2), this, plugin, ROOT);
+								if(!action.console.disableNewline && !this.startcli) {
+									console.log("");
+								}
+								resolve(true)
 								this.cli();
 								return true;
 							} catch (e) {
@@ -155,16 +160,20 @@ module.exports = function prototype(Shell) {
 							}
 						}
 					}
-					resolve(true);
-					this.cli();
 				}
 			}
+			init();
+			this.utils.parseOption();
+			// logic
+			var plugin = this.plugin.find((v) => v.name == this.framework);
+			if (plugin) {
+				await command(plugin, (v) => v.name === this.arg[1])
+			}
 			if (!isFound) {
-				const running = System.find(
-					(v) => v.statement(this.arg) !== false
-				);
-				if (!running) {
-					if (this.arg.length > 0 && this.arg[0] !== "" && !isFound) {
+				var system = this.plugin.find((v) => v.name === 'system');
+				const running = await command(system, (v) => v.statement(this.arg) !== false)
+				if (!isFound) {
+					if (this.arg.length > 0 && this.arg[0] !== "") {
 						isFound = true;
 						await this.subprocess(this.arg.join(" "), {
 							close: () => {
@@ -177,17 +186,6 @@ module.exports = function prototype(Shell) {
 						resolve(true);
 						this.exit();
 					}
-				} else {
-					if (running.maxArg && this.arg.length < running.maxArg) {
-						this.utils.errorArg(running);
-						resolve(true);
-						this.cli();
-					} else {
-						isFound = true;
-						await running.action(this, ROOT);
-						resolve(true);
-						this.exit();
-					}
 				}
 			}
 		});
@@ -195,7 +193,7 @@ module.exports = function prototype(Shell) {
 	Shell.prototype.consoleHelper = function (options = Function) {
 		console.log("");
 		console.log("Help Commands: ");
-		console.log("\t", `[${this.LIST.join(", ")}] [options]`.underline);
+		console.log("\t", `[${this.LIST.filter(item => item !== 'system').join(", ")}] [options]`.underline);
 		console.log("options: ");
 		options((...arg) => console.log("\t", ...arg));
 	};
@@ -325,18 +323,18 @@ module.exports = function prototype(Shell) {
 		readline.cursorTo(process.stdout, 0);
 		process.stdout.write(`${this.time()} ${log}\r`);
 	};
-	Shell.prototype.exit = function (skip = false) {
+	Shell.prototype.exit = function (skip = false, restart = false) {
 		if (this.startcli) {
 			this.cli();
 		} else {
-			if (skip || !this.startcli) {
+			if (restart || (skip || !this.startcli)) {
 				rl.close();
 				process.exit();
 			}
 		}
 	};
-	Shell.prototype.console = function (log) {
-		console.log(`${this.time()}`, log);
+	Shell.prototype.console = function (...log) {
+		console.log(`${this.time()}`, ...log);
 	};
 	Shell.prototype.time = function () {
 		var date = new Date(),

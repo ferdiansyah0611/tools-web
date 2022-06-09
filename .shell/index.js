@@ -5,6 +5,6 @@ class Shell {
 	}
 }
 
-require("./.shell/prototype")(Shell);
+require("./prototype")(Shell);
 
 module.exports = Shell;

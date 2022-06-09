@@ -1,4 +1,4 @@
-const Shell = require("./shell");
+const Shell = require("./.shell");
 const Ci4 = require("../.plugin/codeigniter4");
 const React = require("./.shell/react");
 const Vue = require("./.shell/vue");

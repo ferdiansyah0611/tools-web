@@ -69,6 +69,25 @@ function to integrate plugins.
 sh.use(Plugin);
 ```
 
+## add(framework, action)
+
+function to push action in plugins.
+
+```javascript
+sh.add("react", {
+  name: "print",
+  console: {
+    name: "print",
+    description: "hello world",
+    tab: 1,
+  },
+  action(arg, shell, plugin) {
+    console.log("hello world!!!")
+    // console.log(arg, shell, plugin);
+  },
+});
+```
+
 ## quest(string)
 
 function to question cli using prompt.
