@@ -1,7 +1,7 @@
 const Vue = function (sh) {
   this.name = "vue";
   this.config = sh.config;
-  this.root = sh.config.rootShell + "vue/";
+  this.root = sh.config.vue;
   this.parse = sh.parse();
   this.init = (arg) => {
     const { createDirRecursive, read, write } = sh.SystemFile;

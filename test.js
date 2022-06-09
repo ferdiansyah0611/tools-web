@@ -1,8 +1,8 @@
 const Shell = require("./shell");
 const Ci4 = require("../.plugin/codeigniter4");
-const React = require("./.shell/core/react");
-const Vue = require("./.shell/core/vue");
-const Express = require("./.shell/core/express");
+const React = require("./.shell/react");
+const Vue = require("./.shell/vue");
+const Express = require("./.shell/express");
 
 const sh = new Shell({
 	mode: 0,

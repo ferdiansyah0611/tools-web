@@ -82,7 +82,14 @@ module.exports = function prototype(Shell) {
 	// config directory
 	Shell.prototype.configure = function () {
 		this.config = {
-			rootShell: ROOT + "/.shell/",
+			root: ROOT + "/.shell/",
+			source: ROOT + "/.source/",
+			express: ROOT + "/.source/express/",
+			react: ROOT + "/.source/react/",
+			vue: ROOT + "/.source/vue/",
+			firebase: ROOT + "/.source/firebase/",
+			tailwind: ROOT + "/.source/tailwind/",
+			vite: ROOT + "/.source/vite/",
 			directory: {
 				component: this.env.root + "/src/component",
 				route: this.env.root + "/src/route",

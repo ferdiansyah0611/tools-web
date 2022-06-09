@@ -107,7 +107,7 @@ const System = [
       const file = sh.SystemFile;
       file.createDirRecursive(sh.root + "/test");
       file.copy(
-        sh.config.rootShell + "test/api.js",
+        sh.config.root + "test/api.js",
         sh.env.root + "/test/" + sh.arg[1]
       );
     },

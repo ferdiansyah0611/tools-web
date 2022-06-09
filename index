@@ -5,7 +5,7 @@ const sh = new Shell({
 	root: "myapp",
 })
 // don't remove this comment
-sh.use(require("./.shell/core/react"))
-sh.use(require("./.shell/core/vue"))
-sh.use(require("./.shell/core/express"))
+sh.use(require("./.shell/react"))
+sh.use(require("./.shell/vue"))
+sh.use(require("./.shell/express"))
 sh.cli()

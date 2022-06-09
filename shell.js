@@ -1,5 +1,3 @@
-const SystemFile = require("./.shell/core/file");
-
 class Shell {
 	constructor(env) {
 		this.beforeRun(env);
@@ -7,6 +5,6 @@ class Shell {
 	}
 }
 
-require("./.shell/core/prototype")(Shell);
+require("./.shell/prototype")(Shell);
 
 module.exports = Shell;

@@ -1,7 +1,7 @@
 const Express = function (sh) {
   this.name = "express";
   this.config = sh.config;
-  this.root = sh.config.rootShell + "express/";
+  this.root = sh.config.express;
   this.parse = sh.parse();
   this.engine = ["dust", "ejs", "hbs", "hjs", "jade", "pug", "twig"];
   this.lib = ["mongoose", "sequelize"];
@@ -85,7 +85,7 @@ const Express = function (sh) {
         const { copy } = sh.SystemFile;
         createDirRecursive(this.config.directory.service);
         copy(
-          this.config.rootShell + "firebase/storage-be.js",
+          this.config.firebase + "storage-be.js",
           this.config.directory.service + "/storage.js"
         );
         core.success();

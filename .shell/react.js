@@ -1,7 +1,7 @@
 const React = function (sh) {
   this.name = "react";
   this.config = sh.config;
-  this.root = (path) => sh.config.rootShell + "react/" + path;
+  this.root = (path) => sh.config.react + path;
   this.parse = sh.parse();
   this.init = (arg) => {
     const { createDirRecursive, read, write } = sh.SystemFile;

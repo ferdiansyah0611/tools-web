@@ -100,7 +100,7 @@ module.exports = function (sh) {
 					close: () => {
 						var core = sh.core();
 						var code = read(
-							sh.config.rootShell + "vite.config.js"
+							sh.config.vite + "vite.config.js"
 						).toString();
 						code = code.replace("react", name);
 						write(sh.env.root + "/vite.config.js", code);
@@ -124,11 +124,11 @@ module.exports = function (sh) {
 				await sh.subprocess(exec, {
 					close: () => {
 						copy(
-							sh.config.rootShell + "tailwind.sass",
+							sh.config.tailwind + "tailwind.sass",
 							sh.env.root + "/src/tailwind.sass"
 						);
 						copy(
-							sh.config.rootShell + "tailwind.config.js",
+							sh.config.tailwind + "tailwind.config.js",
 							sh.env.root + "/tailwind.config.js"
 						);
 						var dir =
@@ -145,7 +145,7 @@ module.exports = function (sh) {
 			createFirebaseStorage: () => {
 				createDirRecursive(sh.config.directory.service);
 				var code = read(
-					sh.config.rootShell + "firebase/storage.js"
+					sh.config.firebase + "storage.js"
 				).toString();
 				write(
 					sh.config.directory.service + "/firebase-storage.js",
@@ -156,11 +156,11 @@ module.exports = function (sh) {
 			},
 			initializeFirebase: () => {
 				copy(
-					sh.config.rootShell + "firebase/firebase.js",
+					sh.config.firebase + "firebase.js",
 					sh.env.root + "/src/firebase.js"
 				);
 				copy(
-					sh.config.rootShell + "firebase/validate.js",
+					sh.config.firebase + "validate.js",
 					sh.env.root + "/src/service/validate-auth.js"
 				);
 				var core = sh.core();
@@ -169,7 +169,7 @@ module.exports = function (sh) {
 			createModelFirestore: (caseName) => {
 				caseName = String(caseName).toLowerCase();
 				createDirRecursive(sh.env.root + "/src/model");
-				var code = read(sh.config.rootShell + "firebase/model.js")
+				var code = read(sh.config.firebase + "model.js")
 					.toString()
 					.replaceAll("model", caseName);
 				write(sh.env.root + "/src/model/" + caseName + ".js", code);
