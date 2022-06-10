@@ -38,9 +38,7 @@ const System = function (sh) {
       },
       action: async (arg, sh, plug, ROOT) => {
         sh.consoleHelper(() => {
-          console.log("\t", "-h --help", "\t".repeat(5), "Show help command");
-          console.log("\t", "--cli", "\t".repeat(6), "Run command without stdin");
-          sh.utils.showTitle("System");
+          sh.utils.showTitle("System", true);
           plug.action
             .sort(
               (a, b) =>
@@ -57,6 +55,9 @@ const System = function (sh) {
             .map((v) => {
               sh.utils.showHelper(v.action, v.name);
             });
+        }, () => {
+          console.log("\t", "-h --help", "\t".repeat(5), "Show help command");
+          console.log("\t", "--cli", "\t".repeat(6), "Run command without stdin");
         });
       },
     },

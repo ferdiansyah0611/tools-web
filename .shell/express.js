@@ -73,25 +73,6 @@ const Express = function (sh) {
       },
     },
     {
-      name: "make:gcs",
-      console: {
-        name: "make:gcs",
-        description: "Generate google cloud storage in service folder",
-        tab: 5,
-      },
-      action: async (arg) => {
-        var { createDirRecursive, read, write, core, caseName } =
-          this.init(arg);
-        const { copy } = sh.SystemFile;
-        createDirRecursive(this.config.directory.service);
-        copy(
-          this.config.firebase + "storage-be.js",
-          this.config.directory.service + "/storage.js"
-        );
-        core.success();
-      },
-    },
-    {
       name: "make:api",
       maxArg: 3,
       console: {
@@ -270,9 +251,9 @@ const Express = function (sh) {
       },
     },
     {
-      name: "run:server",
+      name: "dev",
       console: {
-        name: "run:server",
+        name: "dev",
         description: "Run the server application on the background",
         tab: 5,
       },

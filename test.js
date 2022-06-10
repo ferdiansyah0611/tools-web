@@ -3,6 +3,7 @@ const Ci4 = require("../.plugin/codeigniter4");
 const React = require("./.shell/react");
 const Vue = require("./.shell/vue");
 const Express = require("./.shell/express");
+const Firebase = require("./.shell/firebase");
 
 const sh = new Shell({
 	mode: 0,
@@ -13,4 +14,5 @@ sh.use(React);
 sh.use(Vue);
 sh.use(Express);
 sh.use(Ci4);
+sh.use(Firebase);
 sh.cli();

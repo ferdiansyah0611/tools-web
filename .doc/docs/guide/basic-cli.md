@@ -48,6 +48,18 @@ Run prettier in the current project
 prettier all
 ```
 
+Enable the plugin
+
+```bash
+enable vue
+```
+
+Disable the plugin
+
+```bash
+disable vue
+```
+
 ## Edit file
 
 ```bash

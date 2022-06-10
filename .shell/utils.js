@@ -48,8 +48,12 @@ module.exports = function (sh) {
 			"\t".repeat(v.console.tab),
 			v.console.description
 		);
-	this.showTitle = (title) =>
-		console.log("\n\t", sh.parse().toUpper(title).cyan, "Commands".cyan);
+	this.showTitle = (title, disableLine = false) =>
+		console.log(
+			disableLine ? "\t" : "\n\t",
+			sh.parse().toUpper(title).cyan,
+			"Commands".cyan
+		);
 	this.showHelper = (arr, title = null) => {
 		if (title) {
 			this.showTitle(title);
@@ -87,102 +91,58 @@ module.exports = function (sh) {
 			return caseName;
 		}
 	};
-	this.CORE = () => {
-		const { createDirRecursive, copy, read, write, append } = sh.SystemFile;
-		return {
-			createProject: async (name, end = Function) => {
-				var exec =
-					"npm create vite@latest " +
+	this.createVite = async (name, end = Function) => {
+		let file = sh.SystemFile;
+		var exec = `npm create vite@latest ${sh.env.root} -- --template ${name}`;
+		await sh.subprocess(exec, {
+			close: () => {
+				var code = file
+					.read(sh.config.vite + "vite.config.js")
+					.toString();
+				code = code.replace("react", name);
+				file.write(sh.env.root + "/vite.config.js", code);
+				file.write(
+					sh.env.root + "/vercel.json",
+					'{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }'
+				);
+				end();
+			},
+			hide: true,
+			hideLog: true,
+		});
+	};
+	this.createTailwind = async (type) => {
+		let file = sh.SystemFile;
+		var exec =
+			sh.env.mode === 1
+				? "cd " +
+				  sh.env.root +
+				  " && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p"
+				: "ls";
+		await sh.subprocess(exec, {
+			close: () => {
+				file.copy(
+					sh.config.tailwind + "tailwind.sass",
+					sh.env.root + "/src/tailwind.sass"
+				);
+				file.copy(
+					sh.config.tailwind + "tailwind.config.js",
+					sh.env.root + "/tailwind.config.js"
+				);
+				var dir =
 					sh.env.root +
-					" -- --template " +
-					name;
-				await sh.subprocess(exec, {
-					close: () => {
-						var core = sh.core();
-						var code = read(
-							sh.config.vite + "vite.config.js"
-						).toString();
-						code = code.replace("react", name);
-						write(sh.env.root + "/vite.config.js", code);
-						write(
-							sh.env.root + "/vercel.json",
-							'{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }'
-						);
-						end();
-					},
-					hide: true,
-					hideLog: true,
-				});
+					(type == "react" ? "/src/main.jsx" : "/src/main.js");
+				var code = file.read(dir).toString();
+				file.write(dir, "import './tailwind.sass'\n" + code);
+				sh.log("successfuly setup & install tailwindcss!");
 			},
-			createTailwind: async (type) => {
-				var exec =
-					sh.env.mode === 1
-						? "cd " +
-						  sh.env.root +
-						  " && npm install -D tailwindcss postcss autoprefixer sass && npx tailwindcss init -p"
-						: "ls";
-				await sh.subprocess(exec, {
-					close: () => {
-						copy(
-							sh.config.tailwind + "tailwind.sass",
-							sh.env.root + "/src/tailwind.sass"
-						);
-						copy(
-							sh.config.tailwind + "tailwind.config.js",
-							sh.env.root + "/tailwind.config.js"
-						);
-						var dir =
-							sh.env.root +
-							(type == "react"
-								? "/src/main.jsx"
-								: "/src/main.js");
-						var code = read(dir).toString();
-						write(dir, "import './tailwind.sass'\n" + code);
-						sh.log("successfuly setup & install tailwindcss!");
-					},
-				});
-			},
-			createFirebaseStorage: () => {
-				createDirRecursive(sh.config.directory.service);
-				var code = read(
-					sh.config.firebase + "storage.js"
-				).toString();
-				write(
-					sh.config.directory.service + "/firebase-storage.js",
-					code
-				);
-				var core = sh.core();
-				core.success();
-			},
-			initializeFirebase: () => {
-				copy(
-					sh.config.firebase + "firebase.js",
-					sh.env.root + "/src/firebase.js"
-				);
-				copy(
-					sh.config.firebase + "validate.js",
-					sh.env.root + "/src/service/validate-auth.js"
-				);
-				var core = sh.core();
-				core.success();
-			},
-			createModelFirestore: (caseName) => {
-				caseName = String(caseName).toLowerCase();
-				createDirRecursive(sh.env.root + "/src/model");
-				var code = read(sh.config.firebase + "model.js")
-					.toString()
-					.replaceAll("model", caseName);
-				write(sh.env.root + "/src/model/" + caseName + ".js", code);
-				var core = sh.core();
-				core.success();
-			},
-			success: (newline = true) => {
-				if (newline) {
-					process.stdout.write("\n");
-				}
-				sh.exit();
-			},
-		};
+		});
+	};
+	this.runServerNpm = () => {
+		sh.subprocess("cd " + sh.root + " && npm run dev", {
+			close: () => {},
+			notSync: true,
+		});
 	};
 	return this;
 };

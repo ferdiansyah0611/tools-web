@@ -35,14 +35,11 @@ module.exports = function prototype(Shell) {
 				return true;
 			},
 		});
-		this.use(require('./system'))
+		this.use(require("./system"));
 		this.root = this.env.root;
 		this.isProduction = this.env.mode === 1;
 		this.SystemFile = new SystemFile(this);
 		this.utils = new Utils(this);
-	};
-	Shell.prototype.core = function () {
-		return this.utils.CORE();
 	};
 	// input cli
 	Shell.prototype.quest = function (msg) {
@@ -59,12 +56,12 @@ module.exports = function prototype(Shell) {
 		this.plugin.push(plugin);
 	};
 	Shell.prototype.add = function (name, action) {
-		this.plugin = this.plugin.map(item => {
-			if(item.name === name) {
-				item.action.push(action)
+		this.plugin = this.plugin.map((item) => {
+			if (item.name === name) {
+				item.action.push(action);
 			}
-			return item
-		})
+			return item;
+		});
 	};
 	Shell.prototype.cli = async function () {
 		if (process.argv.find((item) => item === "--cli")) {
@@ -124,7 +121,7 @@ module.exports = function prototype(Shell) {
 				this.framework = firstArg;
 			};
 			const command = async (plugin, logic) => {
-				if (["-h", "--help"].indexOf(this.arg[1]) !== -1) {
+				if (["-h", "--help"].indexOf(this.arg[1]) !== -1 && plugin.name !== 'system') {
 					isFound = true;
 					this.consoleHelper(() =>
 						this.utils.showHelper(plugin.action)
@@ -138,7 +135,8 @@ module.exports = function prototype(Shell) {
 						isFound = true;
 						if (
 							action.maxArg &&
-							this.arg.slice(plugin.name === 'system' ? 0 : 2).length < action.maxArg
+							this.arg.slice(plugin.name === "system" ? 0 : 2)
+								.length < action.maxArg
 						) {
 							this.utils.errorArg(action);
 							resolve(true);
@@ -146,11 +144,19 @@ module.exports = function prototype(Shell) {
 							return true;
 						} else {
 							try {
-								await action.action(this.arg.slice(2), this, plugin, ROOT);
-								if(!action.console.disableNewline && !this.startcli) {
+								await action.action(
+									this.arg.slice(2),
+									this,
+									plugin,
+									ROOT
+								);
+								if (
+									!action.console.disableNewline &&
+									!this.startcli
+								) {
 									console.log("");
 								}
-								resolve(true)
+								resolve(true);
 								this.cli();
 								return true;
 							} catch (e) {
@@ -161,17 +167,22 @@ module.exports = function prototype(Shell) {
 						}
 					}
 				}
-			}
+			};
 			init();
 			this.utils.parseOption();
 			// logic
 			var plugin = this.plugin.find((v) => v.name == this.framework);
 			if (plugin) {
-				await command(plugin, (v) => v.name === this.arg[1])
+				if(!plugin.disabled) {
+					await command(plugin, (v) => v.name === this.arg[1]);
+				}
 			}
 			if (!isFound) {
-				var system = this.plugin.find((v) => v.name === 'system');
-				const running = await command(system, (v) => v.statement(this.arg) !== false)
+				var system = this.plugin.find((v) => v.name === "system");
+				const running = await command(
+					system,
+					(v) => v.statement(this.arg) !== false
+				);
 				if (!isFound) {
 					if (this.arg.length > 0 && this.arg[0] !== "") {
 						isFound = true;
@@ -190,12 +201,28 @@ module.exports = function prototype(Shell) {
 			}
 		});
 	};
-	Shell.prototype.consoleHelper = function (options = Function) {
+	Shell.prototype.consoleHelper = function (
+		command = Function,
+		flag = false
+	) {
+		let listOnString = this.LIST.filter((item) => item !== "system").join(
+			", "
+		);
 		console.log("");
-		console.log("Help Commands: ");
-		console.log("\t", `[${this.LIST.filter(item => item !== 'system').join(", ")}] [options]`.underline);
-		console.log("options: ");
-		options((...arg) => console.log("\t", ...arg));
+		console.log("Usage: ");
+		console.log("\t", `[${listOnString}] [command] [flag]`.underline);
+		if (flag) {
+			console.log("Flag: ");
+			flag();
+			console.log("");
+		}
+		console.log("Command: ");
+		command();
+		console.log("");
+		console.log(
+			`Use "[command] --help" for more information about a command.`
+		);
+		console.log("");
 	};
 	Shell.prototype.subprocess = async function (
 		run,
@@ -238,9 +265,15 @@ module.exports = function prototype(Shell) {
 					this.console(v.red);
 				}
 			});
-			this.core().success(false);
+			this.success(false)
 		}
 	};
+	Shell.prototype.success = function (newline = true) {
+		if (newline) {
+			process.stdout.write("\n");
+		}
+		this.exit();
+	}
 	Shell.prototype.parse = function () {
 		return {
 			toUpper: (text) =>
@@ -250,72 +283,6 @@ module.exports = function prototype(Shell) {
 					? text[0].toUpperCase() + text.slice(1, text.indexOf("."))
 					: null,
 		};
-	};
-	Shell.prototype.coreFeatureDefault = function (core, options) {
-		return [
-			{
-				name: "install:tailwindcss",
-				console: {
-					name: "install:tailwindcss",
-					description: "Installation & configuration for tailwindcss",
-					tab: 4,
-				},
-				action: async (arg) => {
-					core.createTailwind(options.framework);
-				},
-			},
-			{
-				name: "make:gcs",
-				console: {
-					name: "make:gcs",
-					description:
-						"Generate service firebase-storage for upload & remove (v8)",
-					tab: 5,
-				},
-				action: async (arg) => {
-					core.createFirebaseStorage();
-				},
-			},
-			{
-				name: "make:firebase",
-				console: {
-					name: "make:firebase",
-					description: "Generate config firebase (v9)",
-					tab: 5,
-				},
-				action: (arg) => {
-					core.initializeFirebase();
-				},
-			},
-			{
-				name: "make:model:firestore",
-				maxArg: 1,
-				console: {
-					name: "make:model:firestore [file]",
-					description: "Generate model firestore (v9)",
-					tab: 3,
-				},
-				action: (arg) => {
-					core.createModelFirestore(
-						this.parse().removeFormat(arg[0])
-					);
-				},
-			},
-			{
-				name: "run:server",
-				console: {
-					name: "run:server",
-					description: "Run the server application on the background",
-					tab: 5,
-				},
-				action: async () => {
-					this.subprocess("cd " + this.root + " && npm run dev", {
-						close: () => {},
-						notSync: true,
-					});
-				},
-			},
-		];
 	};
 
 	Shell.prototype.log = function (log) {
@@ -327,7 +294,7 @@ module.exports = function prototype(Shell) {
 		if (this.startcli) {
 			this.cli();
 		} else {
-			if (restart || (skip || !this.startcli)) {
+			if (restart || skip || !this.startcli) {
 				rl.close();
 				process.exit();
 			}

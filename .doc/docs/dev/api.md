@@ -205,6 +205,22 @@ function to generate style.
 utils.generateStyle("myapp.scss", "component");
 ```
 
+### createVite(type)
+
+create project frontend vite.
+
+```javascript
+await core.createVite("vue");
+```
+
+### createTailwind(type)
+
+install & config tailwindcss frontend vite.
+
+```javascript
+await core.createTailwind("vue");
+```
+
 ## time()
 
 return datetime [hours:minutes].
@@ -235,62 +251,6 @@ sh.consoleHelper((log) => {
 });
 ```
 
-## core()
-
-return function core.
-
-```javascript
-const core = sh.core();
-```
-
-### createProject(type)
-
-create project frontend vite.
-
-```javascript
-core.createProject("vue");
-```
-
-### createTailwind(type)
-
-install & config tailwindcss frontend vite.
-
-```javascript
-core.createTailwind("vue");
-```
-
-### createFirebaseStorage(name)
-
-Generate service firebase-storage for upload & remove (v8).
-
-```javascript
-core.createFirebaseStorage("vue");
-```
-
-### initializeFirebase()
-
-Generate config firebase (v9).
-
-```javascript
-core.initializeFirebase();
-```
-
-### createModelFirestore()
-
-Generate model firestore (v9).
-
-```javascript
-core.createModelFirestore(caseName);
-```
-
-### success()
-
-Call this function if end of execute.
-
-```javascript
-core.success();
-```
-
 ## parse()
 
 return function parse.
@@ -299,4 +259,12 @@ return function parse.
 const parse = sh.parse();
 parse.toUpper("helloworld.js"); // return Helloworld.js
 parse.removeFormat("helloworld.js"); // return helloworld
+```
+
+## success()
+
+Call this function if end of execute.
+
+```javascript
+sh.success();
 ```

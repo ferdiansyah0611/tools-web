@@ -29,24 +29,12 @@ Did you know that tools-web can integrate other tools made by developers?
   ```
 - **Installation & configuration for tailwindcss**
   ```bash
-  react install:tailwindcss
-  ```
-- **Generate service firebase-storage for upload & remove (v8)**
-  ```bash
-  react make:gcs
-  ```
-- **Generate config firebase (v9)**
-  ```bash
-  react make:firebase
+  react add:tailwindcss
   ```
 - **Generate store redux toolkit**
   ```bash
   react make:store users.js async http://localhost:8000/api/users
   react make:store users.js reducer
-  ```
-- **Generate model firestore (v9)**
-  ```bash
-  react make:model:firestore user.js
   ```
 - **Generate route crud for store**
   ```bash
@@ -58,7 +46,7 @@ Did you know that tools-web can integrate other tools made by developers?
   ```
 - **Run the server on the background**
   ```bash
-  react run:server
+  react dev
   ```
 
 ## Vue
@@ -81,19 +69,7 @@ Did you know that tools-web can integrate other tools made by developers?
   ```
 - **Installation & configuration for tailwindcss**
   ```bash
-  vue install:tailwindcss
-  ```
-- **Generate service firebase-storage for upload & remove (v8)**
-  ```bash
-  vue make:gcs
-  ```
-- **Generate config firebase (v9)**
-  ```bash
-  vue make:firebase
-  ```
-- **Generate model firestore (v9)**
-  ```bash
-  vue make:model:firestore user.js
+  vue add:tailwindcss
   ```
 - **Run the server on the background**
   ```bash
@@ -118,13 +94,9 @@ Did you know that tools-web can integrate other tools made by developers?
   ```bash
   express make:model User.js mongoose name,email,phone
   ```
-- **Generate google-cloud-storage & storage route API**
-  ```bash
-  express make:gcp
-  ```
 - **Run the server on the background**
   ```bash
-  react run:server
+  express dev
   ```
   ::: warning
   don't be remove on this line at app.js
@@ -137,3 +109,26 @@ Did you know that tools-web can integrate other tools made by developers?
   ```
 
   :::
+
+## Firebase
+
+- **Start command**
+  ```bash
+  firebase -h
+  ```
+- **Generate service google cloud storage for backend**
+  ```bash
+  firebase gcs
+  ```
+- **Generate initialize firebase, storage & authenticate (v9)**
+  ```bash
+  firebase init
+  ```
+- **Generate model firestore**
+  ```bash
+  firebase make:model user.js
+  ```
+- **Generate service storage**
+  ```bash
+  firebase storage
+  ```

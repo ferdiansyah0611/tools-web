@@ -15,27 +15,21 @@ system(){
 react(){
 	restart "> React Test"
 	node test.js --cli react make:project
-	node test.js --cli react install:mui
+	node test.js --cli react add:mui
 	node test.js --cli react make:component Sidebar.jsx sass
 	node test.js --cli react make:store users.js reducer
 	node test.js --cli react make:store users.js async http://localhost:8000/api/users
 	node test.js --cli react make:route User.jsx sass users
 	node test.js --cli react make:route:crud user
 	node test.js --cli react make:crud:simple User.jsx user sass name,email,password,phone,place,company text,email,password,number,text,text name,email,company,place
-	node test.js --cli react make:firebase
-	node test.js --cli react make:gcs
-	node test.js --cli react make:model:firestore user.js
-	node test.js --cli react install:tailwindcss
+	node test.js --cli react add:tailwindcss
 }
 vue(){
 	restart "> Vue Test"
 	node test.js --cli vue make:project
 	node test.js --cli vue make:component Button.vue
 	node test.js --cli vue make:route About.vue /about
-	node test.js --cli vue make:firebase
-	node test.js --cli vue make:gcs
-	node test.js --cli vue make:model:firestore user.js
-	node test.js --cli vue install:tailwindcss
+	node test.js --cli vue add:tailwindcss
 }
 express(){
 	restart "> Express Test"
@@ -43,6 +37,13 @@ express(){
 	node test.js --cli express make:api user.js mongoose name,email,phone
 	node test.js --cli express make:model User.js mongoose name,email,phone
 	node test.js --cli express make:gcs
+}
+firebase(){
+	restart "> Firebase Test"
+	node test.js --cli firebase init
+	node test.js --cli firebase make:model user.js
+	node test.js --cli firebase storage
+	node test.js --cli firebase gcs
 }
 
 # run test
@@ -64,4 +65,7 @@ if [[ $1 == "vue" ]]; then
 fi
 if [[ $1 == "express" ]]; then
 	express
+fi
+if [[ $1 == "firebase" ]]; then
+	firebase
 fi

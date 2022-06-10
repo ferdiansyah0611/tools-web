@@ -5,11 +5,9 @@ const React = function (sh) {
   this.parse = sh.parse();
   this.init = (arg) => {
     const { createDirRecursive, read, write } = sh.SystemFile;
-    const core = sh.core();
     const fixName = this.parse.toUpper(arg[0]);
     const caseName = this.parse.removeFormat(arg[0]);
     return {
-      core,
       fixName,
       caseName,
       createDirRecursive,
@@ -18,9 +16,6 @@ const React = function (sh) {
     };
   };
   this.action = [
-    ...sh.coreFeatureDefault(sh.core(), {
-      framework: "react",
-    }),
     {
       name: "make:crud:simple",
       console: {
@@ -31,7 +26,7 @@ const React = function (sh) {
       action: (arg) => {
         return new Promise((resolve) => {
           try {
-            const { createDirRecursive, read, write, core, fixName, caseName } =
+            const { createDirRecursive, read, write, fixName, caseName } =
               this.init(arg);
             const parse = this.parse;
             const { append } = sh.SystemFile;
@@ -185,7 +180,7 @@ const React = function (sh) {
                   )
               );
             }
-            core.success();
+            sh.success();
           } catch (e) {
             console.log(e);
           } finally {
@@ -202,7 +197,7 @@ const React = function (sh) {
         tab: 2,
       },
       action: (arg) => {
-        const { createDirRecursive, read, write, core, fixName, caseName } =
+        const { createDirRecursive, read, write, fixName, caseName } =
           this.init(arg);
         return new Promise((resolve) => {
           createDirRecursive(this.config.directory.component, fixName);
@@ -228,7 +223,7 @@ const React = function (sh) {
         tab: 1,
       },
       action: (arg) => {
-        const { createDirRecursive, read, write, core, fixName, caseName } =
+        const { createDirRecursive, read, write, fixName, caseName } =
           this.init(arg);
         const { append } = sh.SystemFile;
         const url = arg[2].toLowerCase();
@@ -261,7 +256,7 @@ const React = function (sh) {
                 )
             );
           }
-          core.success();
+          sh.success();
           resolve(true);
         });
       },
@@ -274,7 +269,7 @@ const React = function (sh) {
         tab: 1,
       },
       action: (arg) => {
-        let { createDirRecursive, read, write, core, fixName, caseName } =
+        let { createDirRecursive, read, write, fixName, caseName } =
           this.init(arg);
         const { append } = sh.SystemFile;
         fixName = fixName.toLowerCase();
@@ -329,7 +324,7 @@ const React = function (sh) {
               );
             }
           })();
-          core.success();
+          sh.success();
           resolve(true);
         });
       },
@@ -342,7 +337,7 @@ const React = function (sh) {
         tab: 3,
       },
       action: (arg) => {
-        let { createDirRecursive, read, write, core, fixName, caseName } =
+        let { createDirRecursive, read, write, fixName, caseName } =
           this.init(arg);
         const { append } = sh.SystemFile;
         var store = arg[0];
@@ -413,7 +408,7 @@ const React = function (sh) {
                 )
             );
           }
-          core.success();
+          sh.success();
           resolve(true);
         });
       },
@@ -426,70 +421,90 @@ const React = function (sh) {
         tab: 5,
       },
       action: (arg) => {
-        let { createDirRecursive, core } = this.init([""]);
-        let { copy } = sh.SystemFile;
+        let file = sh.SystemFile;
         return new Promise(async (resolve) => {
-          await core.createProject("react", () => {
+          await sh.utils.createVite("react", () => {
             var exec =
               "cd " +
               sh.env.root +
               " && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios";
-            createDirRecursive(this.config.directory.service);
-            createDirRecursive(this.config.directory.style);
-            createDirRecursive(this.config.directory.component);
-            createDirRecursive(this.config.directory.store);
-            createDirRecursive(this.config.directory.route);
-            copy(
+            file.createDirRecursive(this.config.directory.service);
+            file.createDirRecursive(this.config.directory.style);
+            file.createDirRecursive(this.config.directory.component);
+            file.createDirRecursive(this.config.directory.store);
+            file.createDirRecursive(this.config.directory.route);
+            file.copy(
               this.root("route/index.jsx"),
               this.config.directory.route + "/index.jsx"
             );
-            copy(
+            file.copy(
               this.root("route/Home.jsx"),
               this.config.directory.route + "/Home.jsx"
             );
-            copy(
+            file.copy(
               this.root("route/About.jsx"),
               this.config.directory.route + "/About.jsx"
             );
-            copy(
+            file.copy(
               this.root("service/auth.js"),
               this.config.directory.service + "/auth.js"
             );
-            copy(
+            file.copy(
               this.root("service/http.js"),
               this.config.directory.service + "/http.js"
             );
-            copy(
+            file.copy(
               this.root("store/index.js"),
               this.config.directory.store + "/index.js"
             );
-            copy(
+            file.copy(
               this.root("store/app.js"),
               this.config.directory.store + "/app.js"
             );
-            copy(
+            file.copy(
               this.root("component/template.jsx"),
               this.config.directory.component + "/template.jsx"
             );
-            copy(this.root("App.jsx"), sh.env.root + "/src/App.jsx");
-            copy(this.root("main.jsx"), sh.env.root + "/src/main.jsx");
-            sh.log("please run:", exec.underline);
-            core.success();
+            file.copy(this.root("App.jsx"), sh.env.root + "/src/App.jsx");
+            file.copy(this.root("main.jsx"), sh.env.root + "/src/main.jsx");
+            sh.log("please run: " + exec.underline);
+            sh.success();
             resolve(true);
           });
         });
       },
     },
     {
-      name: "install:mui",
+      name: "dev",
       console: {
-        name: "install:mui",
+        name: "dev",
+        description: "Run server dev on the background",
+        tab: 6,
+      },
+      action: () => {
+        sh.utils.runServerNpm();
+      },
+    },
+    {
+      name: "add:tailwindcss",
+      console: {
+        name: "add:tailwindcss",
+        description: "Install & configuration of tailwindcss",
+        tab: 4,
+      },
+      action: async () => {
+        await sh.utils.createTailwind(this.name);
+      },
+    },
+    {
+      name: "add:mui",
+      console: {
+        name: "add:mui",
         description:
           "Install the Material UI & include toggle dark/light theme & palette colors",
         tab: 5,
       },
       action: () => {
-        let { core } = this.init([""]);
         let { copy } = sh.SystemFile;
         return new Promise(async (resolve) => {
           await sh.subprocess(
@@ -509,7 +524,7 @@ const React = function (sh) {
                   this.root("service/color.js"),
                   this.config.directory.service + "/color.js"
                 );
-                core.success();
+                sh.success();
                 resolve(true);
               },
             }
