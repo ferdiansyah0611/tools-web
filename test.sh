@@ -10,7 +10,6 @@ system(){
 	node test.js --cli disable react
 	node test.js --cli enable react
 	node test.js --cli show env
-	node test.js --cli prettier
 }
 react(){
 	restart "> React Test"
@@ -45,6 +44,31 @@ firebase(){
 	node test.js --cli firebase storage
 	node test.js --cli firebase gcs
 }
+tool(){
+	restart "> Tool Test"
+	node test.js --cli tool prettier all
+	node test.js --cli tool test:api product.js
+}
+helps(){
+	restart "> Helps Test"
+	node test.js --cli -h
+	sleep 5
+	echo "> React Helps"
+	node test.js --cli react -h
+	sleep 5
+	echo "> Vue Helps"
+	node test.js --cli vue -h
+	sleep 5
+	echo "> Express Helps"
+	node test.js --cli express -h
+	sleep 5
+	echo "> Firebase Helps"
+	node test.js --cli firebase -h
+	sleep 5
+	echo "> Tool Helps"
+	node test.js --cli tool -h
+	sleep 5
+}
 
 # run test
 node test.js --cli mode 0
@@ -68,4 +92,10 @@ if [[ $1 == "express" ]]; then
 fi
 if [[ $1 == "firebase" ]]; then
 	firebase
+fi
+if [[ $1 == "tool" ]]; then
+	tool
+fi
+if [[ $1 == "helps" ]]; then
+	helps
 fi

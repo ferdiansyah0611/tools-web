@@ -8,4 +8,5 @@ const sh = new Shell({
 sh.use(require("./.shell/react"))
 sh.use(require("./.shell/vue"))
 sh.use(require("./.shell/express"))
+sh.use(require("./.shell/firebase"))
 sh.cli()

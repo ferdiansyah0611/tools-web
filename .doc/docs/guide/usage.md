@@ -132,3 +132,22 @@ Did you know that tools-web can integrate other tools made by developers?
   ```bash
   firebase storage
   ```
+
+## Tool
+
+- **Start command**
+  ```bash
+  tool -h
+  ```
+- **Run prettier in the current project**
+  ```bash
+  tool prettier all
+  ```
+- **Create testing API http using deno**
+  ```bash
+  tool test:api user.js
+  ```
+- **Commit any files & push to repository**
+  ```bash
+  tool git:automate origin main
+  ```

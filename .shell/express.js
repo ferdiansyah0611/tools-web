@@ -255,7 +255,7 @@ const Express = function (sh) {
       console: {
         name: "dev",
         description: "Run the server application on the background",
-        tab: 5,
+        tab: 6,
       },
       action: async () => {
         sh.subprocess("cd " + sh.root + " && npm run start", {

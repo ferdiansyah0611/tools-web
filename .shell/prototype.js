@@ -36,6 +36,7 @@ module.exports = function prototype(Shell) {
 			},
 		});
 		this.use(require("./system"));
+		this.use(require("./tool"));
 		this.root = this.env.root;
 		this.isProduction = this.env.mode === 1;
 		this.SystemFile = new SystemFile(this);
@@ -106,100 +107,94 @@ module.exports = function prototype(Shell) {
 			},
 		};
 	};
-	Shell.prototype.start = function (customize = null) {
-		return new Promise(async (resolve) => {
-			var isFound = false;
-			var firstArg = this.arg[0];
-			const init = () => {
-				if (Array.isArray(customize)) {
-					this.customize = true;
-					this.arg = customize;
-					firstArg = this.arg[0];
-				} else if (this.arg.length === 0) {
-					firstArg = "-h";
-				}
-				this.framework = firstArg;
-			};
-			const command = async (plugin, logic) => {
-				if (["-h", "--help"].indexOf(this.arg[1]) !== -1 && plugin.name !== 'system') {
+	Shell.prototype.start = async function (customize = null) {
+		var isFound = false;
+		var firstArg = this.arg[0];
+		const init = () => {
+			if (Array.isArray(customize)) {
+				this.customize = true;
+				this.arg = customize;
+				firstArg = this.arg[0];
+			} else if (this.arg.length === 0) {
+				firstArg = "-h";
+			}
+			this.framework = firstArg;
+		};
+		const command = async (plugin, logic) => {
+			if (
+				["-h", "--help"].indexOf(this.arg[1]) !== -1 &&
+				plugin.name !== "system"
+			) {
+				isFound = true;
+				this.consoleHelper(() => this.utils.showHelper(plugin.action));
+				this.exit();
+				return true;
+			} else {
+				var action = plugin.action.find(logic);
+				if (action) {
 					isFound = true;
-					this.consoleHelper(() =>
-						this.utils.showHelper(plugin.action)
-					);
-					resolve(true);
-					this.exit();
-					return true;
-				} else {
-					var action = plugin.action.find(logic);
-					if (action) {
-						isFound = true;
-						if (
-							action.maxArg &&
-							this.arg.slice(plugin.name === "system" ? 0 : 2)
-								.length < action.maxArg
-						) {
-							this.utils.errorArg(action);
-							resolve(true);
+					if (
+						action.maxArg &&
+						this.arg.slice(plugin.name === "system" ? 0 : 2)
+							.length < action.maxArg
+					) {
+						this.utils.errorArg(action);
+						this.cli();
+						return true;
+					} else {
+						try {
+							await action.action(
+								this.arg.slice(2),
+								this,
+								plugin,
+								ROOT
+							);
+							if (
+								!action.console.disableNewline &&
+								!this.startcli
+							) {
+								console.log("");
+							}
 							this.cli();
 							return true;
-						} else {
-							try {
-								await action.action(
-									this.arg.slice(2),
-									this,
-									plugin,
-									ROOT
-								);
-								if (
-									!action.console.disableNewline &&
-									!this.startcli
-								) {
-									console.log("");
-								}
-								resolve(true);
-								this.cli();
-								return true;
-							} catch (e) {
-								this.console(e.message.red);
-								this.cli();
-								return true;
-							}
+						} catch (e) {
+							this.console(e.message.red);
+							this.cli();
+							return true;
 						}
 					}
 				}
-			};
-			init();
-			this.utils.parseOption();
-			// logic
-			var plugin = this.plugin.find((v) => v.name == this.framework);
-			if (plugin) {
-				if(!plugin.disabled) {
-					await command(plugin, (v) => v.name === this.arg[1]);
-				}
 			}
+		};
+		init();
+		this.utils.parseOption();
+		// logic
+		var plugin = this.plugin.find((v) => v.name == this.framework);
+		if (plugin) {
+			if (!plugin.disabled) {
+				await command(plugin, (v) => v.statement ? v.statement(this.arg.slice(1)) !== false : v.name === this.arg[1]);
+			}
+		}
+		if (!isFound) {
+			var system = this.plugin.find((v) => v.name === "system");
+			const running = await command(
+				system,
+				(v) => v.statement(this.arg) !== false
+			);
 			if (!isFound) {
-				var system = this.plugin.find((v) => v.name === "system");
-				const running = await command(
-					system,
-					(v) => v.statement(this.arg) !== false
-				);
-				if (!isFound) {
-					if (this.arg.length > 0 && this.arg[0] !== "") {
-						isFound = true;
-						await this.subprocess(this.arg.join(" "), {
-							close: () => {
-								resolve(true);
-								this.cli();
-							},
-							hideLog: true,
-						});
-					} else {
-						resolve(true);
-						this.exit();
-					}
+				if (this.arg.length > 0 && this.arg[0] !== "") {
+					isFound = true;
+					await this.subprocess(this.arg.join(" "), {
+						close: () => {
+							this.cli();
+						},
+						hideLog: true,
+					});
+				} else {
+					this.exit();
 				}
 			}
-		});
+		}
 	};
 	Shell.prototype.consoleHelper = function (
 		command = Function,
@@ -265,7 +260,7 @@ module.exports = function prototype(Shell) {
 					this.console(v.red);
 				}
 			});
-			this.success(false)
+			this.success(false);
 		}
 	};
 	Shell.prototype.success = function (newline = true) {
@@ -273,7 +268,7 @@ module.exports = function prototype(Shell) {
 			process.stdout.write("\n");
 		}
 		this.exit();
-	}
+	};
 	Shell.prototype.parse = function () {
 		return {
 			toUpper: (text) =>

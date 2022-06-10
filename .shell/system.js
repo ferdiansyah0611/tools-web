@@ -122,23 +122,6 @@ const System = function (sh) {
       },
     },
     {
-      statement: (arg) => arg[0] == "test:api",
-      maxArg: 1,
-      console: {
-        name: "test:api [file]",
-        description: "Create testing API http using deno",
-        tab: 4,
-      },
-      action: async (arg, sh, plug, ROOT) => {
-        const file = sh.SystemFile;
-        file.createDirRecursive(sh.root + "/test");
-        file.copy(
-          sh.config.root + "test/api.js",
-          sh.env.root + "/test/" + sh.arg[1]
-        );
-      },
-    },
-    {
       statement: (arg) => arg[0] == "show",
       maxArg: 2,
       console: {
@@ -322,20 +305,7 @@ const System = function (sh) {
           });
         })();
       },
-    },
-    {
-      statement: (arg) => arg[0] === "prettier",
-      console: {
-        name: "prettier all",
-        description: "Run prettier in the current project",
-        tab: 5,
-      },
-      action(arg, sh, plug, ROOT) {
-        sh.subprocess(`cd ${sh.env.root} && npx prettier --write .`, {
-          close() {},
-        });
-      },
-    },
+    }
   ];
   return this;
 };
