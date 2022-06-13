@@ -81,7 +81,7 @@ module.exports = function prototype(Shell) {
 			return process.exit();
 		}
 		this.startcli = true;
-		const arg = await this.quest(`${this.time()} > `);
+		const arg = await this.quest(`${this.time()} ${`/${this.env.root}`.green} > `);
 		this.arg = arg.split(" ");
 		this.start();
 	};
