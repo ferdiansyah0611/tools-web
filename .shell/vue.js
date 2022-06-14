@@ -124,37 +124,35 @@ const Vue = function (sh) {
       },
       action: async (arg) => {
         let file = sh.SystemFile;
-        await sh.utils.createVite("vue", () => {
-          file.createDirRecursive(this.config.directory.route);
-          file.copy(
-            this.root + "router.js",
-            this.config.directory.route + "/index.js",
-            () => {}
-          );
-          file.copy(
-            this.root + "Home.vue",
-            this.config.directory.route + "/Home.vue",
-            () => {}
-          );
-          file.copy(
-            this.root + "storeindex.js",
-            this.config.directory.store + "/index.js",
-            () => {}
-          );
-          file.copy(
-            this.root + "App.vue",
-            sh.env.root + "/src/App.vue",
-            () => {}
-          );
-          file.copy(
-            this.root + "main.js",
-            sh.env.root + "/src/main.js",
-            () => {}
-          );
-          var exec = `cd ${sh.env.root} && npm i && npm i vuex@next vue-router@next`;
-          sh.log("please run: " + exec.underline);
-          sh.success();
-        });
+        return new Promise(async (resolve) => {
+          await sh.utils.createVite("vue", () => {
+            file.createDirRecursive(this.config.directory.route);
+            file.createDirRecursive(this.config.directory.store);
+            file.copy(
+              this.root + "router.js",
+              this.config.directory.route + "/index.js",
+            );
+            file.copy(
+              this.root + "Home.vue",
+              this.config.directory.route + "/Home.vue",
+            );
+            file.copy(
+              this.root + "storeindex.js",
+              this.config.directory.store + "/index.js",
+            );
+            file.copy(
+              this.root + "App.vue",
+              sh.env.root + "/src/App.vue",
+            );
+            file.copy(
+              this.root + "main.js",
+              sh.env.root + "/src/main.js",
+            );
+            var exec = `cd ${sh.env.root} && npm i && npm i vuex@next vue-router@next`;
+            sh.log("please run: " + exec.underline);
+            resolve(true);
+          });
+        })
       },
     },
   ];

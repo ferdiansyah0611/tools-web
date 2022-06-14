@@ -99,7 +99,7 @@ module.exports = function (sh) {
 				var code = file
 					.read(sh.config.vite + "vite.config.js")
 					.toString();
-				code = code.replace("react", name);
+				code = code.replaceAll("react", name);
 				file.write(sh.env.root + "/vite.config.js", code);
 				file.write(
 					sh.env.root + "/vercel.json",
