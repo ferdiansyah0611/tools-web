@@ -118,7 +118,7 @@ module.exports = function (sh) {
 				? "cd " +
 				  sh.env.root +
 				  " && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p"
-				: "ls";
+				: "echo 1";
 		await sh.subprocess(exec, {
 			close: () => {
 				file.copy(

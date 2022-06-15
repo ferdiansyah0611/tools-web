@@ -180,7 +180,6 @@ const React = function (sh) {
                   )
               );
             }
-            sh.success();
           } catch (e) {
             console.log(e);
           } finally {
@@ -256,7 +255,6 @@ const React = function (sh) {
                 )
             );
           }
-          sh.success();
           resolve(true);
         });
       },
@@ -324,7 +322,6 @@ const React = function (sh) {
               );
             }
           })();
-          sh.success();
           resolve(true);
         });
       },
@@ -408,7 +405,6 @@ const React = function (sh) {
                 )
             );
           }
-          sh.success();
           resolve(true);
         });
       },
@@ -423,53 +419,52 @@ const React = function (sh) {
       action: (arg) => {
         let file = sh.SystemFile;
         return new Promise(async (resolve) => {
-          await sh.utils.createVite("react", () => {
-            var exec =
-              "cd " +
-              sh.env.root +
-              " && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios";
-            file.createDirRecursive(this.config.directory.service);
-            file.createDirRecursive(this.config.directory.style);
-            file.createDirRecursive(this.config.directory.component);
-            file.createDirRecursive(this.config.directory.store);
-            file.createDirRecursive(this.config.directory.route);
-            file.copy(
-              this.root("route/index.jsx"),
-              this.config.directory.route + "/index.jsx"
-            );
-            file.copy(
-              this.root("route/Home.jsx"),
-              this.config.directory.route + "/Home.jsx"
-            );
-            file.copy(
-              this.root("route/About.jsx"),
-              this.config.directory.route + "/About.jsx"
-            );
-            file.copy(
-              this.root("service/auth.js"),
-              this.config.directory.service + "/auth.js"
-            );
-            file.copy(
-              this.root("service/http.js"),
-              this.config.directory.service + "/http.js"
-            );
-            file.copy(
-              this.root("store/index.js"),
-              this.config.directory.store + "/index.js"
-            );
-            file.copy(
-              this.root("store/app.js"),
-              this.config.directory.store + "/app.js"
-            );
-            file.copy(
-              this.root("component/template.jsx"),
-              this.config.directory.component + "/template.jsx"
-            );
-            file.copy(this.root("App.jsx"), sh.env.root + "/src/App.jsx");
-            file.copy(this.root("main.jsx"), sh.env.root + "/src/main.jsx");
-            sh.log("please run: " + exec.underline);
-            sh.success();
-            resolve(true);
+          await sh.utils.createVite("react", async() => {
+            var exec = "cd " + sh.env.root + " && npm i && npm i @reduxjs/toolkit react-redux react-router-dom axios";
+            await sh.subprocess(sh.env.mode === 1 ? exec : "echo 1", {
+              close: () => {
+                file.createDirRecursive(this.config.directory.service);
+                file.createDirRecursive(this.config.directory.style);
+                file.createDirRecursive(this.config.directory.component);
+                file.createDirRecursive(this.config.directory.store);
+                file.createDirRecursive(this.config.directory.route);
+                file.copy(
+                  this.root("route/index.jsx"),
+                  this.config.directory.route + "/index.jsx"
+                );
+                file.copy(
+                  this.root("route/Home.jsx"),
+                  this.config.directory.route + "/Home.jsx"
+                );
+                file.copy(
+                  this.root("route/About.jsx"),
+                  this.config.directory.route + "/About.jsx"
+                );
+                file.copy(
+                  this.root("service/auth.js"),
+                  this.config.directory.service + "/auth.js"
+                );
+                file.copy(
+                  this.root("service/http.js"),
+                  this.config.directory.service + "/http.js"
+                );
+                file.copy(
+                  this.root("store/index.js"),
+                  this.config.directory.store + "/index.js"
+                );
+                file.copy(
+                  this.root("store/app.js"),
+                  this.config.directory.store + "/app.js"
+                );
+                file.copy(
+                  this.root("component/template.jsx"),
+                  this.config.directory.component + "/template.jsx"
+                );
+                file.copy(this.root("App.jsx"), sh.env.root + "/src/App.jsx");
+                file.copy(this.root("main.jsx"), sh.env.root + "/src/main.jsx");
+                resolve(true);
+              }
+            })
           });
         });
       },
@@ -497,6 +492,33 @@ const React = function (sh) {
       },
     },
     {
+      name: "add:antd",
+      console: {
+        name: "add:antd",
+        description:
+          "Install antd library",
+        tab: 5,
+      },
+      action: () => {
+        return new Promise(async(resolve) => {
+          const file = sh.SystemFile
+          await sh.subprocess(
+            sh.env.mode === 1
+              ? "cd " +
+                  sh.root +
+                  " && npm install antd --save"
+              : "echo 1",
+            {
+              close: () => {
+                file.append(sh.env.root + "/src/index.css", "@import '../node_modules/antd/dist/antd.css';\n")
+                resolve(true);
+              },
+            }
+          );
+        })
+      }
+    },
+    {
       name: "add:mui",
       console: {
         name: "add:mui",
@@ -511,7 +533,7 @@ const React = function (sh) {
             sh.env.mode === 1
               ? "cd " +
                   sh.root +
-                  " && npm install @mui/material @emotion/react @emotion/styled @mui/icons-material"
+                  " && npm install @mui/material @emotion/react @emotion/styled @mui/icons-material --save"
               : "echo 1",
             {
               close: () => {
@@ -524,7 +546,6 @@ const React = function (sh) {
                   this.root("service/color.js"),
                   this.config.directory.service + "/color.js"
                 );
-                sh.success();
                 resolve(true);
               },
             }

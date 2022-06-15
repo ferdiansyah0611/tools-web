@@ -22,6 +22,7 @@ react(){
 	node test.js --cli react make:route:crud user
 	node test.js --cli react make:crud:simple User.jsx user sass name,email,password,phone,place,company text,email,password,number,text,text name,email,company,place
 	node test.js --cli react add:tailwindcss
+	node test.js --cli react add:antd
 }
 vue(){
 	restart "> Vue Test"
@@ -35,7 +36,6 @@ express(){
 	node test.js --cli express make:project ejs mongoose
 	node test.js --cli express make:api user.js mongoose name,email,phone
 	node test.js --cli express make:model User.js mongoose name,email,phone
-	node test.js --cli express make:gcs
 }
 firebase(){
 	restart "> Firebase Test"

@@ -125,7 +125,7 @@ const Vue = function (sh) {
       action: async (arg) => {
         let file = sh.SystemFile;
         return new Promise(async (resolve) => {
-          await sh.utils.createVite("vue", () => {
+          await sh.utils.createVite("vue", async () => {
             file.createDirRecursive(this.config.directory.route);
             file.createDirRecursive(this.config.directory.store);
             file.copy(
@@ -148,9 +148,16 @@ const Vue = function (sh) {
               this.root + "main.js",
               sh.env.root + "/src/main.js",
             );
-            var exec = `cd ${sh.env.root} && npm i && npm i vuex@next vue-router@next`;
-            sh.log("please run: " + exec.underline);
-            resolve(true);
+            if(sh.isProduction) {
+              var exec = `cd ${sh.env.root} && npm i && npm i vuex@next vue-router@next --save`;
+              await sh.subprocess(exec, {
+                close: () => {
+                  resolve(true);
+                },
+              });
+            } else {
+              resolve(true);
+            }
           });
         })
       },
