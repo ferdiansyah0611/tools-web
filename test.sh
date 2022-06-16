@@ -30,6 +30,7 @@ vue(){
 	node test.js --cli vue make:component Button.vue
 	node test.js --cli vue make:route About.vue /about
 	node test.js --cli vue add:tailwindcss
+	node test.js --cli vue add:quasar
 }
 express(){
 	restart "> Express Test"

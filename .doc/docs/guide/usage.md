@@ -31,6 +31,10 @@ Did you know that tools-web can integrate other tools made by developers?
   ```bash
   react add:tailwindcss
   ```
+- **Install antd library**
+  ```bash
+  react add:antd
+  ```
 - **Generate store redux toolkit**
   ```bash
   react make:store users.js async http://localhost:8000/api/users
@@ -70,6 +74,10 @@ Did you know that tools-web can integrate other tools made by developers?
 - **Installation & configuration for tailwindcss**
   ```bash
   vue add:tailwindcss
+  ```
+- **Installation & configuration for quasar**
+  ```bash
+  vue add:quasar
   ```
 - **Run the server on the background**
   ```bash

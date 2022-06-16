@@ -116,13 +116,45 @@ const Vue = function (sh) {
       },
     },
     {
+      name: "add:quasar",
+      console: {
+        name: "add:quasar",
+        description: "Install & configuration of quasar",
+        tab: 4,
+      },
+      action: () => {
+        return new Promise(async(resolve) => {
+          let exec = sh.isProduction ? "cd " + sh.root + " && npm i quasar @quasar/extras --save && npm i -D @quasar/vite-plugin sass@1.32.12" : "echo 1"
+          await sh.subprocess(exec, {
+            close: () => {
+              const file = sh.SystemFile
+              let required = ''
+              required += "import { Quasar } from 'quasar'\n"
+              required += "import '@quasar/extras/material-icons/material-icons.css';\n"
+              required += "import 'quasar/src/css/index.sass';"
+              file.append(sh.env.root + "/src/main.js", '', null, (text) => 
+                text.replace('from "vue";', 'from "vue";\n' + required).
+                replace("createApp(App);", "createApp(App);\n" + "app.use(Quasar, {plugins: {}});")
+              )
+              file.append(sh.env.root + "/vite.config.js", '', null, (text) => 
+                text.replace('from "path";', 'from "path";\n' + "import { quasar, transformAssetUrls } from '@quasar/vite-plugin';").
+                replace("vue(),", "vue({ template: { transformAssetUrls } }),\n\t\tquasar({ sassVariables: 'src/quasar-variables.sass'}),")
+              )
+              file.copy(this.root + "quasar-variables.sass", sh.env.root + "/src/quasar-variables.sass")
+              setTimeout(resolve, 1000)
+            }
+          })
+        })
+      },
+    },
+    {
       name: "make:project",
       console: {
         name: "make:project",
         description: "Create new project using vite",
         tab: 5,
       },
-      action: async (arg) => {
+      action: (arg) => {
         let file = sh.SystemFile;
         return new Promise(async (resolve) => {
           await sh.utils.createVite("vue", async () => {
