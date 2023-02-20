@@ -120,7 +120,7 @@ const Vue = function (sh) {
       console: {
         name: "add:quasar",
         description: "Install & configuration of quasar",
-        tab: 4,
+        tab: 5,
       },
       action: () => {
         return new Promise(async(resolve) => {

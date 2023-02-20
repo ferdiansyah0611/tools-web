@@ -263,7 +263,7 @@ const React = function (sh) {
       name: "make:store",
       console: {
         name: "make:store [file] [async|reducer] [url]",
-        description: "Generate store",
+        description: "Generate store redux toolkit",
         tab: 1,
       },
       action: (arg) => {
