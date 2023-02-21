@@ -136,14 +136,12 @@ prototype to manage file.
 const file = sh.SystemFile;
 ```
 
-### copy(oldfile, newfile, success)
+### copy(oldfile, newfile)
 
 copy specified file.
 
 ```javascript
-file.copy("myapp/src/app.sass", "myapp/src/tailwind.sass", () =>
-  sh.log("success")
-);
+file.copy("myapp/src/app.sass", "myapp/src/tailwind.sass");
 ```
 
 ### app: class Shell

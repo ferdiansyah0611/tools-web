@@ -24,8 +24,8 @@ class SystemFile {
       first + (replace ? replace(text) : text) + (end || "")
     );
   }
-  copy(copy, dir, callback = Function) {
-    fs.copyFile(copy, dir, callback);
+  copy(copy, dir) {
+    fs.copyFileSync(copy, dir);
     return this.app.log(`writing ${dir}`.green);
   }
   write(dir, val) {
