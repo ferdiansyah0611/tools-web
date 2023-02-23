@@ -126,8 +126,8 @@ module.exports = function (sh) {
 					sh.env.root + "/src/tailwind.sass"
 				);
 				file.copy(
-					sh.config.tailwind + "tailwind.config.js",
-					sh.env.root + "/tailwind.config.js"
+					sh.config.tailwind + "tailwind.config.cjs",
+					sh.env.root + "/tailwind.config.cjs"
 				);
 				var dir =
 					sh.env.root +
