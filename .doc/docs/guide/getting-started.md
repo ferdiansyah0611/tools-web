@@ -37,12 +37,18 @@ This section will help you use tools-web from scratch.
   ```
 - **Step 4:** Start command
   ```bash
-  node index
+  npm run start
   ```
 - **Step 5:** Show help command
   ```bash
   --help
   ```
+
+## With NPX
+
+```bash
+npx twb
+```
 
 ## Before you use
 - You have to run the command before your project directory.

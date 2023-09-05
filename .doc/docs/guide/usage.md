@@ -5,86 +5,94 @@ title: Usage
 # Usage
 
 Here are some uses of the cli on tools-web.
-::: tip
-Did you know that tools-web can integrate other tools made by developers?
-:::
 
 ## React
+
+Basic command:
 
 - **Start command**
   ```bash
   react -h
   ```
-- **Create new project**
-  ```bash
-  react make:project
-  ```
 - **Create new component**
   ```bash
-  react make:component Button.jsx sass
+  react make:component Button
+  react make:component Button --ts # typescript format
+  react make:component Button --style style # with generate style (css,sass,scss)
   ```
 - **Create new route**
   ```bash
-  react make:route About.jsx sass about
-  ```
-- **Installation & configuration for tailwindcss**
-  ```bash
-  react add:tailwindcss
-  ```
-- **Install antd library**
-  ```bash
-  react add:antd
+  react make:route World /world
+  react make:route World /world --ts # typescript format
+  react make:route World /world --style style # with generate style (css,sass,scss)
   ```
 - **Generate store redux toolkit**
   ```bash
-  react make:store users.js async http://localhost:8000/api/users
-  react make:store users.js reducer
-  ```
-- **Generate route crud for store**
-  ```bash
-  react make:route:crud users
-  ```
-- **Generate simple crud using redux, include table and form**
-  ```bash
-  react make:crud:simple User.jsx user sass name,email,password,phone,place,company text,email,password,number,text,text name,email,company,place
-  ```
-- **Run the server on the background**
-  ```bash
-  react dev
+  react make:toolkit users --type reducer
+  react make:toolkit users --type async --url http://localhost:8000/api/users
   ```
 
+Integration framework/library command:
+
+```bash
+react add:mui
+react add:antd
+```
+
 ## Vue
+
+Basic command:
 
 - **Start command**
   ```bash
   vue -h
   ```
-- **Create new project**
-  ```bash
-  vue make:project
-  ```
 - **Create new component**
   ```bash
-  vue make:component Button.vue
+  vue make:component Button
   ```
 - **Create new route**
   ```bash
-  vue make:route About.vue /about
+  vue make:route World /world
   ```
-- **Installation & configuration for tailwindcss**
+- **Create new store**
   ```bash
-  vue add:tailwindcss
-  ```
-- **Installation & configuration for quasar**
-  ```bash
-  vue add:quasar
-  ```
-- **Run the server on the background**
-  ```bash
-  react run:server
+  vue make:store user
   ```
 
+Integration framework/library command:
+
+```bash
+vue add:quasar
+vue add:vuetify
+vue add:antd
+vue add:element-plus
+```
+
+## TailwindCSS
+
+Basic command:
+
+- **Start command**
+  ```bash
+  react -h
+  ```
+- **Add tailwindcss to project**
+  ```bash
+  tailwind create
+  ```
+
+Integration framework/library command:
+
+```bash
+tailwind add:daisyui
+tailwind add:headlessui
+tailwind add:flowbite
+```
+
 ## Express
+
+Basic command:
 
 - **Start command**
   ```bash
@@ -92,20 +100,23 @@ Did you know that tools-web can integrate other tools made by developers?
   ```
 - **Create new project (include unit test)**
   ```bash
-  express make:project ejs mongoose
+  # template choice is "dust", "ejs", "hbs", "hjs", "jade", "pug", "twig"
+  # db choice is "mongoose", "sequelize"
+  express make:project --template ejs --db mongoose
   ```
 - **Create new api**
   ```bash
-  express make:api user.js mongoose name,email,phone
+  express make:api user --db mongoose --col name,email,phone
   ```
 - **Create new model**
   ```bash
-  express make:model User.js mongoose name,email,phone
+  express make:model User --db mongoose --col name,email,phone
   ```
 - **Run the server on the background**
   ```bash
   express dev
   ```
+
   ::: warning
   don't be remove on this line at app.js
 
@@ -119,6 +130,8 @@ Did you know that tools-web can integrate other tools made by developers?
   :::
 
 ## Firebase
+
+Basic command:
 
 - **Start command**
   ```bash
@@ -134,28 +147,26 @@ Did you know that tools-web can integrate other tools made by developers?
   ```
 - **Generate model firestore**
   ```bash
-  firebase make:model user.js
+  firebase make:model user
   ```
 - **Generate service storage**
   ```bash
   firebase storage
   ```
 
-## Tool
+## Tools
+
+Basic command:
 
 - **Start command**
   ```bash
-  tool -h
+  tools -h
   ```
 - **Run prettier in the current project**
   ```bash
-  tool prettier all
-  ```
-- **Create testing API http using deno**
-  ```bash
-  tool test:api user.js
+  tools prettier:all
   ```
 - **Commit any files & push to repository**
   ```bash
-  tool git:automate origin main
+  tools git:automate origin main
   ```

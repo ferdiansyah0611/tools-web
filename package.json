@@ -2,22 +2,40 @@
   "name": "tools-web",
   "version": "1.1.58",
   "description": "tools-web is a tool to speed up developing a website using the cli. Such as making new project, components, state management, routes, model, and others.",
-  "main": "index",
-  "scripts": {},
+  "main": "main",
+  "scripts": {
+    "start": "node ./dist/src/multi-command.js",
+    "test:express": "node ./dist/test/cli/express.test.js",
+    "test:firebase": "node ./dist/test/cli/firebase.test.js",
+    "test:react": "node ./dist/test/cli/react.test.js",
+    "test:system": "node ./dist/test/cli/system.test.js",
+    "test:tools": "node ./dist/test/cli/tools.test.js",
+    "test:tailwind": "node ./dist/test/cli/tailwind.test.js",
+    "test:vite": "node ./dist/test/cli/vite.test.js",
+    "test:vue": "node ./dist/test/cli/vue.test.js"
+  },
+  "type": "module",
   "keywords": [
     "cli",
-    "vue",
     "express",
+    "firebase",
     "react",
-    "codeigniter 4",
-    "tools"
+    "vite",
+    "vue",
+    "tools",
+    "frontend",
+    "backend"
   ],
   "author": "ferdiansyah0611",
   "license": "ISC",
   "bin": {
-    "twb": "./index"
+    "twb": "node ./dist/src/multi-command.js"
   },
-  "dependencies": {
-    "colors": "^1.4.0"
+  "devDependencies": {
+    "@tsconfig/node-lts": "^18.12.5",
+    "@types/node": "^20.5.7",
+    "chalk": "^5.3.0",
+    "commander": "^11.0.0",
+    "ora": "^7.0.1"
   }
 }
