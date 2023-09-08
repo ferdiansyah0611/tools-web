@@ -1,10 +1,11 @@
 import { SpawnSyncReturns } from "child_process";
 import { paths } from "../constraint.js";
-import { program, output, Option } from "../lib.js";
-import { toUpperFirst } from "../utils/text.js";
+import { program, Option } from "../lib.js";
+import { compactName } from "../utils/text.js";
 import subprocess, { prettier } from "../utils/subprocess.js";
 import config from "../utils/config.js";
-import file from "../utils/file.js";
+import file, { makeRecursiveFolder } from "../utils/file.js";
+import Task from "../utils/task.js";
 
 const vue = program.command("vue").description("List vue.js cli");
 
@@ -62,18 +63,23 @@ vue
   .action(makeStore);
 
 export async function addQuasar() {
-  const task = output.task("Installing...");
+  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(0)
 
   let execution = `cd ${dir} && npm i quasar @quasar/extras --save && npm i -D @quasar/vite-plugin sass@1.32.12`;
   if (value.mode === 0) execution = "echo 1";
 
   let result: SpawnSyncReturns<Buffer> = subprocess.run(execution, {
     sync: true,
-    hideLog: true,
+    hideStdout: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
+  task.success(1)
 
   let code = "";
   code += "import { Quasar } from 'quasar';\n";
@@ -104,13 +110,17 @@ export async function addQuasar() {
     paths.directory.src(["quasar-variables.sass"], dir),
   );
   prettierFormatted(dir);
-  task.done("Installed");
+  task.success(2);
 }
 
 export async function addVuetify(option: any) {
-  const task = output.task("Installing...");
+  const task = new Task(["Read Configuration", "Generate Code", "Execution", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(0)
 
   let code = "";
   let execution = `cd ${dir} && npm i vuetify@^3.3.15`;
@@ -168,13 +178,16 @@ export async function addVuetify(option: any) {
     code = code.replace("mdi", "fa");
   }
 
+  task.success(1)
+
   if (value.mode === 0) execution = "echo 1";
 
   let result: SpawnSyncReturns<Buffer> = subprocess.run(execution, {
     sync: true,
-    hideLog: true,
+    hideStdout: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
+  task.success(2)
 
   file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) =>
     text
@@ -184,22 +197,27 @@ export async function addVuetify(option: any) {
   );
   prettier(dir, "index.html");
   prettier(paths.directory.src([], dir), "main.js");
-  task.done("Installed");
+  task.success(3)
 }
 
 export async function addAntd() {
-  const task = output.task("Installing...");
+  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(0)
 
   let execution = `cd ${dir} && npm i --save ant-design-vue@4.x && npm install unplugin-vue-components -D`;
   if (value.mode === 0) execution = "echo 1";
 
   let result: SpawnSyncReturns<Buffer> = subprocess.run(execution, {
     sync: true,
-    hideLog: true,
+    hideStdout: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
+  task.success(1)
 
   let code = "";
   code += "import Antd from 'ant-design-vue';\n";
@@ -221,22 +239,27 @@ export async function addAntd() {
       ),
   );
   prettierFormatted(dir);
-  task.done("Installed");
+  task.success(2)
 }
 
 export async function addElementPlus() {
-  const task = output.task("Installing...");
+  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(0)
 
   let execution = `cd ${dir} && npm install element-plus --save && npm install -D unplugin-vue-components unplugin-auto-import`;
   if (value.mode === 0) execution = "echo 1";
 
   let result: SpawnSyncReturns<Buffer> = subprocess.run(execution, {
     sync: true,
-    hideLog: true,
+    hideStdout: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
+  task.success(1)
 
   let code = "";
   code += "import ElementPlus from 'element-plus';\n";
@@ -261,15 +284,19 @@ export async function addElementPlus() {
       ),
   );
   prettierFormatted(dir);
-  task.done("Installed");
+  task.success(2)
 }
 
 export function makeComponent(name: string, option: any) {
-  const task = output.task("Generating...");
+  const task = new Task(["Read Configuration", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const fixName = String(toUpperFirst(name));
-  const format = fixName + (fixName.includes(".vue") ? "" : ".vue");
+  const compact = compactName(name, ".vue");
+
+  makeRecursiveFolder("components", dir, name);
+  task.success(0)
 
   let code = file
     .read(
@@ -282,16 +309,20 @@ export function makeComponent(name: string, option: any) {
     .replaceAll("$name", name);
 
   file.mkdir(paths.directory.components([], dir));
-  file.write(paths.directory.components([format], dir), code);
-  task.done("Generated");
+  file.write(paths.directory.components([compact.path], dir), code);
+  task.success(1)
 }
 
 export function makeRoute(name: string, url: string, option: any) {
-  const task = output.task("Generating...");
+  const task = new Task(["Read Configuration", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const fixName = String(toUpperFirst(name));
-  const format = fixName + ".vue";
+  const compact = compactName(name, ".vue");
+
+  makeRecursiveFolder("route", dir, name);
+  task.success(0)
 
   let code = file
     .read(
@@ -304,7 +335,7 @@ export function makeRoute(name: string, url: string, option: any) {
     .replaceAll("$name", name);
 
   file.mkdir(paths.directory.route([], dir));
-  file.write(paths.directory.route([format], dir), code);
+  file.write(paths.directory.route([compact.path], dir), code);
   file.append(
     paths.directory.route(["index.js"], dir),
     "",
@@ -313,23 +344,27 @@ export function makeRoute(name: string, url: string, option: any) {
       text
         .replace(
           "// dont remove [1]",
-          `// dont remove [1]\nimport ${name} from '@route/${name}.vue'`,
+          `// dont remove [1]\nimport ${compact.titleCaseWordOnly} from '@route/${compact.path}'`,
         )
         .replace(
           "// dont remove [2]",
-          `// dont remove [2]\n\t{ path: '${url}', name: '${name}', component: ${name} },`,
+          `// dont remove [2]\n\t{ path: '${url}', name: '${compact.titleCaseWordOnly}', component: ${compact.titleCaseWordOnly} },`,
         ),
   );
-  task.done("Generated");
+  task.success(1)
 }
 
 export function makeStore(name: string) {
-  const task = output.task("Generating...");
+  const task = new Task(["Read Configuration", "Generate Code"]);
+  task.start(0);
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+  const compact = compactName(name, ".js");
 
-  let fixName = String(toUpperFirst(name));
-  let format = fixName + ".js";
+  makeRecursiveFolder("store", dir, name);
+  task.success(0)
+  
   let code = file
     .read(paths.data.vue + "store.js")
     .toString()
@@ -341,11 +376,11 @@ export function makeStore(name: string) {
     null,
     (text: string) =>
       text
-        .replace("// store", `// store\n\t\t${name}: ${name}`)
-        .replace("export", `import ${name} from '${name}'\nexport`),
+        .replace("// store", `// store\n\t\t${compact.camelCase}: ${compact.camelCase},`)
+        .replace("export", `import ${compact.camelCase} from './${compact.pathNoFormat}'\nexport`),
   );
-  file.write(paths.directory.store([format], dir), code);
-  task.done("Done");
+  file.write(paths.directory.store([compact.path], dir), code);
+  task.success(1)
 }
 
 /**

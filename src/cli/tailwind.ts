@@ -4,6 +4,7 @@ import { program, output } from "../lib.js";
 import config from "../utils/config.js";
 import file, { readPackageJson } from "../utils/file.js";
 import subprocess from "../utils/subprocess.js";
+import Task from "../utils/task.js";
 
 const tailwind = program
   .command("tailwind")
@@ -26,9 +27,13 @@ tailwind
   .action(addFlowbite);
 
 export async function addTailwind(): Promise<any> {
-  const task = output.task("Install Package");
+  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
+  task.start(0)
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(0)
 
   let execution = `cd ${dir} && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p`;
   if (value.mode === 0) execution = "echo 1";
@@ -37,9 +42,9 @@ export async function addTailwind(): Promise<any> {
     sync: true,
     hideLog: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
 
-  task.done().next("Generate Code");
+  task.success(1)
 
   let isJsx = file.isExists("/src/main.jsx");
   let isJs = file.isExists("/src/main.js");
@@ -54,13 +59,17 @@ export async function addTailwind(): Promise<any> {
     paths.data.tailwind + "tailwind.config.cjs",
     dir + "/tailwind.config.cjs",
   );
-  task.done();
+  task.success(2);
 }
 
 export async function addDaisyUI(): Promise<any> {
-  const task = output.task("Install Package");
+  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
+  task.start(0)
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(0)
 
   let execution = `cd ${dir} && npm i -D daisyui@latest`;
   if (value.mode === 0) execution = "echo 1";
@@ -69,27 +78,32 @@ export async function addDaisyUI(): Promise<any> {
     sync: true,
     hideLog: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
+  task.success(1)
 
   let tailwindConfig = dir + "/tailwind.config.cjs";
-  if (!file.isExists(tailwindConfig)) return task.fail();
+  if (!file.isExists(tailwindConfig)) return output.error(tailwindConfig + ' not exists');
 
   let code = file
     .read(tailwindConfig)
     .toString()
     .replace("plugins: [", 'plugins: [ require("daisyui"), ');
   file.write(tailwindConfig, code);
-  task.done();
+  task.success(2);
 }
 
 export async function addHeadlessUI(): Promise<any> {
-  const task = output.task("Install Package");
+  const task = new Task(["Read Configuration", "Execution"]);
+  task.start(0)
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
 
   let execution = `cd ${dir}`;
   let packageJson = readPackageJson(dir);
-  if (!packageJson || !packageJson.dependencies) return task.fail();
+  if (!packageJson || !packageJson.dependencies) return task.fail(0);
+
+  task.success(0)
   if (packageJson.dependencies.react) {
     execution += " && npm install @headlessui/react";
   } else if (packageJson.dependencies.vue) {
@@ -101,14 +115,18 @@ export async function addHeadlessUI(): Promise<any> {
     sync: true,
     hideLog: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
-  task.done();
+  if (result.stderr.byteLength) return subprocess.error(result);
+  task.success(1);
 }
 
 export async function addFlowbite(): Promise<any> {
-  const task = output.task("Install Package");
+  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
+  task.start(0)
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
+
+  task.success(1)
 
   let execution = `cd ${dir} && npm install flowbite`;
   if (value.mode === 0) execution = "echo 1";
@@ -117,10 +135,12 @@ export async function addFlowbite(): Promise<any> {
     sync: true,
     hideLog: true,
   });
-  if (result.stderr.byteLength) return subprocess.error(task, result);
+  if (result.stderr.byteLength) return subprocess.error(result);
 
   let tailwindConfig = dir + "/tailwind.config.cjs";
-  if (!file.isExists(tailwindConfig)) return task.fail();
+  if (!file.isExists(tailwindConfig)) return output.error(tailwindConfig + ' not exists');
+
+  task.success(1)
 
   let code = file
     .read(tailwindConfig)
@@ -128,8 +148,8 @@ export async function addFlowbite(): Promise<any> {
     .replace("plugins: [", 'plugins: [ require("flowbite/plugin"), ')
     .replace("content: [", 'content: [ "./node_modules/flowbite/**/*.js", ');
   file.write(tailwindConfig, code);
-  task.done();
   output.log(
     'Don`t forget to add code on the <body> `<script src="../path/to/flowbite/dist/flowbite.min.js"></script>`',
   );
+  task.success(2);
 }

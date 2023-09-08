@@ -37,8 +37,8 @@ sys app:active myapp # current project
 sys app:root C:/User/Ferdi/Project # namespace
 sys app:mode 1 # development/production
 sys app:update # upgrading to latest version
-sys package:off name # disable package
-sys package:on name # enable package
-sys package:install name # install package
-sys package:uninstall name # uninstall package
+sys off name # disable package
+sys on name # enable package
+sys install name # install package
+sys uninstall name # uninstall package
 ```

@@ -37,12 +37,18 @@ This section will help you use tools-web from scratch.
   ```
 - **Step 4:** Start command
   ```bash
-  node index
+  npm run start
   ```
 - **Step 5:** Show help command
   ```bash
   --help
   ```
+
+#### With NPX
+
+```bash
+npx twb
+```
 
 ### Before you use
 
@@ -53,14 +59,17 @@ This section will help you use tools-web from scratch.
 
 ## Developer
 
-Testing the command with bash.
+If you want run a testing, do this:
 
 ```bash
-sh test.sh all
-sh test.sh system
-sh test.sh react
-sh test.sh vue
-sh test.sh express
+npm run test:express
+npm run test:firebase
+npm run test:react
+npm run test:system
+npm run test:tools
+npm run test:tailwind
+npm run test:vite
+npm run test:vue
 ```
 
 ## Contributing

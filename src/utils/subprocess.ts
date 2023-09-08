@@ -63,9 +63,8 @@ class SubProcess {
 	detachController(index: number) {
 		this.controller = this.controller.filter((_, i: number) => i !== index);
 	}
-	error(task: any, spawnResult: SpawnSyncReturns<Buffer>) {
-		task.fail();
-		return output.error("Error: " + spawnResult.stderr.toString());
+	error(spawnResult: SpawnSyncReturns<Buffer>) {
+		return output.error(spawnResult.stderr.toString());
 	}
 }
 

@@ -27,22 +27,22 @@ sys
 
 // package
 sys
-  .command("package:off")
+  .command("off")
   .description("Disable the package")
   .argument("<name>", "package name")
   .action(packageOff);
 sys
-  .command("package:on")
+  .command("on")
   .description("Enable the package")
   .argument("<name>", "package name")
   .action(packageOn);
 sys
-  .command("package:install")
+  .command("install")
   .description("Install the plugin")
   .argument("<name>", "package name")
   .action(packageInstall);
 sys
-  .command("package:uninstall")
+  .command("uninstall")
   .description("Uninstall the plugin")
   .argument("<name>", "package name")
   .action(packageUninstall);

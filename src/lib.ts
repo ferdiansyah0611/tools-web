@@ -1,7 +1,7 @@
 import chalk from 'chalk';
-import ora from 'ora';
 import { program, Option } from 'commander';
 import * as readline from 'node:readline';
+import logSymbols from 'log-symbols';
 
 // input
 interface InputType {
@@ -22,7 +22,7 @@ class Input implements InputType {
 	async ask(message: string) {
 		return await new Promise((resolve, reject) => {
 			if(!this.instance) return reject("input not initialized");
-			this.instance.question(chalk.magenta("> ") + message, resolve)
+			this.instance.question(chalk.whiteBright("> ") + message, resolve)
 		})
 	}
 }
@@ -35,28 +35,16 @@ const output = {
 		process.stdout.write(chalk.cyan("> ") + message + "\r");
 	},
 	log: function(...message: any[]) {
-		console.log(chalk.cyan(">"), ...message)
+		console.log(logSymbols.info, ...message)
 	},
 	error: function(...message: any[]) {
-		output.log(chalk.redBright(...message))
+		console.log(logSymbols.error, chalk.redBright(...message))
 	},
-	task: function(message: string) {
-		let task = ora(message).start();
-		let result = {
-			next(text: string) {
-				task.text = text
-				task.start()
-			},
-			done(text?: string) {
-				task.succeed(text)
-				return this;
-			},
-			fail(text?: string) {
-				task.fail(text)
-				return this;
-			}
-		}
-		return result;
+	warn: function(...message: any[]) {
+		console.log(logSymbols.warning, ...message)
+	},
+	success: function(...message: any[]) {
+		console.log(logSymbols.success, ...message)
 	}
 }
 

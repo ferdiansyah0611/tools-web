@@ -4,7 +4,32 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename).replace("\\src", "");
 
-export const paths = {
+type PathType = {
+	root: string;
+	data: {
+		express: string;
+		firebase: string;
+		react: string;
+		tailwind: string;
+		test: string;
+		vite: string;
+		vue: string;
+	};
+	directory: {
+		[key: string]: (next: string[], appFolder: string) => string;
+		component: (next: string[], appFolder: string) => string;
+		components: (next: string[], appFolder: string) => string;
+		route: (next: string[], appFolder: string) => string;
+		store: (next: string[], appFolder: string) => string;
+		style: (next: string[], appFolder: string) => string;
+		service: (next: string[], appFolder: string) => string;
+		model: (next: string[], appFolder: string) => string;
+		api: (next: string[], appFolder: string) => string;
+		src: (next: string[], appFolder: string) => string;
+	}
+}
+
+export const paths: PathType = {
 	root: __dirname,
 	data: {
 		express: join(__dirname, "../", "/data/express/"),

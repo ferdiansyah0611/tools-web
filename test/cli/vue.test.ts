@@ -27,10 +27,7 @@ test("vue cli test", async (t) => {
 
   await t.test("do add quasar", async (t) => {
     await addQuasar();
-    assert.strictEqual(
-      file.isExists(paths.directory.src(["quasar-variables.sass"], dir)),
-      true,
-    );
+    assert.strictEqual(file.isExists(paths.directory.src(["quasar-variables.sass"], dir)), true);
   });
 
   await t.test("do add vuetify", async (t) => {
@@ -46,20 +43,50 @@ test("vue cli test", async (t) => {
     await addElementPlus();
   });
 
-  await t.test("do make component", (t) => {
-    makeComponent("sidebar", {});
-    makeComponent("navbar", {});
-    makeComponent("sidebar-3", { hook: false });
+  await t.test("do make component", async (t) => {
+    const samples = {
+      data: ["layout/navbar", "layout/sidebar", "button", "card", "list"],
+    };
+
+    for (let sample of samples.data) makeComponent(sample, { hook: Math.floor(Math.random() * 1) ? true : false });
+    for (let sample of samples.data) {
+      sample += ".vue";
+      await t.test(`exists ${sample}`, () =>
+        assert.strictEqual(file.isExists(paths.directory.components([sample], dir)), true),
+      );
+    }
   });
 
-  await t.test("do make store", (t) => {
-    makeStore("user");
-    makeStore("people");
+  await t.test("do make store", async (t) => {
+    const samples = {
+      data: ["api/user", "api/repository", "api/oauth", "template", "information", "profile", "auth"],
+    };
+    for (let sample of samples.data) makeStore(sample);
+    for (let sample of samples.data) {
+      sample += ".js";
+      await t.test(`exists ${sample}`, () =>
+        assert.strictEqual(file.isExists(paths.directory.store([sample], dir)), true),
+      );
+    }
   });
 
-  await t.test("do make route", (t) => {
-    makeRoute("notfound", "/404", {});
-    makeRoute("home", "/home", {});
-    makeRoute("welcome", "/welcome", { hook: false });
+  await t.test("do make route", async (t) => {
+    const samples = {
+      data: [
+        ["world", "/world"],
+        ["welcome", "/welcome"],
+        ["profile/show", "/profile/show"],
+        ["profile/edit", "/profile/edit"],
+        ["auth/signin", "/auth/signin"],
+      ],
+    };
+    for (let sample of samples.data)
+      makeRoute(sample[0], sample[1], { hook: Math.floor(Math.random() * 1) ? true : false });
+    for (let sample of samples.data) {
+      sample[0] += ".vue";
+      await t.test(`exists ${sample[0]}`, () =>
+        assert.strictEqual(file.isExists(paths.directory.route([sample[0]], dir)), true),
+      );
+    }
   });
 });
