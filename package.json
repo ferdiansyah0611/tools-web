@@ -1,9 +1,10 @@
 {
   "name": "tools-web",
   "version": "1.1.58",
-  "description": "tools-web is a tool to speed up developing a website using the cli. Such as making new project, components, state management, routes, model, and others.",
+  "description": "tools-web is a tool to speed up developing a website using the cli.",
   "main": "main",
   "scripts": {
+    "postinstall": "node setup.js",
     "start": "node ./dist/src/multi-command.js",
     "test:express": "node ./dist/test/cli/express.test.js",
     "test:firebase": "node ./dist/test/cli/firebase.test.js",

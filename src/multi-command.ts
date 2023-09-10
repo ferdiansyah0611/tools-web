@@ -1,7 +1,6 @@
-import { Input, output, readline } from "./lib.js"
-import { readdirSync, existsSync } from "fs";
-import { spawn, ChildProcessWithoutNullStreams, spawnSync } from "child_process";
-import { paths } from "./constraint.js";
+import { Input, chalk, output } from "./lib.js"
+import { readdirSync } from "fs";
+import { spawn, ChildProcessWithoutNullStreams } from "child_process";
 import config from "./utils/config.js";
 
 type StateType = {
@@ -25,7 +24,9 @@ function main() {
 	action();
 
 	async function action(argv: string|any = ""): Promise<any> {
-		argv = argv || await input.ask("")
+		let value = config.read();
+
+		argv = argv || await input.ask("", chalk.green(`/${value.app_active} `))
 
 		let split: string[] = argv.split(" ")
 		let command: string = `node dist/main.js${argv ? ' ' + argv: ''}`
@@ -46,7 +47,7 @@ function main() {
 		else if(!cli.find(v => v === split[0]) && !["-v", "--version", "-h", "--help"].find(v => v === argv)) command = argv;
 
 		let result: ChildProcessWithoutNullStreams = spawn(command, { shell: true })
-		result.stdout.pipe(process.stdout)
+		result.stdout.on("data", (std: Buffer) => stdOut(std, command.includes("help")));
 		result.stderr.pipe(process.stdout)
 		result.on("close", () => {
 			return action()
@@ -54,17 +55,30 @@ function main() {
 	}
 }
 
+function stdOut(std: Buffer, isHelp: boolean) {
+	let value = std.toString()
+	let timer = value.match(/\[.+\]/);
+	let oneQuote = value.match(/'.+'/);
+	if(timer) {
+		value = value.replace(timer[0], chalk.magentaBright(timer[0]));
+	}
+	if(oneQuote) {
+		value = value.replace(oneQuote[0], chalk.greenBright(oneQuote[0]));
+	}
+	if(value.length > process.stdout.columns && !isHelp) {
+		value = value.slice(0, process.stdout.columns) + "...\n"
+	}
+	process.stdout.write(value);
+}
+
 function welcome() {
-	checkBuild();
-
 	let conf = config.read();
-
 	let message = `
 	Welcome to Tools Web
-	Namespace\t: ${conf.app_path}
-	App\t\t: ${conf.app_active}
-	Library\t\t: ${!conf.library.length ? "None": conf.library.filter(v => v.active === true).map(v => v.name).join(", ")}
-	Mode\t\t: ${conf.mode === 1 ? "Production": "Development"}
+	${chalk.magentaBright('Namespace')}\t: ${conf.app_path}
+	${chalk.magentaBright('App')}\t\t: ${conf.app_active}
+	${chalk.magentaBright('Library')}\t\t: ${!conf.library.length ? "None": conf.library.filter(v => v.active === true).map(v => v.name).join(", ")}
+	${chalk.magentaBright('Mode')}\t\t: ${conf.mode === 1 ? "Production": "Development"}
 	`
 	console.log(message)
 }
@@ -73,37 +87,4 @@ function backgroundProcess(argv: string|any) {
 	const abort = new AbortController();
 	spawn(argv.replace(".bg ", ""), { detached: true, shell: true, signal: abort.signal }).unref();
 	state.process.push(abort);
-}
-
-function checkBuild() {
-	let dot =  1;
-	let text = "Downloading";
-	try {
-		if(existsSync("./dist")) return;
-
-		let interval = setInterval(() => {
-			output.write(text + ".".repeat(dot))
-			dot += 1;
-			if (dot === 4) dot = 1;
-		}, 500);
-
-		let tsc = spawnSync("tsc --version");
-		if(tsc.stderr) {
-			spawnSync("npm i -g typescript && npm i -g prettier");
-		}
-		text = "Building";
-		spawnSync("cd " + paths.root + " && tsc");
-		clearInterval(interval);
-		config.update({
-			app_path: paths.root + "\\app",
-			app_active: "myapp",
-			library: [],
-			mode: 1
-		});
-		readline.clearLine(process.stdout, 0);
-		readline.cursorTo(process.stdout, 0)
-		output.write("Successfuly");
-	} catch(err) {
-		process.exit(1);
-	}
 }

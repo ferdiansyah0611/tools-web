@@ -51,19 +51,16 @@ export function changeAppActive(path: string) {
   let value = config.read();
   value.app_active = path;
   config.update(value);
-  output.log("config updated");
 }
 export function changeAppRoot(path: string) {
   let value = config.read();
   value.app_path = path;
   config.update(value);
-  output.log("config updated");
 }
 export function changeAppMode(mode: string) {
   let value = config.read();
   value.mode = parseInt(mode);
   config.update(value);
-  output.log("config updated");
 }
 export function appUpdate() {
   let value = config.read();
@@ -71,7 +68,6 @@ export function appUpdate() {
 
   subprocess.run(execute, { sync: true, hideLog: true });
   config.update(value);
-  output.log("Tools Web has been updated, please restart now!");
 }
 export function packageOff(name: string) {
   let value = config.read();
@@ -82,7 +78,6 @@ export function packageOff(name: string) {
     return lib;
   });
   config.update(value);
-  output.log("package has been disabled");
 }
 export function packageOn(name: string) {
   let value = config.read();
@@ -93,7 +88,6 @@ export function packageOn(name: string) {
     return lib;
   });
   config.update(value);
-  output.log("package has been enabled");
 }
 export function packageInstall(name: string) {
   let value = config.read();
@@ -107,7 +101,6 @@ export function packageInstall(name: string) {
     path: name,
   });
   config.update(value);
-  output.log(name + " has been installed");
 }
 export function packageUninstall(name: string) {
   if (["express", "firebase", "react", "vite", "vue"].find((v) => v === name))
@@ -119,5 +112,4 @@ export function packageUninstall(name: string) {
   subprocess.run(execute, { sync: true, hideLog: true });
   value.library = value.library.filter((lib) => lib.name !== name);
   config.update(value);
-  output.log(name + " has been removed");
 }

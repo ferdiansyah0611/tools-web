@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { program, Option } from 'commander';
 import * as readline from 'node:readline';
-import logSymbols from 'log-symbols';
 
 // input
 interface InputType {
@@ -19,10 +18,10 @@ class Input implements InputType {
 	end() {
 		this.instance?.close();
 	}
-	async ask(message: string) {
+	async ask(message: string, start?: string) {
 		return await new Promise((resolve, reject) => {
 			if(!this.instance) return reject("input not initialized");
-			this.instance.question(chalk.whiteBright("> ") + message, resolve)
+			this.instance.question(start + chalk.blue("$ ") + message, resolve)
 		})
 	}
 }
@@ -35,17 +34,22 @@ const output = {
 		process.stdout.write(chalk.cyan("> ") + message + "\r");
 	},
 	log: function(...message: any[]) {
-		console.log(logSymbols.info, ...message)
+		console.log(chalk.magentaBright(getTimeLog()), ...message)
 	},
 	error: function(...message: any[]) {
-		console.log(logSymbols.error, chalk.redBright(...message))
+		console.log(chalk.magentaBright(getTimeLog()), chalk.redBright(...message))
 	},
 	warn: function(...message: any[]) {
-		console.log(logSymbols.warning, ...message)
+		console.log(chalk.magentaBright(getTimeLog()), ...message)
 	},
 	success: function(...message: any[]) {
-		console.log(logSymbols.success, ...message)
+		console.log(chalk.magentaBright(getTimeLog()), ...message)
 	}
+}
+
+function getTimeLog() {
+	let date = new Date();
+	return (`[${date.getMinutes()}:${date.getSeconds()}]\t`)
 }
 
 export { program, Option, chalk, output, Input, readline };

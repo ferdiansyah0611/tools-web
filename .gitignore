@@ -2,6 +2,6 @@
 /.doc/node_modules
 /.doc/docs/.vitepress/dist
 /*.test.*
-/app
+/app/*/
 /dist
 /.doc/docs/.vitepress/cache

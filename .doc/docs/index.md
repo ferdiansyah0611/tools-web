@@ -28,6 +28,10 @@ features:
     icon: 👨‍💻
     title: Generator
     details: Generate any code like component, routing, and more
+  - 
+    icon: ⏳
+    title: Save Time
+    details: Save your time upto 10% to make project
 ---
 
 <script setup>

@@ -6,8 +6,11 @@ title: Getting Started
 
 This section will help you use tools-web from scratch.
 
-## Install with NPM
+## Installation
 
+There are three options, you can choose one of the installation methods:
+
+::: details Install with NPM
 - **Step 1:** Install tools-web on global
   ```bash
   npm install tools-web -g
@@ -20,9 +23,9 @@ This section will help you use tools-web from scratch.
   ```bash
   --help
   ```
+:::
 
-## Install with Git
-
+::: details Install with Git
 - **Step 1:** Cloning tools-web
   ```bash
   git clone https://github.com/ferdiansyah0611/tools-web.git
@@ -43,15 +46,22 @@ This section will help you use tools-web from scratch.
   ```bash
   --help
   ```
+:::
 
-## With NPX
-
+::: details With NPX
 ```bash
 npx twb
 ```
+:::
 
-## Before you use
-- You have to run the command before your project directory.
-Example your project in C:/Users/ferdi/project/myapp and you run 'cd C:/Users/ferdi/project'. Change default app 'app myapp'
-- Run your Command Line Interface with administration to prevent error.
-- Make sure your installation project is made by web-tools as well to prevent errors from occurring.
+## Important!
+
+Please read this before to use it:
+
+**Namespace and Active Project**
+
+You must change namespace `sys app:root C:/user/name/app` and active project `sys app:active myapp`
+
+**Administrator**
+
+Run your Command Line Interface with administration to prevent error.

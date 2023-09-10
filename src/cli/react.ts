@@ -3,10 +3,9 @@ import { paths } from "../constraint.js";
 import { program, Option } from "../lib.js";
 import { generate } from "../utils/style.js";
 import { compactName } from "../utils/text.js";
-import subprocess from "../utils/subprocess.js";
+import subprocess, { prettier } from "../utils/subprocess.js";
 import config from "../utils/config.js";
 import file, { isTypescript, makeRecursiveFolder } from "../utils/file.js";
-import Task from "../utils/task.js";
 
 const configure = {
   list: {
@@ -14,37 +13,63 @@ const configure = {
   },
 };
 const react = program.command("react").description("List react.js cli");
-react.command("add:mui").description("Project integration with Material UI").action(addMUI);
-react.command("add:antd").description("Project integration with Ant Design").action(addAntd);
-react.command("add:styled").description("Project integration with Styled Components").action(addStyled);
+react
+  .command("add:mui")
+  .description("Project integration with Material UI")
+  .action(addMUI);
+react
+  .command("add:antd")
+  .description("Project integration with Ant Design")
+  .action(addAntd);
+react
+  .command("add:styled")
+  .description("Project integration with Styled Components")
+  .action(addStyled);
+react
+  .command("add:recoil")
+  .description("Project integration with Recoil")
+  .action(addRecoil);
+react
+  .command("add:toolkit")
+  .description("Project integration with Redux-Toolkit")
+  .action(addReduxToolkit);
+react
+  .command("add:route")
+  .description("Project integration with React Router")
+  .action(addReactRouter);
 react
   .command("make:component")
   .description("Generate component")
   .argument("<name>", "component name")
-  .addOption(new Option("--style <name>", "style name").choices(configure.list.style))
+  .addOption(
+    new Option("--style <name>", "style name").choices(configure.list.style),
+  )
   .action(makeComponent);
 react
   .command("make:route")
   .description("Generate route pages")
   .argument("<name>", "component name")
   .argument("<url>", "path url")
-  .addOption(new Option("--style <name>", "style name").choices(configure.list.style))
+  .addOption(
+    new Option("--style <name>", "style name").choices(configure.list.style),
+  )
   .action(makeRoute);
 react
   .command("make:toolkit")
   .description("Generate store redux toolkit")
   .argument("<name>", "store name")
-  .addOption(new Option("--type <string>", "type store name").choices(["async", "reducer"]))
+  .addOption(
+    new Option("--type <string>", "type store name").choices([
+      "async",
+      "reducer",
+    ]),
+  )
   .addOption(new Option("--url <string>", "URL API [async]"))
-  .action(makeStore);
+  .action(makeReduxToolkit);
 
 export async function addMUI() {
-  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  task.success(0);
 
   let execution = `cd ${dir} && npm install @mui/material @emotion/react @emotion/styled @mui/icons-material --save`;
   if (value.mode === 0) execution = "echo 1";
@@ -53,19 +78,18 @@ export async function addMUI() {
     hideStdout: true,
   });
   if (result.stderr.byteLength) return subprocess.error(result);
-  task.success(1);
-  file.copy(paths.data.react + "store/theme.js", paths.directory.store(["theme.js"], dir));
-  file.copy(paths.data.react + "mui.jsx", paths.directory.src(["mui.jsx"], dir));
-  file.copy(paths.data.react + "service/color.js", paths.directory.service(["color.js"], dir));
-  task.success(2);
+  file.copy(
+    paths.data.react + "@mui/mui.jsx",
+    paths.directory.src(["mui.jsx"], dir),
+  );
+  file.copy(
+    paths.data.react + "@mui/color.js",
+    paths.directory.service(["color.js"], dir),
+  );
 }
 export async function addAntd() {
-  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  task.success(0);
 
   let execution = `cd ${dir} && npm install antd --save`;
   if (value.mode === 0) execution = "echo 1";
@@ -75,33 +99,106 @@ export async function addAntd() {
     hideStdout: true,
   });
   if (result.stderr.byteLength) return subprocess.error(result);
-  task.success(1);
-  file.append(paths.directory.src(["index.css"], dir), "@import '../node_modules/antd/dist/antd.css';\n");
-  task.success(2);
+  file.append(
+    paths.directory.src(["index.css"], dir),
+    "@import '../node_modules/antd/dist/antd.css';\n",
+  );
 }
-export function addStyled() {
-  const task = new Task(["Read Configuration", "Execution"]);
-  task.start(0);
-
+export async function addStyled() {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const execute = `cd ${dir} && npm install styled-components`;
 
-  task.success(0);
-  subprocess.run(execute, { sync: true, hideStdout: true });
-  task.success(1);
+  let execution = `cd ${dir} && npm install styled-components`;
+  if (value.mode === 0) execution = "echo 1";
+
+  subprocess.run(execution, { sync: true, hideStdout: true });
+}
+export async function addRecoil() {
+  const value = config.read();
+  const dir = config.getFullPathApp(value);
+
+  let execution = `cd ${dir} && npm install recoil`;
+  if (value.mode === 0) execution = "echo 1";
+
+  subprocess.run(execution, { sync: true, hideStdout: true });
+
+  file.append(paths.directory.src(["main.jsx"], dir), "", "", (text: string) =>
+    text
+      .replace('"react";', '"react";\nimport { RecoilRoot } from "recoil";')
+      .replace("<React.StrictMode>", "<React.StrictMode>\n\t\t<RecoilRoot>")
+      .replace("</React.StrictMode>", "\t</RecoilRoot>\n\t</React.StrictMode>"),
+  );
+  prettier(dir, "src/main.jsx");
+}
+export async function addReduxToolkit() {
+  const value = config.read();
+  const dir = config.getFullPathApp(value);
+
+  let execution = `cd ${dir} && npm install @reduxjs/toolkit react-redux`;
+  if (value.mode === 0) execution = "echo 1";
+
+  subprocess.run(execution, { sync: true, hideStdout: true });
+
+  file.copy(
+    paths.data.react + "@redux-toolkit/index.js",
+    paths.directory.store(["index.js"], dir),
+  );
+  file.copy(
+    paths.data.react + "@redux-toolkit/app.js",
+    paths.directory.store(["app.js"], dir),
+  );
+  file.append(paths.directory.src(["main.jsx"], dir), "", "", (text: string) =>
+    text
+      .replace(
+        '"react";',
+        '"react";\nimport { Provider } from "react-redux";\nimport { createRoot } from "react-dom/client";\nimport store from "./store";\n',
+      )
+      .replace(
+        "<React.StrictMode>",
+        "<React.StrictMode>\n\t\t<Provider store={store}>",
+      )
+      .replace("</React.StrictMode>", "\t</Provider>\n\t</React.StrictMode>"),
+  );
+
+  prettier(dir, "src/main.jsx");
+}
+export async function addReactRouter() {
+  const value = config.read();
+  const dir = config.getFullPathApp(value);
+
+  let execution = `cd ${dir} && npm install react-router-dom`;
+  if (value.mode === 0) execution = "echo 1";
+
+  subprocess.run(execution, { sync: true, hideStdout: true });
+
+  file.copy(
+    paths.data.react + "@react-router/App.jsx",
+    paths.directory.src(["App.jsx"], dir),
+  );
+  file.copy(
+    paths.data.react + "@react-router/index.jsx",
+    paths.directory.route(["index.jsx"], dir),
+  );
+  file.copy(
+    paths.data.react + "@react-router/Home.jsx",
+    paths.directory.component(["Home.jsx"], dir),
+  );
+  file.copy(
+    paths.data.react + "@react-router/About.jsx",
+    paths.directory.component(["About.jsx"], dir),
+  );
+  file.copy(
+    paths.data.react + "@react-router/template.jsx",
+    paths.directory.component(["template.jsx"], dir),
+  );
 }
 export function makeComponent(name: string, option: any) {
-  const task = new Task(["Read Configuration", "Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, isTypescript(dir) ? ".tsx": ".jsx");
+  const compact = compactName(name, isTypescript(dir) ? ".tsx" : ".jsx");
 
   makeRecursiveFolder("component", dir, name);
   file.mkdir(paths.directory.component([], dir));
-  task.success(0);
 
   let code = file
     .read(paths.data.react + "component.jsx")
@@ -116,22 +213,20 @@ export function makeComponent(name: string, option: any) {
     });
     if (style) code = `import styled from '@style/component/${style}'\n` + code;
   }
-  file.write(paths.directory.component([compact.pathTitleCaseNoSeparate], dir), code);
-  task.success(1);
+  file.write(
+    paths.directory.component([compact.pathTitleCaseNoSeparate], dir),
+    code,
+  );
 }
 export function makeRoute(name: string, url: string, option: any) {
-  const task = new Task(["Read Configuration", "Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, isTypescript(dir) ? ".tsx": ".jsx");
+  const compact = compactName(name, isTypescript(dir) ? ".tsx" : ".jsx");
 
   makeRecursiveFolder("route", dir, name);
-  task.success(0);
 
   let code = file
-    .read(paths.data.react + "route.jsx")
+    .read(paths.data.react + "@react-router/route.jsx")
     .toString()
     .replaceAll("$name", compact.titleCaseWordOnly);
   if (option.style) {
@@ -145,7 +240,10 @@ export function makeRoute(name: string, url: string, option: any) {
   }
 
   file.mkdir(paths.directory.route([], dir));
-  file.write(paths.directory.route([compact.pathTitleCaseNoSeparate], dir), code);
+  file.write(
+    paths.directory.route([compact.pathTitleCaseNoSeparate], dir),
+    code,
+  );
 
   let virtual = `import ${compact.titleCaseWordOnly} from '@route/${compact.folder}/${compact.titleCaseWordOnly}'`,
     routeIndex = paths.directory.route(["index.jsx"], dir),
@@ -153,36 +251,36 @@ export function makeRoute(name: string, url: string, option: any) {
   if (check) {
     file.append(routeIndex, "", null, (text: string) =>
       text
-        .replace("// dont remove this comment 1", `// dont remove this comment 1\n${virtual}`)
+        .replace(
+          "// dont remove this comment 1",
+          `// dont remove this comment 1\n${virtual}`,
+        )
         .replace(
           "{/*dont remove this comment 2*/}",
           `{/*dont remove this comment 2*/}\n\t\t\t\t\t<Route path="${url}" element={<${compact.titleCaseWordOnly}/>}/>`,
         ),
     );
   }
-  task.success(1);
 }
-export function makeStore(name: string, option: any) {
-  const task = new Task(["Read Configuration", "Generate Code"]);
-  task.start(0);
-
+export function makeReduxToolkit(name: string, option: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
 
   makeRecursiveFolder("route", dir, name);
-  task.success(0);
 
   let code = "";
   if (option.type === "async") {
     const url: any = option.url || "http://localhost:8000/api/user";
     code = file
-      .read(paths.data.react + "store-crud.js")
+      .read(paths.data.react + "@redux-toolkit/store-crud.js")
       .toString()
       .replaceAll("$name", compact.camelCase)
       .replaceAll("$url", url);
   } else if (option.type === "reducer") {
-    const text = file.read(paths.data.react + "store-crud-reducer.js");
+    const text = file.read(
+      paths.data.react + "@redux-toolkit/store-crud-reducer.js",
+    );
     code = text
       .toString()
       .replaceAll("$name", compact.camelCase)
@@ -192,7 +290,7 @@ export function makeStore(name: string, option: any) {
         `// import {handle${compact.titleCaseWordOnly}, reset${compact.titleCaseWordOnly}, create${compact.titleCaseWordOnly}, findOne${compact.titleCaseWordOnly}, update${compact.titleCaseWordOnly}, remove${compact.titleCaseWordOnly}} from @store/${compact.pathNoFormat}`,
       );
   } else {
-    const text = file.read(paths.data.react + "store.js");
+    const text = file.read(paths.data.react + "@redux-toolkit/store.js");
     code = text.toString().replaceAll("$name", compact.camelCase);
   }
 
@@ -203,11 +301,16 @@ export function makeStore(name: string, option: any) {
   if (check) {
     file.append(storeIndex, "", null, (text: string) =>
       text
-        .replace("// dont remove this comment 1", `// dont remove this comment 1\n${virtual}`)
-        .replace("reducer: {", `reducer: {\n\t\t${compact.camelCase}: ${compact.camelCase}Reducer,`),
+        .replace(
+          "// dont remove this comment 1",
+          `// dont remove this comment 1\n${virtual}`,
+        )
+        .replace(
+          "reducer: {",
+          `reducer: {\n\t\t${compact.camelCase}: ${compact.camelCase}Reducer,`,
+        ),
     );
   }
   file.mkdir(paths.directory.store([compact.folder], dir));
   file.write(paths.directory.store([compact.path], dir), code);
-  task.success(1);
 }

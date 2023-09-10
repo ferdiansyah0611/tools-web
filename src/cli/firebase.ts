@@ -2,7 +2,6 @@ import { paths } from "../constraint.js";
 import { program } from "../lib.js";
 import config from "../utils/config.js";
 import file from "../utils/file.js";
-import Task from "../utils/task.js";
 import { compactName } from "../utils/text.js";
 
 const firebase = program.command("firebase").description("List firebase cli");
@@ -25,9 +24,6 @@ firebase
   .action(gcs);
 
 export function init() {
-  const task = new Task(["Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
   file.mkdir(dir + "/src/service");
@@ -36,12 +32,8 @@ export function init() {
     paths.data.firebase + "validate.js",
     dir + "/src/service/validate-auth.js",
   );
-  task.success(0);
 }
 export function makeModel(name: string) {
-  const task = new Task(["Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
@@ -52,27 +44,21 @@ export function makeModel(name: string) {
 
   file.mkdir(paths.directory.model([compact.folder], dir));
   file.write(paths.directory.model([compact.path], dir), code);
-  task.success(0);
 }
 export function storage() {
-  const task = new Task(["Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const code = file.read(paths.data.firebase + "storage.js").toString();
 
   file.mkdir(dir + "/src/service");
   file.write(`${dir}/src/service/firebase-storage.js`, code);
-  task.success(0);
 }
 export function gcs() {
-  const task = new Task(["Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
   file.mkdir(dir + "/src/service");
-  file.copy(paths.data.firebase + "storage-be.js", `${dir}/src/service/storage.js`);
-  task.success(0);
+  file.copy(
+    paths.data.firebase + "storage-be.js",
+    `${dir}/src/service/storage.js`,
+  );
 }

@@ -7,12 +7,33 @@ const __dirname = dirname(__filename).replace("\\src", "");
 type PathType = {
 	root: string;
 	data: {
+		/**
+		 * /data/express/
+		 */
 		express: string;
+		/**
+		 * /data/firebase/
+		 */
 		firebase: string;
+		/**
+		 * /data/react/
+		 */
 		react: string;
+		/**
+		 * /data/tailwind/
+		 */
 		tailwind: string;
+		/**
+		 * /data/test/
+		 */
 		test: string;
+		/**
+		 * /data/vite/
+		 */
 		vite: string;
+		/**
+		 * /data/vue/
+		 */
 		vue: string;
 	};
 	directory: {

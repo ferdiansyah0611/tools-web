@@ -2,7 +2,7 @@ import assert from "node:assert";
 import test from "node:test";
 import config from "../../src/utils/config.js";
 import file from "../../src/utils/file.js";
-import { addMUI, addAntd, makeComponent, makeRoute, makeStore } from "../../src/cli/react.js";
+import { addMUI, addAntd, makeComponent, makeRoute, makeReduxToolkit, addRecoil, addReduxToolkit, addReactRouter } from "../../src/cli/react.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { paths } from "../../src/constraint.js";
 
@@ -20,13 +20,24 @@ test("react cli test", async (t) => {
 
   await t.test("do add mui", async (t) => {
     await addMUI();
-    assert.strictEqual(file.isExists(paths.directory.store(["theme.js"], dir)), true);
     assert.strictEqual(file.isExists(paths.directory.src(["mui.jsx"], dir)), true);
     assert.strictEqual(file.isExists(paths.directory.service(["color.js"], dir)), true);
   });
 
   await t.test("do add antd", async (t) => {
     await addAntd();
+  });
+
+  await t.test("do add recoil", async (t) => {
+    await addRecoil();
+  });
+
+  await t.test("do add redux-toolkit", async (t) => {
+    await addReduxToolkit();
+  });
+
+  await t.test("do add react-router", async (t) => {
+    await addReactRouter();
   });
 
   await t.test("do make component", async (t) => {
@@ -60,7 +71,7 @@ test("react cli test", async (t) => {
     }
   });
 
-  await t.test("do make store", async (t) => {
+  await t.test("do make redux-toolkit", async (t) => {
     const samples = {
       data: [
         ["api/user", "async"],
@@ -74,8 +85,8 @@ test("react cli test", async (t) => {
     };
 
     for (let sample of samples.data) {
-      if (sample[1]) makeStore(sample[0], { type: sample[1] });
-      else makeStore(sample[0], {});
+      if (sample[1]) makeReduxToolkit(sample[0], { type: sample[1] });
+      else makeReduxToolkit(sample[0], {});
     }
     for (let sample of samples.data) {
       sample[0] += ".js";

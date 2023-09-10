@@ -5,7 +5,6 @@ import subprocess from "../utils/subprocess.js";
 import file from "../utils/file.js";
 import { toTitleCase, compactName } from "../utils/text.js";
 import { SpawnSyncReturns } from "node:child_process";
-import Task from "../utils/task.js";
 
 const configure = {
   list: {
@@ -16,9 +15,17 @@ const configure = {
 const express = program.command("express").description("List express.js cli");
 express
   .command("make:project")
-  .description("Create new project include middleware authentication")
-  .addOption(new Option("--template <name>", "template engine").choices(configure.list.template).makeOptionMandatory())
-  .addOption(new Option("--db <name>", "database engine").choices(configure.list.db).makeOptionMandatory())
+  .description("Create new project")
+  .addOption(
+    new Option("--template <name>", "template engine")
+      .choices(configure.list.template)
+      .makeOptionMandatory(),
+  )
+  .addOption(
+    new Option("--db <name>", "database engine")
+      .choices(configure.list.db)
+      .makeOptionMandatory(),
+  )
   .action(makeProject);
 
 express
@@ -35,7 +42,11 @@ express
   .command("make:model")
   .description("Generate model")
   .argument("<name>", "model name")
-  .addOption(new Option("--db <name>", "database engine").choices(configure.list.db).makeOptionMandatory())
+  .addOption(
+    new Option("--db <name>", "database engine")
+      .choices(configure.list.db)
+      .makeOptionMandatory(),
+  )
   .option("--col <name>", "column name (2 min)", ",")
   .action(makeModel);
 
@@ -43,14 +54,15 @@ express
   .command("make:api")
   .description("Generate api")
   .argument("<name>", "api name")
-  .addOption(new Option("--db <name>", "database engine").choices(configure.list.db).makeOptionMandatory())
+  .addOption(
+    new Option("--db <name>", "database engine")
+      .choices(configure.list.db)
+      .makeOptionMandatory(),
+  )
   .option("--col <name>", "column name (2 min)", ",")
   .action(makeAPI);
 
 export async function makeProject(option: any) {
-  const task = new Task(["Read Configuration", "Execution", "Generate Code"]);
-  task.start(0);
-  
   const value = config.read();
   const dir = config.getFullPathApp(value);
 
@@ -63,7 +75,6 @@ export async function makeProject(option: any) {
     execution += ` && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias dotenv --save`;
     execution += ` && npm i mocha supertest -D`;
   }
-  task.success(0);
   let result: SpawnSyncReturns<Buffer> = await subprocess.run(execution, {
     sync: true,
     hideStdout: true,
@@ -71,7 +82,6 @@ export async function makeProject(option: any) {
   if (result.stderr.byteLength) return subprocess.error(result);
 
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  task.success(1);
 
   let appJsCode = file.read(`${paths.data.express}app.js`).toString();
   let upperCaseDb = toTitleCase(option.db);
@@ -82,13 +92,26 @@ export async function makeProject(option: any) {
   file.copy(paths.data.express + `env`, dir + "/.env");
   file.copy(paths.data.express + `env`, dir + "/.env.dev");
   file.copy(paths.data.express + `env`, dir + "/.env.test");
-  file.copy(paths.data.express + `jwt${option.db}.js`, dir + "/service/auth.js");
-  file.copy(paths.data.express + `api/authenticate_${upperCaseDb}.js`, paths.directory.api(["authenticate.js"], dir));
-  file.copy(paths.data.express + `model/Token${upperCaseDb}.js`, paths.directory.model(["Token.js"], dir));
-  file.copy(paths.data.express + `model/User${upperCaseDb}.js`, paths.directory.model(["User.js"], dir));
+  file.copy(
+    paths.data.express + `jwt${option.db}.js`,
+    dir + "/service/auth.js",
+  );
+  file.copy(
+    paths.data.express + `api/authenticate_${upperCaseDb}.js`,
+    paths.directory.api(["authenticate.js"], dir),
+  );
+  file.copy(
+    paths.data.express + `model/Token${upperCaseDb}.js`,
+    paths.directory.model(["Token.js"], dir),
+  );
+  file.copy(
+    paths.data.express + `model/User${upperCaseDb}.js`,
+    paths.directory.model(["User.js"], dir),
+  );
   file.copy(paths.data.express + `test/testing.js`, dir + "/test/testing.js");
   // replace app.js code
-  appJsCode = `const authenticate = require('@api/authenticate');\n` + appJsCode;
+  appJsCode =
+    `const authenticate = require('@api/authenticate');\n` + appJsCode;
   appJsCode = appJsCode
     .replace(
       "// catch 404 and forward to error handler",
@@ -107,7 +130,10 @@ export async function makeProject(option: any) {
     virtual += `\t\tconsole.error('Unable to connect to the database:', error.message);\n`;
     virtual += "\t}\n";
     virtual += "})();\n";
-    appJsCode = appJsCode.replace("const app = express();", `const app = express();\n` + virtual);
+    appJsCode = appJsCode.replace(
+      "const app = express();",
+      `const app = express();\n` + virtual,
+    );
     appJsCode = appJsCode.replace(
       `const cors = require('cors');`,
       `const cors = require('cors');\nconst db = require('./db');`,
@@ -123,7 +149,10 @@ export async function makeProject(option: any) {
   virtual += "\t'@service': __dirname + '/service',\n";
   virtual += "\t'@api': __dirname + '/api'\n";
   virtual += "})\n";
-  appJsCode = appJsCode.replace("const authenticate", virtual + "const authenticate");
+  appJsCode = appJsCode.replace(
+    "const authenticate",
+    virtual + "const authenticate",
+  );
 
   // write app.js
   file.write(dir + "/app.js", appJsCode);
@@ -132,16 +161,15 @@ export async function makeProject(option: any) {
       '"scripts": {',
       `"scripts": {\n\t\t"dev": "SET DEBUG=${dir}:* && npx nodemon ./bin/www --ignore public/* --ignore testing.js",`,
     );
-    text = text.replace('"scripts": {', `"scripts": {\n\t\t"test": "mocha test/*.js --watch --timeout 10000",`);
+    text = text.replace(
+      '"scripts": {',
+      `"scripts": {\n\t\t"test": "mocha test/*.js --watch --timeout 10000",`,
+    );
     return text;
   });
-  task.success(2);
 }
 
 export function makeModel(name: string, option: any) {
-  const task = new Task(["Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
@@ -152,9 +180,11 @@ export function makeModel(name: string, option: any) {
   if (cols.length < 2) throw Error("minimum have 2+ column!");
   cols.forEach((col, i) => {
     if (option.db === "mongoose") {
-      return (virtual += `\t${col}: String,` + (i === cols.length - 1 ? "" : "\n"));
+      return (virtual +=
+        `\t${col}: String,` + (i === cols.length - 1 ? "" : "\n"));
     }
-    return (virtual += `\t${col}: DataTypes.STRING,` + (i === cols.length - 1 ? "" : "\n"));
+    return (virtual +=
+      `\t${col}: DataTypes.STRING,` + (i === cols.length - 1 ? "" : "\n"));
   });
   const code = file
     .read(paths.data.express + option.db + ".js")
@@ -165,13 +195,9 @@ export function makeModel(name: string, option: any) {
 
   file.mkdir(paths.directory.model([compact.folder], dir));
   file.write(paths.directory.model([compact.pathTitleCase], dir), code);
-  task.success(0);
 }
 
 export function makeAPI(name: string, option: any) {
-  const task = new Task(["Generate Code"]);
-  task.start(0);
-
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
@@ -189,11 +215,19 @@ export function makeAPI(name: string, option: any) {
     middleware += `, valid.${col}`;
   });
   api = api.replace("const valid = {", `const valid = {\n${validation}`);
-  api = api.replace(`router.post('/', validate`, `router.post('/', validate${middleware}`);
-  api = api.replace(`router.patch('/:id', validate`, `router.patch('/:id', validate${middleware}`);
+  api = api.replace(
+    `router.post('/', validate`,
+    `router.post('/', validate${middleware}`,
+  );
+  api = api.replace(
+    `router.patch('/:id', validate`,
+    `router.patch('/:id', validate${middleware}`,
+  );
   // app.js
   let code = file.read(dir + "/app.js").toString();
-  code = `const ${compact.camelCase}Router = require('@api/${compact.pathNoFormat}');\n` + code;
+  code =
+    `const ${compact.camelCase}Router = require('@api/${compact.pathNoFormat}');\n` +
+    code;
   code = code.replace(
     "// catch 404 and forward to error handler",
     `// catch 404 and forward to error handler\napp.use('/api/${compact.pathNoFormat}', ${compact.camelCase}Router)`,
@@ -202,5 +236,4 @@ export function makeAPI(name: string, option: any) {
   file.mkdir(paths.directory.api([compact.folder], dir));
   file.write(dir + "/app.js", code);
   file.write(paths.directory.api([compact.path], dir), api);
-  task.success(0);
 }
