@@ -1,7 +1,7 @@
-import { output, program } from "../lib.js";
-import config from "../utils/config.js";
-import subprocess from "../utils/subprocess.js";
+import { actionRunner, output, program } from "../lib.js";
 import { paths } from "../constraint.js";
+import { execute } from "../utils/execute.js";
+import config from "../utils/config.js";
 
 // app
 const sys = program.command("sys").description("List system cli");
@@ -9,67 +9,67 @@ sys
   .command("app:active")
   .description("Change default active project")
   .argument("<path>", "new path active project")
-  .action(changeAppActive);
+  .action(actionRunner(changeAppActive));
 sys
   .command("app:root")
   .description("Change default namespace folder")
   .argument("<path>", "new path namespace")
-  .action(changeAppRoot);
+  .action(actionRunner(changeAppRoot));
 sys
   .command("app:mode")
   .description("Change mode command")
   .argument("<int>", "0/1 to change mode")
-  .action(changeAppMode);
+  .action(actionRunner(changeAppMode));
 sys
   .command("app:update")
   .description("Update tools-web to latest version")
-  .action(appUpdate);
+  .action(actionRunner(appUpdate));
 
 // package
 sys
   .command("off")
   .description("Disable the package")
   .argument("<name>", "package name")
-  .action(packageOff);
+  .action(actionRunner(packageOff));
 sys
   .command("on")
   .description("Enable the package")
   .argument("<name>", "package name")
-  .action(packageOn);
+  .action(actionRunner(packageOn));
 sys
   .command("install")
   .description("Install the plugin")
   .argument("<name>", "package name")
-  .action(packageInstall);
+  .action(actionRunner(packageInstall));
 sys
   .command("uninstall")
   .description("Uninstall the plugin")
   .argument("<name>", "package name")
-  .action(packageUninstall);
+  .action(actionRunner(packageUninstall));
 
-export function changeAppActive(path: string) {
+export async function changeAppActive(path: string) {
   let value = config.read();
   value.app_active = path;
   config.update(value);
 }
-export function changeAppRoot(path: string) {
+export async function changeAppRoot(path: string) {
   let value = config.read();
   value.app_path = path;
   config.update(value);
 }
-export function changeAppMode(mode: string) {
+export async function changeAppMode(mode: string) {
   let value = config.read();
   value.mode = parseInt(mode);
   config.update(value);
 }
-export function appUpdate() {
-  let value = config.read();
-  let execute = "npm i -g tools-web";
+export async function appUpdate() {
+  const value = config.read();
+  const sub = execute("npm i -g tools-web", {});
 
-  subprocess.run(execute, { sync: true, hideLog: true });
+  sub.doSync();
   config.update(value);
 }
-export function packageOff(name: string) {
+export async function packageOff(name: string) {
   let value = config.read();
   value.library = value.library.map((lib) => {
     if (lib.name === name) {
@@ -79,7 +79,7 @@ export function packageOff(name: string) {
   });
   config.update(value);
 }
-export function packageOn(name: string) {
+export async function packageOn(name: string) {
   let value = config.read();
   value.library = value.library.map((lib) => {
     if (lib.name === name) {
@@ -89,12 +89,13 @@ export function packageOn(name: string) {
   });
   config.update(value);
 }
-export function packageInstall(name: string) {
-  let value = config.read();
-  let execute = `cd ${paths} && npm i ${name}`;
+export async function packageInstall(name: string) {
+  const value = config.read();
+  const sub = execute(`cd ${paths} && npm i ${name}`, {});
 
-  if (value.mode === 0) execute = "echo 1";
-  subprocess.run(execute, { sync: true, hideLog: true });
+  sub.changeEcho(value);
+  sub.doSync();
+
   value.library.push({
     name,
     active: true,
@@ -102,14 +103,28 @@ export function packageInstall(name: string) {
   });
   config.update(value);
 }
-export function packageUninstall(name: string) {
-  if (["express", "firebase", "react", "vite", "vue"].find((v) => v === name))
+export async function packageUninstall(name: string) {
+  if (
+    [
+      "express",
+      "firebase",
+      "react",
+      "sys",
+      "tailwind",
+      "tools",
+      "vite",
+      "vue",
+    ].find((v) => v === name)
+  ) {
     return output.error(`the package is from system, can't do it.`);
-  let value = config.read();
-  let execute = `cd ${paths} && npm uninstall ${name}`;
+  }
 
-  if (value.mode === 0) execute = "echo 1";
-  subprocess.run(execute, { sync: true, hideLog: true });
+  const value = config.read();
+  const sub = execute(`cd ${paths} && npm uninstall ${name}`, {});
+
+  sub.changeEcho(value);
+  sub.doSync();
+
   value.library = value.library.filter((lib) => lib.name !== name);
   config.update(value);
 }

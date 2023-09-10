@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test from "node:test";
 import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { file } from "../../src/utils/file.js";
 import { addMUI, addAntd, makeComponent, makeRoute, makeReduxToolkit, addRecoil, addReduxToolkit, addReactRouter } from "../../src/cli/react.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { paths } from "../../src/constraint.js";

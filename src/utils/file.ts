@@ -13,13 +13,15 @@ class File {
 	/**
 	 * create folder recursive if not exists
 	 */
-	mkdir(dir: string) {
+	mkdir(...dir: string[]) {
 		try {
-			if (!existsSync(dir)) {
-				output.log("mkdir", dir)
-				return mkdirSync(dir, {
-					recursive: true,
-				});
+			for(let x of dir) {
+				if (!existsSync(x)) {
+					output.log("mkdir", x)
+					mkdirSync(x, {
+						recursive: true,
+					});
+				}
 			}
 		} catch(e: any) {
 			output.error(e.message)
@@ -28,10 +30,12 @@ class File {
 	/**
 	 * append text to file
 	 */
-	append(filepath: string, first: string, end: string | null = null, replace: Function | null = null) {
+	append(filepath: string, first: string, end: string | null = null, replace: ((text: string) => string) | null = null) {
 		try {
-			var text = readFileSync(filepath, "utf8").toString();
-			return writeFileSync(filepath, first + (replace ? replace(text) : text) + (end || ""));
+			let text = readFileSync(filepath, "utf8").toString();
+			let commit = first + (replace ? replace(text) : text) + (end || "");
+			writeFileSync(filepath, commit);
+			output.log(`append value from ${filepath} [${commit.length} bytes]`)
 		} catch(e: any) {
 			output.error(e.message)
 		}
@@ -45,6 +49,14 @@ class File {
 			return output.log("copied to", dir)
 		} catch(e: any) {
 			output.error(e.message)
+		}
+	}
+	/**
+	 * copy file on array
+	 */
+	copyBulk(...data: string[][]) {
+		for(let x of data) {
+			this.copy(x[0], x[1]);
 		}
 	}
 	/**
@@ -62,7 +74,7 @@ class File {
 	 * read file
 	 */
 	read(dir: string) {
-		return readFileSync(dir, "utf8");
+		return readFileSync(dir, "utf8").toString();
 	}
 	/**
 	 * clear file/folder on recursive
@@ -83,9 +95,10 @@ class File {
 	}
 }
 
-const file = new File();
-
-export default file;
+/**
+ * file instance
+ */
+export const file = new File();
 
 /**
  * read package.json with parsing to object
@@ -93,7 +106,7 @@ export default file;
 export function readPackageJson(appDir: string) {
 	let path = appDir + "/package.json";
 	if(!file.isExists(path)) return null;
-	return JSON.parse(file.read(path).toString());
+	return JSON.parse(file.read(path));
 }
 
 /**

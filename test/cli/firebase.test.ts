@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { init, makeModel, storage, gcs } from "../../src/cli/firebase.js";
 import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { init, makeModel, storage, gcs } from "../../src/cli/firebase.js";
+import { file } from "../../src/utils/file.js";
 import { paths } from "../../src/constraint.js";
 
 test("firebase cli test", async (t) => {

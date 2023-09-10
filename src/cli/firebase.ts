@@ -1,29 +1,29 @@
 import { paths } from "../constraint.js";
-import { program } from "../lib.js";
-import config from "../utils/config.js";
-import file from "../utils/file.js";
+import { actionRunner, program } from "../lib.js";
+import { file } from "../utils/file.js";
 import { compactName } from "../utils/text.js";
+import config from "../utils/config.js";
 
 const firebase = program.command("firebase").description("List firebase cli");
 firebase
   .command("init")
   .description("Generate initialize firebase, storage & authenticate (v9)")
-  .action(init);
+  .action(actionRunner(init));
 firebase
   .command("make:model")
   .description("Generate model firestore")
   .argument("<name>", "model name")
-  .action(makeModel);
+  .action(actionRunner(makeModel));
 firebase
   .command("storage")
   .description("Generate service storage")
-  .action(storage);
+  .action(actionRunner(storage));
 firebase
   .command("gcs")
   .description("Generate service google cloud storage for backend")
-  .action(gcs);
+  .action(actionRunner(gcs));
 
-export function init() {
+export async function init() {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   file.mkdir(dir + "/src/service");
@@ -33,27 +33,26 @@ export function init() {
     dir + "/src/service/validate-auth.js",
   );
 }
-export function makeModel(name: string) {
+export async function makeModel(name: string) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
   const code = file
     .read(paths.data.firebase + "model.js")
-    .toString()
     .replaceAll("model", compact.camelCase);
 
   file.mkdir(paths.directory.model([compact.folder], dir));
   file.write(paths.directory.model([compact.path], dir), code);
 }
-export function storage() {
+export async function storage() {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const code = file.read(paths.data.firebase + "storage.js").toString();
+  const code = file.read(paths.data.firebase + "storage.js");
 
   file.mkdir(dir + "/src/service");
   file.write(`${dir}/src/service/firebase-storage.js`, code);
 }
-export function gcs() {
+export async function gcs() {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   file.mkdir(dir + "/src/service");

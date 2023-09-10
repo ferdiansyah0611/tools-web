@@ -1,5 +1,6 @@
 import assert from "node:assert";
 import test from "node:test";
+import config from "../../src/utils/config.js";
 import {
   addTailwind,
   addDaisyUI,
@@ -7,8 +8,7 @@ import {
   addFlowbite,
 } from "../../src/cli/tailwind.js";
 import { makeProject } from "../../src/cli/vite.js";
-import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { file } from "../../src/utils/file.js";
 
 test("tailwindcss cli test", async (t) => {
   const value = config.read();

@@ -59,13 +59,17 @@ function stdOut(std: Buffer, isHelp: boolean) {
 	let value = std.toString()
 	let timer = value.match(/\[.+\]/);
 	let oneQuote = value.match(/'.+'/);
+	let isError = value.match(/Error:/)
 	if(timer) {
 		value = value.replace(timer[0], chalk.magentaBright(timer[0]));
 	}
 	if(oneQuote) {
 		value = value.replace(oneQuote[0], chalk.greenBright(oneQuote[0]));
 	}
-	if(value.length > process.stdout.columns && !isHelp) {
+	if(isError) {
+		value = chalk.redBright(value);
+	}
+	if(value.length > process.stdout.columns && !isHelp && !isError) {
 		value = value.slice(0, process.stdout.columns) + "...\n"
 	}
 	process.stdout.write(value);

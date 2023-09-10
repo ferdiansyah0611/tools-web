@@ -9,11 +9,12 @@
     "test:express": "node ./dist/test/cli/express.test.js",
     "test:firebase": "node ./dist/test/cli/firebase.test.js",
     "test:react": "node ./dist/test/cli/react.test.js",
-    "test:system": "node ./dist/test/cli/system.test.js",
+    "test:sys": "node ./dist/test/cli/sys.test.js",
     "test:tools": "node ./dist/test/cli/tools.test.js",
     "test:tailwind": "node ./dist/test/cli/tailwind.test.js",
     "test:vite": "node ./dist/test/cli/vite.test.js",
-    "test:vue": "node ./dist/test/cli/vue.test.js"
+    "test:vue": "node ./dist/test/cli/vue.test.js",
+    "test:all": "npm run test:express && npm run test:firebase && npm run test:react && npm run test:sys && npm run test:tools && npm run test:tailwind && npm run test:vite && npm run test:vue"
   },
   "type": "module",
   "keywords": [
@@ -36,10 +37,6 @@
     "@tsconfig/node-lts": "^18.12.5",
     "@types/node": "^20.5.7",
     "chalk": "^5.3.0",
-    "commander": "^11.0.0",
-    "ora": "^7.0.1"
-  },
-  "dependencies": {
-    "log-symbols": "^5.1.0"
+    "commander": "^11.0.0"
   }
 }

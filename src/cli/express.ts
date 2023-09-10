@@ -1,10 +1,10 @@
 import { paths } from "../constraint.js";
-import { program, Option } from "../lib.js";
-import config from "../utils/config.js";
-import subprocess from "../utils/subprocess.js";
-import file from "../utils/file.js";
+import { program, Option, actionRunner } from "../lib.js";
+import { file } from "../utils/file.js";
 import { toTitleCase, compactName } from "../utils/text.js";
-import { SpawnSyncReturns } from "node:child_process";
+import { execute, prettier } from "../utils/execute.js";
+import { code } from "../utils/code.js";
+import config from "../utils/config.js";
 
 const configure = {
   list: {
@@ -26,17 +26,18 @@ express
       .choices(configure.list.db)
       .makeOptionMandatory(),
   )
-  .action(makeProject);
+  .action(actionRunner(makeProject));
 
 express
   .command("server:dev")
   .description("Run the server application on the background")
-  .action(() => {
+  .action(actionRunner(async () => {
     const value = config.read();
-    subprocess.run("cd " + config.getFullPathApp(value) + " && npm run start", {
+    const sub = execute(`cd ${config.getFullPathApp(value)} && npm run start`, {
       background: true,
     });
-  });
+    sub.doRun();
+  }));
 
 express
   .command("make:model")
@@ -48,7 +49,7 @@ express
       .makeOptionMandatory(),
   )
   .option("--col <name>", "column name (2 min)", ",")
-  .action(makeModel);
+  .action(actionRunner(makeModel));
 
 express
   .command("make:api")
@@ -60,55 +61,45 @@ express
       .makeOptionMandatory(),
   )
   .option("--col <name>", "column name (2 min)", ",")
-  .action(makeAPI);
+  .action(actionRunner(makeAPI));
 
 export async function makeProject(option: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
+  const sub = execute(
+    `npx express-generator ${dir} --view ${option.template}`,
+    {},
+  );
 
   file.rm(dir);
 
-  let execution = `npx express-generator ${dir} --view ${option.template}`;
-  // production
-  if (value.mode === 1) {
-    execution += ` && cd ${dir}`;
-    execution += ` && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias dotenv --save`;
-    execution += ` && npm i mocha supertest -D`;
-  }
-  let result: SpawnSyncReturns<Buffer> = await subprocess.run(execution, {
-    sync: true,
-    hideStdout: true,
+  sub.changeOnProduction(value, (current) => {
+    current += ` && cd ${dir}`;
+    current += ` && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias dotenv --save`;
+    current += ` && npm i mocha supertest -D`;
+    return current;
   });
-  if (result.stderr.byteLength) return subprocess.error(result);
+  sub.doSync();
 
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  let appJsCode = file.read(`${paths.data.express}app.js`).toString();
+  let appJsCode = file.read(`${paths.data.express}app.js`);
   let upperCaseDb = toTitleCase(option.db);
-  file.mkdir(dir + "/service");
-  file.mkdir(dir + "/api");
-  file.mkdir(dir + "/test");
+  let fileToCopy = [
+    ["env", dir + "/.env"],
+    ["env", dir + "/.env.dev"],
+    ["env", dir + "/.env.test"],
+    [`jwt${option.db}.js`, dir + "/service/auth.js"],
+    [
+      `api/authenticate_${upperCaseDb}.js`,
+      paths.directory.api(["authenticate.js"], dir),
+    ],
+    [`model/Token${upperCaseDb}.js`, paths.directory.model(["Token.js"], dir)],
+    [`model/User${upperCaseDb}.js`, paths.directory.model(["User.js"], dir)],
+    ["test/testing.js", dir + "/test/testing.js"],
+  ];
+
+  file.mkdir(dir + "/service", dir + "/api", dir + "/test");
   file.mkdir(paths.directory.model([], dir));
-  file.copy(paths.data.express + `env`, dir + "/.env");
-  file.copy(paths.data.express + `env`, dir + "/.env.dev");
-  file.copy(paths.data.express + `env`, dir + "/.env.test");
-  file.copy(
-    paths.data.express + `jwt${option.db}.js`,
-    dir + "/service/auth.js",
-  );
-  file.copy(
-    paths.data.express + `api/authenticate_${upperCaseDb}.js`,
-    paths.directory.api(["authenticate.js"], dir),
-  );
-  file.copy(
-    paths.data.express + `model/Token${upperCaseDb}.js`,
-    paths.directory.model(["Token.js"], dir),
-  );
-  file.copy(
-    paths.data.express + `model/User${upperCaseDb}.js`,
-    paths.directory.model(["User.js"], dir),
-  );
-  file.copy(paths.data.express + `test/testing.js`, dir + "/test/testing.js");
+  file.copyBulk(...fileToCopy.map((v) => [paths.data.express + v[0], v[1]]));
   // replace app.js code
   appJsCode =
     `const authenticate = require('@api/authenticate');\n` + appJsCode;
@@ -120,19 +111,20 @@ export async function makeProject(option: any) {
     .replace("'view engine', 'jade'", `'view engine', '${option.view}'`);
   // if db sequelize
   if (option.db === "sequelize") {
-    let virtual = "";
-    virtual += "// connect database\n";
-    virtual += "(async() => {\n";
-    virtual += "\ttry {\n";
-    virtual += "\t\tawait db.authenticate();\n";
-    virtual += `\t\tconsole.log('Connection has been established successfully.');\n`;
-    virtual += "\t} catch (error) {\n";
-    virtual += `\t\tconsole.error('Unable to connect to the database:', error.message);\n`;
-    virtual += "\t}\n";
-    virtual += "})();\n";
+    const virtual = code(
+      "// connect database",
+      "(async() => {",
+      "\ttry {",
+      "\t\tawait db.authenticate();",
+      `\t\tconsole.log('Connection has been established successfully.');`,
+      "\t} catch (error) {",
+      `\t\tconsole.error('Unable to connect to the database:', error.message);`,
+      "\t}",
+      "})();",
+    );
     appJsCode = appJsCode.replace(
       "const app = express();",
-      `const app = express();\n` + virtual,
+      `const app = express();\n` + virtual.v,
     );
     appJsCode = appJsCode.replace(
       `const cors = require('cors');`,
@@ -141,17 +133,18 @@ export async function makeProject(option: any) {
     file.copy(paths.data.express + `db${option.db}.js`, dir + "/db.js");
   }
   // alias import
-  let virtual = "";
-  virtual += "require('module-alias').addAliases({\n";
-  virtual += "\t'@root'  : __dirname,\n";
-  virtual += "\t'@routes': __dirname + '/routes',\n";
-  virtual += "\t'@model': __dirname + '/model',\n";
-  virtual += "\t'@service': __dirname + '/service',\n";
-  virtual += "\t'@api': __dirname + '/api'\n";
-  virtual += "})\n";
+  const virtual = code(
+    "require('module-alias').addAliases({",
+    "\t'@root'  : __dirname,",
+    "\t'@routes': __dirname + '/routes',",
+    "\t'@model': __dirname + '/model',",
+    "\t'@service': __dirname + '/service',",
+    "\t'@api': __dirname + '/api'",
+    "})",
+  );
   appJsCode = appJsCode.replace(
     "const authenticate",
-    virtual + "const authenticate",
+    virtual.v + "const authenticate",
   );
 
   // write app.js
@@ -167,9 +160,10 @@ export async function makeProject(option: any) {
     );
     return text;
   });
+  prettier(dir, "/app.js");
 }
 
-export function makeModel(name: string, option: any) {
+export async function makeModel(name: string, option: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
@@ -188,7 +182,6 @@ export function makeModel(name: string, option: any) {
   });
   const code = file
     .read(paths.data.express + option.db + ".js")
-    .toString()
     .replaceAll("$name", compact.titleCaseWordOnly)
     .replaceAll("$models", compact.titleCaseWordOnly)
     .replace(replaceState, replaceState + "\n" + virtual);
@@ -197,12 +190,12 @@ export function makeModel(name: string, option: any) {
   file.write(paths.directory.model([compact.pathTitleCase], dir), code);
 }
 
-export function makeAPI(name: string, option: any) {
+export async function makeAPI(name: string, option: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const compact = compactName(name, ".js");
 
-  let api = file.read(paths.data.express + `api${option.db}.js`).toString();
+  let api = file.read(paths.data.express + `api${option.db}.js`);
   let validation = "";
   let middleware = "";
 
@@ -224,7 +217,7 @@ export function makeAPI(name: string, option: any) {
     `router.patch('/:id', validate${middleware}`,
   );
   // app.js
-  let code = file.read(dir + "/app.js").toString();
+  let code = file.read(dir + "/app.js");
   code =
     `const ${compact.camelCase}Router = require('@api/${compact.pathNoFormat}');\n` +
     code;

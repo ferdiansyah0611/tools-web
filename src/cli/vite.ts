@@ -1,9 +1,8 @@
-import { SpawnSyncReturns } from "child_process";
 import { paths } from "../constraint.js";
-import { program, Option } from "../lib.js";
+import { program, Option, actionRunner } from "../lib.js";
+import { file } from "../utils/file.js";
+import { execute } from "../utils/execute.js";
 import config from "../utils/config.js";
-import file from "../utils/file.js";
-import subprocess from "../utils/subprocess.js";
 
 const configure = {
   list: {
@@ -30,81 +29,68 @@ vite
       .makeOptionMandatory(),
   )
   .option("--ts", "enable typescript")
-  .action(makeProject);
+  .action(actionRunner(makeProject));
 
 export async function makeProject(name: string, option: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value, name);
+  const sub = execute(
+    `cd ${value.app_path} && npm create vite@latest ${name} --template ${option.template}`,
+    {},
+  );
 
   file.rm(dir);
-
-  let execution = `cd ${value.app_path} && npm create vite@latest ${name} --template ${option.template}`;
-  if (option.ts) execution += "-ts";
+  sub.change((current) => (option.ts ? (current += "-ts") : current));
   // check version npm
-  let npm: SpawnSyncReturns<Buffer> = subprocess.run("npm --version", {
-    sync: true,
-    hideStdout: true,
-  });
-  let npmVersion = npm.stdout.toString();
-  if (npm.stderr.byteLength) return subprocess.error(npm);
+  const npm = execute("npm --version", {}).doSync().stdout.toString();
   // npm version <= 6
-  if (![0, 1, 2, 3, 4, 5, 6].find((v) => String(v) === npmVersion[0])) {
-    execution = execution.replace("--template", "-- --template");
+  if (![0, 1, 2, 3, 4, 5, 6].find((v) => String(v) === npm[0])) {
+    sub.change((current) => current.replace("--template", "-- --template"));
   }
   // installing
-  if (value.mode === 1) {
-    execution += ` && cd ${name} && npm i axios`;
+  sub.changeOnProduction(value, (current) => {
+    current += ` && cd ${name} && npm i axios`;
     // react
     if (option.template === "react") {
-      execution += " && npm i axios";
+      current += " && npm i axios";
     }
-  }
-  let result: SpawnSyncReturns<Buffer> = subprocess.run(execution, {
-    sync: true,
-    hideStdout: true,
+    return current;
   });
-  if (result.stderr.byteLength) return subprocess.error(result);
+  sub.doSync();
   // generate code
   if (option.template === "react") {
-    file.mkdir(paths.directory.service([], dir));
-    file.mkdir(paths.directory.style([], dir));
-    file.mkdir(paths.directory.component([], dir));
-    file.mkdir(paths.directory.store([], dir));
-    file.mkdir(paths.directory.route([], dir));
-    file.copy(
-      paths.data.react + "service/auth.js",
-      paths.directory.service(["auth.js"], dir),
+    file.mkdir(
+      paths.directory.service([], dir),
+      paths.directory.style([], dir),
+      paths.directory.component([], dir),
+      paths.directory.store([], dir),
+      paths.directory.route([], dir),
     );
-    file.copy(
-      paths.data.react + "service/http.js",
-      paths.directory.service(["http.js"], dir),
+    file.copyBulk(
+      [
+        paths.data.react + "service/auth.js",
+        paths.directory.service(["auth.js"], dir),
+      ],
+      [
+        paths.data.react + "service/http.js",
+        paths.directory.service(["http.js"], dir),
+      ],
     );
   } else if (option.template === "vue") {
-    file.mkdir(paths.directory.route([], dir));
-    file.mkdir(paths.directory.store([], dir));
-    file.copy(
-      paths.data.vue + "router.js",
-      paths.directory.route(["index.js"], dir),
-    );
-    file.copy(
-      paths.data.vue + "Home.vue",
-      paths.directory.route(["Home.vue"], dir),
-    );
-    file.copy(
-      paths.data.vue + "storeindex.js",
-      paths.directory.store(["index.js"], dir),
-    );
-    file.copy(
-      paths.data.vue + "App.vue",
-      paths.directory.src(["App.vue"], dir),
-    );
-    file.copy(
-      paths.data.vue + "main.js",
-      paths.directory.src(["main.js"], dir),
+    file.mkdir(paths.directory.route([], dir), paths.directory.store([], dir));
+    file.copyBulk(
+      [paths.data.vue + "router.js", paths.directory.route(["index.js"], dir)],
+      [paths.data.vue + "Home.vue", paths.directory.route(["Home.vue"], dir)],
+      [
+        paths.data.vue + "storeindex.js",
+        paths.directory.store(["index.js"], dir),
+      ],
+      [paths.data.vue + "App.vue", paths.directory.src(["App.vue"], dir)],
+      [paths.data.vue + "main.js", paths.directory.src(["main.js"], dir)],
     );
   }
   // update file
-  let code = file.read(paths.data.vite + "vite.config.js").toString();
+  let code = file.read(paths.data.vite + "vite.config.js");
   code = code.replaceAll("react", option.template);
   file.write(dir + "/vite.config.js", code);
   file.write(
@@ -116,22 +102,19 @@ export async function makeProject(name: string, option: any) {
 export async function addTailwind(option: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
+  const sub = execute(
+    `cd ${dir} && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p`,
+    {},
+  );
 
-  let execution = `cd ${dir} && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p`;
-  if (value.mode === 0) execution = "echo 1";
-
-  let result: SpawnSyncReturns<Buffer> = subprocess.run(execution, {
-    sync: true,
-    hideStdout: true,
-  });
-  if (result.stderr.byteLength) return subprocess.error(result);
+  sub.changeEcho(value);
+  sub.doSync();
 
   let target = dir + (option.react ? "/src/main.jsx" : "/src/main.js");
-  let code = file.read(target).toString();
+  let code = file.read(target);
   file.write(target, "import './tailwind.sass'\n" + code);
-  file.copy(paths.data.tailwind + "tailwind.sass", dir + "/src/tailwind.sass");
-  file.copy(
-    paths.data.tailwind + "tailwind.config.cjs",
-    dir + "/tailwind.config.cjs",
+  file.copyBulk(
+    [paths.data.tailwind + "tailwind.sass", dir + "/src/tailwind.sass"],
+    [paths.data.tailwind + "tailwind.config.cjs", dir + "/tailwind.config.cjs"],
   );
 }

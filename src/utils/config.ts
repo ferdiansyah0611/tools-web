@@ -1,7 +1,7 @@
-import file from "./file.js";
+import { file } from "./file.js";
 import { paths } from "../constraint.js"
 
-type ConfigType = {
+export type ConfigType = {
 	app_path: string,
 	app_active: string,
 	mode: number,

@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { makeProject, makeModel, makeAPI } from "../../src/cli/express.js";
 import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { makeProject, makeModel, makeAPI } from "../../src/cli/express.js";
+import { file } from "../../src/utils/file.js";
 import { paths } from "../../src/constraint.js";
 
 test("express cli test", async (t) => {

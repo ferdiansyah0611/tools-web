@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import test from "node:test";
 import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { file } from "../../src/utils/file.js";
 import {
   addQuasar,
   addVuetify,

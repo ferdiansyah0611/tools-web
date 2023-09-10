@@ -52,4 +52,12 @@ function getTimeLog() {
 	return (`[${date.getMinutes()}:${date.getSeconds()}]\t`)
 }
 
-export { program, Option, chalk, output, Input, readline };
+function actionErrorHanlder(error: Error) {
+  output.error("Error:", error.message);
+}
+
+function actionRunner(fn: any) {
+  return (...args: any[]) => fn(...args).catch(actionErrorHanlder);
+}
+
+export { program, Option, chalk, output, Input, readline, actionRunner };

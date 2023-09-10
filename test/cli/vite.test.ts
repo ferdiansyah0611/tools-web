@@ -1,8 +1,8 @@
 import assert from "node:assert";
 import test from "node:test";
-import { makeProject, addTailwind } from "../../src/cli/vite.js";
 import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { makeProject, addTailwind } from "../../src/cli/vite.js";
+import { file } from "../../src/utils/file.js";
 import { paths } from "../../src/constraint.js";
 
 test("vite cli test", async (t) => {

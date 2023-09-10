@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync } from "fs";
-import file from "./file.js";
+import { file } from "./file.js";
 
 type ConfigStyle = {
 	path: string;

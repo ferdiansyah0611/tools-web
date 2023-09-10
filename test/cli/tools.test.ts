@@ -1,8 +1,8 @@
 import test from "node:test";
+import config from "../../src/utils/config.js";
 import { prettierAll, gitAutomate } from "../../src/cli/tools.js";
 import { makeProject } from "../../src/cli/vite.js";
-import config from "../../src/utils/config.js";
-import file from "../../src/utils/file.js";
+import { file } from "../../src/utils/file.js";
 
 test("tools cli test", async (t) => {
   const value = config.read();
