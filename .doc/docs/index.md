@@ -1,5 +1,6 @@
 ---
 layout: home
+title: Home
 footer: true
 hero:
   name: Tools Web

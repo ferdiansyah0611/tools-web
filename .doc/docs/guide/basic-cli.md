@@ -11,19 +11,13 @@ This section will explain about the basic commands in using tools-web
 Help the command.
 
 ```bash
---help
+help
 ```
 
-Get the version of tools-web.
+Exit the command.
 
 ```bash
---version
-```
-
-Stop the command.
-
-```bash
-0
+exit
 ```
 
 You can run more command on system. Example:
@@ -32,19 +26,25 @@ You can run more command on system. Example:
 dir
 ```
 
+::: tip Completion
+Just type char like `v` -> tabs, then type `[` or `]` to next and previous filter command.
+
+Or write `[` or `]` to find all command.
+:::
+
 ## System Command
 
 This command is related to the system. Such as packages, namespaces, projects and others.
 
 ```bash
-sys app:active myapp # current project
-sys app:root C:/User/Ferdi/Project # namespace
-sys app:mode 1 # development/production
-sys app:update # upgrading to latest version
-sys off name # disable package
-sys on name # enable package
-sys install name # install package
-sys uninstall name # uninstall package
+tw active myapp # current project
+tw root C:/User/Ferdi/Project # namespace
+tw mode 1 # development/production
+tw update # upgrading to latest version
+twx off name # disable package
+twx on name # enable package
+twx install name # install package
+twx uninstall name # uninstall package
 ```
 
 ## Tools Command

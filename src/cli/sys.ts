@@ -5,75 +5,76 @@ import config from "../utils/config.js";
 
 program
   .command("exit", "exit the command")
-  .action(() => {
-    output.log("Process Terminated");
-    input.close();
-    process.exit(1);
-  })
+  .action(exitCommand)
   .hide()
 
-  .command("sys app:active", "Change default active project")
+  .command("tw app:active", "Change default active project")
   .argument("<path>", "new path active project")
   .action(changeAppActive)
   .hide()
 
-  .command("sys app:root", "Change default namespace folder")
+  .command("tw app:root", "Change default namespace folder")
   .argument("<path>", "new path namespace")
   .action(changeAppRoot)
   .hide()
 
-  .command("sys app:mode", "Change mode command")
+  .command("tw app:mode", "Change mode command")
   .argument("<mode>", "0/1 to change mode", { validator: program.NUMBER })
   .action(changeAppMode)
   .hide()
 
-  .command("sys app:update", "Update tools-web to latest version")
+  .command("tw app:update", "Update tools-web to latest version")
   .action(appUpdate)
   .hide()
 
-  .command("sys off", "Disable the package")
+  .command("twx off", "Disable the package")
   .argument("<name>", "package name")
   .action(packageOff)
   .hide()
 
-  .command("sys on", "Enable the package")
+  .command("twx on", "Enable the package")
   .argument("<name>", "package name")
   .action(packageOn)
   .hide()
 
-  .command("sys install", "Install the plugin")
+  .command("twx install", "Install the plugin")
   .argument("<name>", "package name")
   .action(packageInstall)
   .hide()
 
-  .command("sys uninstall", "Uninstall the plugin")
+  .command("twx uninstall", "Uninstall the plugin")
   .argument("<name>", "package name")
   .action(packageUninstall)
   .hide();
 
-export async function changeAppActive({ args }: any) {
+export function exitCommand() {
+  output.log("Process Terminated");
+  input.close();
+  process.exit(1);
+}
+export function changeAppActive({ args }: any) {
   let value = config.read();
   value.app_active = args.path;
   config.update(value);
 }
-export async function changeAppRoot({ args }: any) {
+export function changeAppRoot({ args }: any) {
   let value = config.read();
   value.app_path = args.path;
   config.update(value);
 }
-export async function changeAppMode({ args }: any) {
+export function changeAppMode({ args }: any) {
   let value = config.read();
   value.mode = parseInt(args.mode);
   config.update(value);
 }
-export async function appUpdate() {
+export function appUpdate() {
   const value = config.read();
   const sub = execute("npm i -g tools-web", {});
 
   sub.doSync();
   config.update(value);
 }
-export async function packageOff({ args }: any) {
+export function packageOff({ args }: any) {
   let value = config.read();
   value.library = value.library.map((lib) => {
     if (lib.name === args.name) {
@@ -83,7 +84,7 @@ export async function packageOff({ args }: any) {
   });
   config.update(value);
 }
-export async function packageOn({ args }: any) {
+export function packageOn({ args }: any) {
   let value = config.read();
   value.library = value.library.map((lib) => {
     if (lib.name === args.name) {
@@ -93,7 +94,7 @@ export async function packageOn({ args }: any) {
   });
   config.update(value);
 }
-export async function packageInstall({ args }: any) {
+export function packageInstall({ args }: any) {
   const value = config.read();
   const sub = execute(`cd ${paths} && npm i ${args.name}`, {});
 
@@ -107,19 +108,8 @@ export async function packageInstall({ args }: any) {
   });
   config.update(value);
 }
-export async function packageUninstall({ args }: any) {
-  if (
-    [
-      "express",
-      "firebase",
-      "react",
-      "sys",
-      "tailwind",
-      "tools",
-      "vite",
-      "vue",
-    ].find((v) => v === args.name)
-  ) {
+export function packageUninstall({ args }: any) {
+  if (["express", "firebase", "react", "sys", "tailwind", "tools", "vite", "vue"].find((v) => v === args.name)) {
     return output.error(`the package is from system, can't do it.`);
   }
 

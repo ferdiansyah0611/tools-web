@@ -18,7 +18,8 @@ function getGuideSidebar() {
 			makeLink("Firebase", "/library/firebase"),
 		]),
 		makeSub("Developer", [
-			makeLink("Coming Soon", "/developer")
+			makeLink("Test", "/dev/test"),
+			makeLink("Coming Soon", "/dev")
 		])
 	];
 }

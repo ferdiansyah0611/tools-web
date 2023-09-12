@@ -11,40 +11,16 @@ import "./src/cli/tools.js";
 import "./src/cli/sys.js";
 import "./src/cli/vue.js";
 
+// initialize
 program
   .name("tools-web")
   .description("Tools to speed up developing a website using the cli").version("1.2.00");
 
-// type [ or ] to auto write cli
-let current = 0;
-let command: any[] = await program.getAllCommands();
-command = command.map((v: any) => v.name);
-process.stdin.on("keypress", (c: any, k: any) => {
-  if(k.sequence === "]") {
-    input.rl.write(null, {
-      ctrl: true,
-      name: "u"
-    });
-    input.rl.write(command[current])
-    current += 1;
-    if(current + 1 > command.length) current = 0;
-  }
-  else if(k.sequence === "[") {
-    input.rl.write(null, {
-      ctrl: true,
-      name: "u"
-    });
-    input.rl.write(command[current])
-    current -= 1;
-    if(current - 1 < 0) current = command.length;
-  }
-});
-// load library
-const conf = config.read();
+const configValue = config.read();
 await new Promise((resolve) => {
-  if (!conf.library.length) return resolve(true);
+  if (!configValue.library.length) return resolve(true);
 
-  conf.library.forEach(async (library, index, arr) => {
+  configValue.library.forEach(async (library, index, arr) => {
     if (!library.active) return;
     await import(library.path);
     if (index === arr.length - 1) {
@@ -52,7 +28,7 @@ await new Promise((resolve) => {
     }
   });
 });
-
+await completion();
 
 export default async function main(arg: string|string[], callback: any, isTest: boolean = false) {
   try {
@@ -73,4 +49,77 @@ export default async function main(arg: string|string[], callback: any, isTest: 
   } finally {
     if(!isTest) setTimeout(callback, 1000);
   }
+}
+
+/**
+ * 2 optional to autcompletion
+ * type [ or ]
+ * type char on the first word -> tabs and then type [ or ]
+ */
+async function completion() {
+
+  type DataCompletion = {
+    lastChar: string;
+    current: number;
+    inPotential: boolean;
+    potential: any[];
+    cli: any[];
+    nextCurrent(): any;
+    previousCurrent(): any;
+    writeCurrent(): any;
+  }
+
+  let command: any[] = await program.getAllCommands();
+  let data: DataCompletion = {
+    lastChar: "",
+    current: 0,
+    cli: [],
+    nextCurrent() {
+      this.current += 1;
+      if(!this.cli[this.current + 1]) this.current = 0;
+    },
+    previousCurrent() {
+      this.current -= 1;
+      if(!this.cli[this.current - 1]) this.current = this.cli.length - 1;
+    },
+    writeCurrent() {
+      input.rl.write(null, {
+        ctrl: true,
+        name: "u"
+      });
+      input.rl.write(this.cli[this.current])
+    },
+
+    potential: [],
+    inPotential: false
+  }
+
+  command = command.map((v: any) => v.name);
+  data.cli = command;
+
+  process.stdin.on("keypress", (char: string, e: any) => {
+    if(e.sequence === "]") {
+      data.writeCurrent()
+      data.nextCurrent()
+    }
+    else if(e.sequence === "[") {
+      data.writeCurrent()
+      data.previousCurrent()
+    }
+    else if(e.name === "tab") {
+      data.cli = command.filter((v) => v.startsWith(data.lastChar) === true);
+      data.inPotential = true;
+      input.rl.write(null, {
+        ctrl: true,
+        name: "u"
+      });
+    }
+    else if(e.name === "backspace") {
+      data.cli = command;
+      data.inPotential = false;
+    }
+    else {
+      data.lastChar = char;
+    }
+  });
 }

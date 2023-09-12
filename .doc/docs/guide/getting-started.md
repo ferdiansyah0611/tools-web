@@ -60,7 +60,7 @@ Please read this before to use it:
 
 **Namespace and Active Project**
 
-You must change namespace `sys app:root C:/user/name/app` and active project `sys app:active myapp`
+You must change namespace `tw root C:/user/name/app` and active project `tw active myapp`
 
 **Administrator**
 
