@@ -1,28 +1,21 @@
 import { paths } from "../constraint.js";
-import { program, output, actionRunner } from "../lib.js";
+import { program, output } from "../lib.js";
 import { file, readPackageJson } from "../utils/file.js";
 import { execute } from "../utils/execute.js";
 import config from "../utils/config.js";
 
-const tailwind = program
-  .command("tailwind")
-  .description("List tailwindcss cli");
-tailwind
-  .command("create")
-  .description("Add tailwindcss to project")
-  .action(actionRunner(addTailwind));
-tailwind
-  .command("add:daisyui")
-  .description("Project integration with Daisy UI")
-  .action(actionRunner(addDaisyUI));
-tailwind
-  .command("add:headlessui")
-  .description("Project integration with Headless UI")
-  .action(actionRunner(addHeadlessUI));
-tailwind
-  .command("add:flowbite")
-  .description("Project integration with Flowbite")
-  .action(actionRunner(addFlowbite));
+program
+  .command("tailwind create", "Add tailwindcss to project")
+  .action(addTailwind)
+
+  .command("tailwind add:daisyui", "Project integration with Daisy UI")
+  .action(addDaisyUI)
+
+  .command("tailwind add:headlessui", "Project integration with Headless UI")
+  .action(addHeadlessUI)
+
+  .command("tailwind add:flowbite", "Project integration with Flowbite")
+  .action(addFlowbite);
 
 export async function addTailwind(): Promise<any> {
   const value = config.read();
@@ -103,6 +96,6 @@ export async function addFlowbite(): Promise<any> {
     .replace("content: [", 'content: [ "./node_modules/flowbite/**/*.js", ');
   file.write(tailwindConfig, code);
   output.log(
-    'Don`t forget to add code on the <body> `<script src="../path/to/flowbite/dist/flowbite.min.js"></script>`',
+    "Don`t forget to add code on the <body> '<script src=\"../path/to/flowbite/dist/flowbite.min.js\"></script>'",
   );
 }

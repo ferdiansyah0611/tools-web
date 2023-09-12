@@ -1,19 +1,17 @@
-import { actionRunner, output, program } from "../lib.js";
+import { output, program } from "../lib.js";
 import { execute } from "../utils/execute.js";
 import config from "../utils/config.js";
 
-const tools = program.command("tools").description("List tools code");
-tools
-  .command("prettier:all")
-  .description("Run prettier in the current project")
-  .action(actionRunner(prettierAll));
+program
+  .command("tools prettier:all", "Run prettier in the current project")
+  .action(prettierAll)
+  .hide()
 
-tools
-  .command("git:automate")
-  .description("Commit any files & push to repository")
+  .command("tools git:automate", "Commit any files & push to repository")
   .argument("<remote>", "remote url target")
   .argument("<branch>", "branch target")
-  .action(actionRunner(gitAutomate));
+  .action(gitAutomate)
+  .hide();
 
 export async function prettierAll() {
   const value = config.read();
@@ -26,11 +24,11 @@ export async function prettierAll() {
   sub.doSync();
   output.log("Completed");
 }
-export async function gitAutomate(remote: string, branch: string) {
+export async function gitAutomate({ args }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const sub = execute(
-    `cd ${dir} && git add . && git commit -m "automate push" && git push ${remote} ${branch}`,
+    `cd ${dir} && git add . && git commit -m "automate push" && git push ${args.remote} ${args.branch}`,
     {},
   );
 

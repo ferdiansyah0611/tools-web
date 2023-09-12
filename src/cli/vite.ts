@@ -1,5 +1,5 @@
 import { paths } from "../constraint.js";
-import { program, Option, actionRunner } from "../lib.js";
+import { program } from "../lib.js";
 import { file } from "../utils/file.js";
 import { execute } from "../utils/execute.js";
 import config from "../utils/config.js";
@@ -18,29 +18,27 @@ const configure = {
     ],
   },
 };
-const vite = program.command("vite").description("List vite cli");
-vite
-  .command("make:project")
-  .description("Create new vite project")
-  .argument("<name>", "project name")
-  .addOption(
-    new Option("--template <name>", "template name")
-      .choices(configure.list.template)
-      .makeOptionMandatory(),
-  )
-  .option("--ts", "enable typescript")
-  .action(actionRunner(makeProject));
 
-export async function makeProject(name: string, option: any) {
+program
+  .command("vite make:project", "Create new vite project")
+  .argument("<name>", "project name")
+  .option("--template <name>", "template name", {
+    required: true,
+    validator: configure.list.template,
+  })
+  .option("--ts", "enable typescript")
+  .action(makeProject);
+
+export async function makeProject({ args, options }: any) {
   const value = config.read();
-  const dir = config.getFullPathApp(value, name);
+  const dir = config.getFullPathApp(value, args.name);
   const sub = execute(
-    `cd ${value.app_path} && npm create vite@latest ${name} --template ${option.template}`,
+    `cd ${value.app_path} && npm create vite@latest ${args.name} --template ${options.template}`,
     {},
   );
 
   file.rm(dir);
-  sub.change((current) => (option.ts ? (current += "-ts") : current));
+  sub.change((current) => (options.ts ? (current += "-ts") : current));
   // check version npm
   const npm = execute("npm --version", {}).doSync().stdout.toString();
   // npm version <= 6
@@ -49,16 +47,16 @@ export async function makeProject(name: string, option: any) {
   }
   // installing
   sub.changeOnProduction(value, (current) => {
-    current += ` && cd ${name} && npm i axios`;
+    current += ` && cd ${args.name} && npm i axios`;
     // react
-    if (option.template === "react") {
+    if (options.template === "react") {
       current += " && npm i axios";
     }
     return current;
   });
   sub.doSync();
   // generate code
-  if (option.template === "react") {
+  if (options.template === "react") {
     file.mkdir(
       paths.directory.service([], dir),
       paths.directory.style([], dir),
@@ -76,7 +74,7 @@ export async function makeProject(name: string, option: any) {
         paths.directory.service(["http.js"], dir),
       ],
     );
-  } else if (option.template === "vue") {
+  } else if (options.template === "vue") {
     file.mkdir(paths.directory.route([], dir), paths.directory.store([], dir));
     file.copyBulk(
       [paths.data.vue + "router.js", paths.directory.route(["index.js"], dir)],
@@ -91,30 +89,10 @@ export async function makeProject(name: string, option: any) {
   }
   // update file
   let code = file.read(paths.data.vite + "vite.config.js");
-  code = code.replaceAll("react", option.template);
+  code = code.replaceAll("react", options.template);
   file.write(dir + "/vite.config.js", code);
   file.write(
     dir + "/vercel.json",
     '{ "routes": [{ "src": "/[^.]+", "dest": "/", "status": 200 }] }',
-  );
-}
-
-export async function addTailwind(option: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
-  const sub = execute(
-    `cd ${dir} && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p`,
-    {},
-  );
-
-  sub.changeEcho(value);
-  sub.doSync();
-
-  let target = dir + (option.react ? "/src/main.jsx" : "/src/main.js");
-  let code = file.read(target);
-  file.write(target, "import './tailwind.sass'\n" + code);
-  file.copyBulk(
-    [paths.data.tailwind + "tailwind.sass", dir + "/src/tailwind.sass"],
-    [paths.data.tailwind + "tailwind.config.cjs", dir + "/tailwind.config.cjs"],
   );
 }

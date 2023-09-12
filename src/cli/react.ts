@@ -1,5 +1,5 @@
 import { paths } from "../constraint.js";
-import { program, Option, actionRunner } from "../lib.js";
+import { program } from "../lib.js";
 import { generate } from "../utils/style.js";
 import { compactName } from "../utils/text.js";
 import { execute, prettier } from "../utils/execute.js";
@@ -11,60 +11,53 @@ const configure = {
     style: ["css", "sass", "scss"],
   },
 };
-const react = program.command("react").description("List react.js cli");
-react
-  .command("add:mui")
-  .description("Project integration with Material UI")
-  .action(actionRunner(addMUI));
-react
-  .command("add:antd")
-  .description("Project integration with Ant Design")
-  .action(actionRunner(addAntd));
-react
-  .command("add:styled")
-  .description("Project integration with Styled Components")
-  .action(actionRunner(addStyled));
-react
-  .command("add:recoil")
-  .description("Project integration with Recoil")
-  .action(actionRunner(addRecoil));
-react
-  .command("add:toolkit")
-  .description("Project integration with Redux-Toolkit")
-  .action(actionRunner(addReduxToolkit));
-react
-  .command("add:route")
-  .description("Project integration with React Router")
-  .action(actionRunner(addReactRouter));
-react
-  .command("make:component")
-  .description("Generate component")
+const styleOption: any = [
+  "--style",
+  "style format",
+  {
+    required: false,
+    validator: configure.list.style,
+  },
+];
+
+program
+  .command("react add:mui", "Project integration with Material UI")
+  .action(addMUI)
+
+  .command("react add:antd", "Project integration with Ant Design")
+  .action(addAntd)
+
+  .command("react add:styled", "Project integration with Styled Components")
+  .action(addStyled)
+
+  .command("react add:recoil", "Project integration with Recoil")
+  .action(addRecoil)
+
+  .command("react add:toolkit", "Project integration with Redux-Toolkit")
+  .action(addReduxToolkit)
+
+  .command("react add:route", "Project integration with React Router")
+  .action(addReactRouter)
+
+  .command("react make:component", "Generate component")
   .argument("<name>", "component name")
-  .addOption(
-    new Option("--style <name>", "style name").choices(configure.list.style),
-  )
-  .action(actionRunner(makeComponent));
-react
-  .command("make:route")
-  .description("Generate route pages (React Router)")
+  .option(styleOption[0], styleOption[1], styleOption[2])
+  .action(makeComponent)
+
+  .command("react make:route", "Generate route pages (React Router)")
   .argument("<name>", "component name")
   .argument("<url>", "path url")
-  .addOption(
-    new Option("--style <name>", "style name").choices(configure.list.style),
-  )
-  .action(actionRunner(makeRoute));
-react
-  .command("make:toolkit")
-  .description("Generate store redux toolkit")
+  .option(styleOption[0], styleOption[1], styleOption[2])
+  .action(makeRoute)
+
+  .command("react make:toolkit", "Generate store redux toolkit")
   .argument("<name>", "store name")
-  .addOption(
-    new Option("--type <string>", "type store name").choices([
-      "async",
-      "reducer",
-    ]),
-  )
-  .addOption(new Option("--url <string>", "URL API [async]"))
-  .action(actionRunner(makeReduxToolkit));
+  .option("--type", "store type", {
+    required: false,
+    validator: ["async", "reducer"],
+  })
+  .option("--url", "URL API [async]")
+  .action(makeReduxToolkit);
 
 export async function addMUI() {
   const value = config.read();
@@ -189,20 +182,20 @@ export async function addReactRouter() {
     ],
   );
 }
-export async function makeComponent(name: string, option: any) {
+export async function makeComponent({ args, options }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, isTypescript(dir) ? ".tsx" : ".jsx");
+  const compact = compactName(args.name, isTypescript(dir) ? ".tsx" : ".jsx");
 
-  makeRecursiveFolder("component", dir, name);
+  makeRecursiveFolder("component", dir, args.name);
   file.mkdir(paths.directory.component([], dir));
 
   let code = file
     .read(paths.data.react + "component.jsx")
     .replaceAll("$name", compact.titleCaseWordOnly);
-  if (option.style) {
+  if (options.style) {
     let style = generate(dir, {
-      format: option.style,
+      format: options.style,
       name: compact.titleCaseWordOnly,
       path: compact.folder,
       subfolder: "component",
@@ -214,19 +207,19 @@ export async function makeComponent(name: string, option: any) {
     code,
   );
 }
-export async function makeRoute(name: string, url: string, option: any) {
+export async function makeRoute({ args, options }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, isTypescript(dir) ? ".tsx" : ".jsx");
+  const compact = compactName(args.name, isTypescript(dir) ? ".tsx" : ".jsx");
 
-  makeRecursiveFolder("route", dir, name);
+  makeRecursiveFolder("route", dir, args.name);
 
   let code = file
     .read(paths.data.react + "@react-router/route.jsx")
     .replaceAll("$name", compact.titleCaseWordOnly);
-  if (option.style) {
+  if (options.style) {
     let style = generate(dir, {
-      format: option.style,
+      format: options.style,
       name: compact.titleCaseWordOnly,
       path: compact.folder,
       subfolder: "route",
@@ -252,26 +245,26 @@ export async function makeRoute(name: string, url: string, option: any) {
         )
         .replace(
           "{/*dont remove this comment 2*/}",
-          `{/*dont remove this comment 2*/}\n\t\t\t\t\t<Route path="${url}" element={<${compact.titleCaseWordOnly}/>}/>`,
+          `{/*dont remove this comment 2*/}\n\t\t\t\t\t<Route path="${args.url}" element={<${compact.titleCaseWordOnly}/>}/>`,
         ),
     );
   }
 }
-export async function makeReduxToolkit(name: string, option: any) {
+export async function makeReduxToolkit({ args, options }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, ".js");
+  const compact = compactName(args.name, ".js");
 
-  makeRecursiveFolder("route", dir, name);
+  makeRecursiveFolder("route", dir, args.name);
 
   let code = "";
-  if (option.type === "async") {
-    const url: any = option.url || "http://localhost:8000/api/user";
+  if (options.type === "async") {
+    const url: any = options.url || "http://localhost:8000/api/user";
     code = file
       .read(paths.data.react + "@redux-toolkit/store-crud.js")
       .replaceAll("$name", compact.camelCase)
       .replaceAll("$url", url);
-  } else if (option.type === "reducer") {
+  } else if (options.type === "reducer") {
     const text = file.read(
       paths.data.react + "@redux-toolkit/store-crud-reducer.js",
     );

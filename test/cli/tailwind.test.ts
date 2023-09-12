@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { afterEach } from "node:test";
 import config from "../../src/utils/config.js";
 import {
   addTailwind,
@@ -9,15 +9,23 @@ import {
 } from "../../src/cli/tailwind.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { file } from "../../src/utils/file.js";
+import { input } from "../../src/lib.js";
 
 test("tailwindcss cli test", async (t) => {
+  afterEach(() => {
+    input.close();
+  });
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
 
   await t.test("do make project with vite", async (t) => {
     file.rm(dir);
-    await makeProject(value.app_active, {
-      template: "react",
+    await makeProject({
+      args: { name: value.app_active },
+      options: {
+        template: "react",
+      },
     });
   });
 

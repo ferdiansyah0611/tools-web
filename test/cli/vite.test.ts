@@ -1,11 +1,15 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { afterEach } from "node:test";
 import config from "../../src/utils/config.js";
-import { makeProject, addTailwind } from "../../src/cli/vite.js";
+import { makeProject } from "../../src/cli/vite.js";
 import { file } from "../../src/utils/file.js";
-import { paths } from "../../src/constraint.js";
+import { input } from "../../src/lib.js";
 
 test("vite cli test", async (t) => {
+  afterEach(() => {
+    input.close();
+  });
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
 
@@ -20,26 +24,23 @@ test("vite cli test", async (t) => {
 
   await t.test("install vue", async (t) => {
     folderValidation();
-    await makeProject(value.app_active, {
-      template: "vue",
+    await makeProject({
+      args: { name: value.app_active },
+      options: {
+        template: "vue",
+      },
     });
     installValidation();
   });
 
   await t.test("install react", async (t) => {
     folderValidation();
-    await makeProject(value.app_active, {
-      template: "react",
+    await makeProject({
+      args: { name: value.app_active },
+      options: {
+        template: "react",
+      },
     });
     installValidation();
-  });
-
-  await t.test("integrate tailwindcss", async (t) => {
-    await addTailwind({ react: true });
-    assert.strictEqual(
-      file.isExists(paths.directory.src(["tailwind.sass"], dir)),
-      true,
-    );
-    assert.strictEqual(file.isExists(dir + "/tailwind.config.cjs"), true);
   });
 });

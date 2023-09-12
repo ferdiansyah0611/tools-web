@@ -1,27 +1,22 @@
 import { paths } from "../constraint.js";
-import { actionRunner, program } from "../lib.js";
+import { program } from "../lib.js";
 import { file } from "../utils/file.js";
 import { compactName } from "../utils/text.js";
 import config from "../utils/config.js";
 
-const firebase = program.command("firebase").description("List firebase cli");
-firebase
-  .command("init")
-  .description("Generate initialize firebase, storage & authenticate (v9)")
-  .action(actionRunner(init));
-firebase
-  .command("make:model")
-  .description("Generate model firestore")
+program
+  .command("firebase init", "Generate initialize firebase(v9)")
+  .action(init)
+
+  .command("firebase make:model", "Generate model firestore")
   .argument("<name>", "model name")
-  .action(actionRunner(makeModel));
-firebase
-  .command("storage")
-  .description("Generate service storage")
-  .action(actionRunner(storage));
-firebase
-  .command("gcs")
-  .description("Generate service google cloud storage for backend")
-  .action(actionRunner(gcs));
+  .action(makeModel)
+
+  .command("firebase storage", "Generate service storage")
+  .action(storage)
+
+  .command("firebase gcs", "Generate service google cloud storage for backend")
+  .action(gcs);
 
 export async function init() {
   const value = config.read();
@@ -33,10 +28,10 @@ export async function init() {
     dir + "/src/service/validate-auth.js",
   );
 }
-export async function makeModel(name: string) {
+export async function makeModel({ args }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, ".js");
+  const compact = compactName(args.name, ".js");
   const code = file
     .read(paths.data.firebase + "model.js")
     .replaceAll("model", compact.camelCase);

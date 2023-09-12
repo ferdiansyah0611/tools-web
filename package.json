@@ -35,8 +35,11 @@
   },
   "devDependencies": {
     "@tsconfig/node-lts": "^18.12.5",
-    "@types/node": "^20.5.7",
+    "@types/node": "^20.5.7"
+  },
+  "dependencies": {
+    "@caporal/core": "^2.0.7",
     "chalk": "^5.3.0",
-    "commander": "^11.0.0"
+    "minimist": "^1.2.8"
   }
 }

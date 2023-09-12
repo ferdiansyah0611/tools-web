@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { afterEach } from "node:test";
 import config from "../../src/utils/config.js";
 import {
   changeAppActive,
@@ -11,38 +11,43 @@ import {
   packageInstall,
   packageUninstall,
 } from "../../src/cli/sys.js";
+import { input } from "../../src/lib.js";
 
 test("system cli test", async (t) => {
+  afterEach(() => {
+    input.close();
+  });
+
   const value = config.read();
 
   await t.test("do change app active", async (t) => {
-    changeAppActive("./test");
+    changeAppActive({ args: { path: "./test" } });
     assert.strictEqual(config.read().app_active, "./test");
   });
   await t.test("do change app root", async (t) => {
-    changeAppRoot("C:/User/ferdi/test");
+    changeAppRoot({ args: { path: "C:/User/ferdi/test" } });
     assert.strictEqual(config.read().app_path, "C:/User/ferdi/test");
   });
   await t.test("do change app mode", async (t) => {
-    changeAppMode("1");
+    changeAppMode({ args: { mode: "1" } });
     assert.strictEqual(config.read().mode, 1);
-    changeAppMode("0");
+    changeAppMode({ args: { mode: "0" } });
   });
   await t.test("do update tools-web", async (t) => {
     appUpdate();
   });
   await t.test("do off package", async (t) => {
-    packageOff("react");
+    packageOff({ args: { name: "react" } });
   });
   await t.test("do on package", async (t) => {
-    packageOn("react");
+    packageOn({ args: { name: "react" } });
     assert.deepStrictEqual(config.read().library, value.library);
   });
   await t.test("do install package", async (t) => {
-    packageInstall("maybe-error");
+    packageInstall({ args: { name: "maybe-error" } });
   });
   await t.test("do uninstall package", async (t) => {
-    packageUninstall("maybe-error");
+    packageUninstall({ args: { name: "maybe-error" } });
   });
 
   test.after(() => {

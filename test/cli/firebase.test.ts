@@ -1,36 +1,58 @@
 import assert from "node:assert";
-import test from "node:test";
+import test, { afterEach } from "node:test";
 import config from "../../src/utils/config.js";
 import { init, makeModel, storage, gcs } from "../../src/cli/firebase.js";
 import { file } from "../../src/utils/file.js";
 import { paths } from "../../src/constraint.js";
+import { input } from "../../src/lib.js";
 
 test("firebase cli test", async (t) => {
+  afterEach(() => {
+    input.close();
+  });
+
   const value = config.read();
   const dir = config.getFullPathApp(value);
 
   await t.test("do init", async (t) => {
     init();
     assert.strictEqual(file.isExists(dir + "/src/firebase.js"), true);
-    assert.strictEqual(file.isExists(dir + "/src/service/validate-auth.js"), true);
+    assert.strictEqual(
+      file.isExists(dir + "/src/service/validate-auth.js"),
+      true,
+    );
   });
 
   await t.test("do make model", async (t) => {
     const samples = {
-      data: ["api/user", "api/repository", "api/oauth", "template", "information", "profile", "auth"],
+      data: [
+        "api/user",
+        "api/repository",
+        "api/oauth",
+        "template",
+        "information",
+        "profile",
+        "auth",
+      ],
     };
-    for (let sample of samples.data) makeModel(sample);
+    for (let sample of samples.data) makeModel({ args: { name: sample } });
     for (let sample of samples.data) {
       sample += ".js";
       await t.test(`exists ${sample}`, () =>
-        assert.strictEqual(file.isExists(paths.directory.model([sample], dir)), true),
+        assert.strictEqual(
+          file.isExists(paths.directory.model([sample], dir)),
+          true,
+        ),
       );
     }
   });
 
   await t.test("do storage", (t) => {
     storage();
-    assert.strictEqual(file.isExists(dir + "/src/service/firebase-storage.js"), true);
+    assert.strictEqual(
+      file.isExists(dir + "/src/service/firebase-storage.js"),
+      true,
+    );
   });
 
   await t.test("do gcs", (t) => {

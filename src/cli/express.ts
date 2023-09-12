@@ -1,5 +1,5 @@
 import { paths } from "../constraint.js";
-import { program, Option, actionRunner } from "../lib.js";
+import { program } from "../lib.js";
 import { file } from "../utils/file.js";
 import { toTitleCase, compactName } from "../utils/text.js";
 import { execute, prettier } from "../utils/execute.js";
@@ -12,62 +12,52 @@ const configure = {
     db: ["mongoose", "sequelize"],
   },
 };
-const express = program.command("express").description("List express.js cli");
-express
-  .command("make:project")
-  .description("Create new project")
-  .addOption(
-    new Option("--template <name>", "template engine")
-      .choices(configure.list.template)
-      .makeOptionMandatory(),
-  )
-  .addOption(
-    new Option("--db <name>", "database engine")
-      .choices(configure.list.db)
-      .makeOptionMandatory(),
-  )
-  .action(actionRunner(makeProject));
 
-express
-  .command("server:dev")
-  .description("Run the server application on the background")
-  .action(actionRunner(async () => {
+const columnOption: any[] = ["--col <name>", "column name", { required: true }];
+const dbOption: any[] = [
+  "--db",
+  "database engine",
+  {
+    validator: configure.list.db,
+    required: true,
+  },
+];
+
+program
+  .command("express make:project", "Create new project")
+  .option("--template", "template engine", {
+    validator: configure.list.template,
+    required: true,
+  })
+  .option(dbOption[0], dbOption[1], dbOption[2])
+  .action(makeProject)
+
+  .command("express server:dev", "Run the server application on the background")
+  .action(async () => {
     const value = config.read();
     const sub = execute(`cd ${config.getFullPathApp(value)} && npm run start`, {
       background: true,
     });
     sub.doRun();
-  }));
+  })
 
-express
-  .command("make:model")
-  .description("Generate model")
+  .command("express make:model", "Generate model")
   .argument("<name>", "model name")
-  .addOption(
-    new Option("--db <name>", "database engine")
-      .choices(configure.list.db)
-      .makeOptionMandatory(),
-  )
-  .option("--col <name>", "column name (2 min)", ",")
-  .action(actionRunner(makeModel));
+  .option(dbOption[0], dbOption[1], dbOption[2])
+  .option(columnOption[0], columnOption[1], columnOption[2])
+  .action(makeModel)
 
-express
-  .command("make:api")
-  .description("Generate api")
+  .command("express make:api", "Generate api")
   .argument("<name>", "api name")
-  .addOption(
-    new Option("--db <name>", "database engine")
-      .choices(configure.list.db)
-      .makeOptionMandatory(),
-  )
-  .option("--col <name>", "column name (2 min)", ",")
-  .action(actionRunner(makeAPI));
+  .option(dbOption[0], dbOption[1], dbOption[2])
+  .option(columnOption[0], columnOption[1], columnOption[2])
+  .action(makeAPI);
 
-export async function makeProject(option: any) {
+export async function makeProject({ options }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
   const sub = execute(
-    `npx express-generator ${dir} --view ${option.template}`,
+    `npx express-generator ${dir} --view ${options.template}`,
     {},
   );
 
@@ -82,12 +72,12 @@ export async function makeProject(option: any) {
   sub.doSync();
 
   let appJsCode = file.read(`${paths.data.express}app.js`);
-  let upperCaseDb = toTitleCase(option.db);
+  let upperCaseDb = toTitleCase(options.db);
   let fileToCopy = [
     ["env", dir + "/.env"],
     ["env", dir + "/.env.dev"],
     ["env", dir + "/.env.test"],
-    [`jwt${option.db}.js`, dir + "/service/auth.js"],
+    [`jwt${options.db}.js`, dir + "/service/auth.js"],
     [
       `api/authenticate_${upperCaseDb}.js`,
       paths.directory.api(["authenticate.js"], dir),
@@ -108,9 +98,9 @@ export async function makeProject(option: any) {
       "// catch 404 and forward to error handler",
       `// catch 404 and forward to error handler\napp.use('/api/auth', authenticate)`,
     )
-    .replace("'view engine', 'jade'", `'view engine', '${option.view}'`);
+    .replace("'view engine', 'jade'", `'view engine', '${options.view}'`);
   // if db sequelize
-  if (option.db === "sequelize") {
+  if (options.db === "sequelize") {
     const virtual = code(
       "// connect database",
       "(async() => {",
@@ -130,7 +120,7 @@ export async function makeProject(option: any) {
       `const cors = require('cors');`,
       `const cors = require('cors');\nconst db = require('./db');`,
     );
-    file.copy(paths.data.express + `db${option.db}.js`, dir + "/db.js");
+    file.copy(paths.data.express + `db${options.db}.js`, dir + "/db.js");
   }
   // alias import
   const virtual = code(
@@ -163,17 +153,17 @@ export async function makeProject(option: any) {
   prettier(dir, "/app.js");
 }
 
-export async function makeModel(name: string, option: any) {
+export async function makeModel({ args, options }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, ".js");
-  const replaceState = option.db == "mongoose" ? "new Schema({" : ".init({";
-  const cols: string[] = option.col.split(",");
+  const compact = compactName(args.name, ".js");
+  const replaceState = options.db == "mongoose" ? "new Schema({" : ".init({";
+  const cols: string[] = options.col.split(",");
 
   let virtual = "";
   if (cols.length < 2) throw Error("minimum have 2+ column!");
   cols.forEach((col, i) => {
-    if (option.db === "mongoose") {
+    if (options.db === "mongoose") {
       return (virtual +=
         `\t${col}: String,` + (i === cols.length - 1 ? "" : "\n"));
     }
@@ -181,7 +171,7 @@ export async function makeModel(name: string, option: any) {
       `\t${col}: DataTypes.STRING,` + (i === cols.length - 1 ? "" : "\n"));
   });
   const code = file
-    .read(paths.data.express + option.db + ".js")
+    .read(paths.data.express + options.db + ".js")
     .replaceAll("$name", compact.titleCaseWordOnly)
     .replaceAll("$models", compact.titleCaseWordOnly)
     .replace(replaceState, replaceState + "\n" + virtual);
@@ -190,16 +180,16 @@ export async function makeModel(name: string, option: any) {
   file.write(paths.directory.model([compact.pathTitleCase], dir), code);
 }
 
-export async function makeAPI(name: string, option: any) {
+export async function makeAPI({ args, options }: any) {
   const value = config.read();
   const dir = config.getFullPathApp(value);
-  const compact = compactName(name, ".js");
+  const compact = compactName(args.name, ".js");
 
-  let api = file.read(paths.data.express + `api${option.db}.js`);
+  let api = file.read(paths.data.express + `api${options.db}.js`);
   let validation = "";
   let middleware = "";
 
-  const cols: string[] = option.col.split(",");
+  const cols: string[] = options.col.split(",");
   if (cols.length < 2) throw Error("minimum have 2+ column!");
   cols.forEach((col, i) => {
     validation +=
