@@ -10,8 +10,8 @@ test("vite cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
 
   const folderValidation = () => {
     file.rm(dir);
@@ -22,7 +22,7 @@ test("vite cli test", async (t) => {
     assert.strictEqual(file.isExists(dir + "/vercel.json"), true);
   };
 
-  await t.test("install vue", async (t) => {
+  await t.test("install vue", async () => {
     folderValidation();
     await makeProject({
       args: { name: value.app_active },
@@ -33,7 +33,7 @@ test("vite cli test", async (t) => {
     installValidation();
   });
 
-  await t.test("install react", async (t) => {
+  await t.test("install react", async () => {
     folderValidation();
     await makeProject({
       args: { name: value.app_active },

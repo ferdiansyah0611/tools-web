@@ -19,8 +19,7 @@ program
   .action(gcs);
 
 export async function init() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   file.mkdir(dir + "/src/service");
   file.copy(paths.data.firebase + "firebase.js", dir + "/src/firebase.js");
   file.copy(
@@ -29,8 +28,7 @@ export async function init() {
   );
 }
 export async function makeModel({ args }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".js");
   const code = file
     .read(paths.data.firebase + "model.js")
@@ -40,16 +38,14 @@ export async function makeModel({ args }: any) {
   file.write(paths.directory.model([compact.path], dir), code);
 }
 export async function storage() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const code = file.read(paths.data.firebase + "storage.js");
 
   file.mkdir(dir + "/src/service");
   file.write(`${dir}/src/service/firebase-storage.js`, code);
 }
 export async function gcs() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   file.mkdir(dir + "/src/service");
   file.copy(
     paths.data.firebase + "storage-be.js",

@@ -60,8 +60,8 @@ program
   .action(makeReduxToolkit);
 
 export async function addMUI() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npm install @mui/material @emotion/react @emotion/styled @mui/icons-material --save`,
     {},
@@ -79,8 +79,8 @@ export async function addMUI() {
   );
 }
 export async function addAntd() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm install antd --save`, {});
 
   sub.changeEcho(value);
@@ -92,16 +92,16 @@ export async function addAntd() {
   );
 }
 export async function addStyled() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm install styled-components`, {});
 
   sub.changeEcho(value);
   sub.doSync();
 }
 export async function addRecoil() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm install recoil`, {});
 
   sub.changeEcho(value);
@@ -116,8 +116,8 @@ export async function addRecoil() {
   prettier(dir, "src/main.jsx");
 }
 export async function addReduxToolkit() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npm install @reduxjs/toolkit react-redux`,
     {},
@@ -152,8 +152,8 @@ export async function addReduxToolkit() {
   prettier(dir, "src/main.jsx");
 }
 export async function addReactRouter() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm install react-router-dom`, {});
 
   sub.changeEcho(value);
@@ -183,8 +183,7 @@ export async function addReactRouter() {
   );
 }
 export async function makeComponent({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, isTypescript(dir) ? ".tsx" : ".jsx");
 
   makeRecursiveFolder("component", dir, args.name);
@@ -208,8 +207,7 @@ export async function makeComponent({ args, options }: any) {
   );
 }
 export async function makeRoute({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, isTypescript(dir) ? ".tsx" : ".jsx");
 
   makeRecursiveFolder("route", dir, args.name);
@@ -251,8 +249,7 @@ export async function makeRoute({ args, options }: any) {
   }
 }
 export async function makeReduxToolkit({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".js");
 
   makeRecursiveFolder("route", dir, args.name);

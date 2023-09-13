@@ -39,7 +39,7 @@ This command is related to the system. Such as packages, namespaces, projects an
 ```bash
 tw active myapp # current project
 tw root C:/User/Ferdi/Project # namespace
-tw mode 1 # development/production
+tw mode p # development/production
 tw update # upgrading to latest version
 twx off name # disable package
 twx on name # enable package

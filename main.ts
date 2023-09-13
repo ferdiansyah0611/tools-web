@@ -17,9 +17,9 @@ program
   .description("Tools to speed up developing a website using the cli").version("1.2.00");
 
 const configValue = config.read();
+// load library
 await new Promise((resolve) => {
   if (!configValue.library.length) return resolve(true);
-
   configValue.library.forEach(async (library, index, arr) => {
     if (!library.active) return;
     await import(library.path);
@@ -30,6 +30,9 @@ await new Promise((resolve) => {
 });
 await completion();
 
+/**
+ * main function
+ */
 export default async function main(arg: string|string[], callback: any, isTest: boolean = false) {
   try {
     let v = minimist(arg);

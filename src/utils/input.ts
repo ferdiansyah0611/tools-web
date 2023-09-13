@@ -25,7 +25,7 @@ async function ask(question: string) {
 async function select(message: string, options: any[]) {
   let choice = -1;
 
-  const callback = (c: any, k: any, resolve: any) => {
+  const callback = (_: any, k: any, resolve: any) => {
     console.clear();
     process.stdout.write(chalk.cyan("# " + message + "\n"));
 

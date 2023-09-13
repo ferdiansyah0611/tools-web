@@ -12,16 +12,19 @@ function multiCommand() {
   action();
 
   async function action(argv: string | any = ""): Promise<any> {
-    let value = config.read();
+    let value = config.value;
     let argument =
       argv || (await input.prompt(chalk.green(`/${value.app_active} `)));
     let split: string[] = argument.split(" ");
 
-    if(argument === "") {
+    if (argument === "") {
       split = ["help"];
     }
     if (argument === ".") {
       welcome();
+      return action();
+    }
+    if (argument.startsWith("reload")) {
       return action();
     }
     return main(split, action);
@@ -29,7 +32,7 @@ function multiCommand() {
 }
 
 function welcome() {
-  let conf = config.read();
+  let conf = config.value;
   let message = `
 	Welcome to Tools Web
 	${chalk.magentaBright("Namespace")}\t: ${conf.app_path}

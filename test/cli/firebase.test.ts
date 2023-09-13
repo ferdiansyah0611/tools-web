@@ -11,10 +11,9 @@ test("firebase cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
 
-  await t.test("do init", async (t) => {
+  await t.test("do init", async () => {
     init();
     assert.strictEqual(file.isExists(dir + "/src/firebase.js"), true);
     assert.strictEqual(
@@ -47,7 +46,7 @@ test("firebase cli test", async (t) => {
     }
   });
 
-  await t.test("do storage", (t) => {
+  await t.test("do storage", () => {
     storage();
     assert.strictEqual(
       file.isExists(dir + "/src/service/firebase-storage.js"),
@@ -55,7 +54,7 @@ test("firebase cli test", async (t) => {
     );
   });
 
-  await t.test("do gcs", (t) => {
+  await t.test("do gcs", () => {
     gcs();
     assert.strictEqual(file.isExists(dir + "/src/service/storage.js"), true);
   });

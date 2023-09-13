@@ -11,10 +11,9 @@ test("express cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
 
-  await t.test("do make project", async (t) => {
+  await t.test("do make project", async () => {
     await makeProject({
       options: {
         template: "hbs",

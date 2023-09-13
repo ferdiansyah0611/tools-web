@@ -16,10 +16,10 @@ test("tailwindcss cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
 
-  await t.test("do make project with vite", async (t) => {
+  await t.test("do make project with vite", async () => {
     file.rm(dir);
     await makeProject({
       args: { name: value.app_active },
@@ -29,10 +29,10 @@ test("tailwindcss cli test", async (t) => {
     });
   });
 
-  await t.test("do add tailwindcss", async (t) => {
+  await t.test("do add tailwindcss", async () => {
     await addTailwind();
   });
-  await t.test("do add daisy ui", async (t) => {
+  await t.test("do add daisy ui", async () => {
     await addDaisyUI();
     await new Promise((resolve) => {
       setTimeout(() => {
@@ -49,10 +49,10 @@ test("tailwindcss cli test", async (t) => {
       }, 1000);
     });
   });
-  await t.test("do add headless ui", async (t) => {
+  await t.test("do add headless ui", async () => {
     await addHeadlessUI();
   });
-  await t.test("do add flowbite", async (t) => {
+  await t.test("do add flowbite", async () => {
     await addFlowbite();
     await new Promise((resolve) => {
       setTimeout(() => {

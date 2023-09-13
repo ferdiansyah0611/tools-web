@@ -34,7 +34,7 @@ program
 
   .command("express server:dev", "Run the server application on the background")
   .action(async () => {
-    const value = config.read();
+    const value = config.value;
     const sub = execute(`cd ${config.getFullPathApp(value)} && npm run start`, {
       background: true,
     });
@@ -54,8 +54,8 @@ program
   .action(makeAPI);
 
 export async function makeProject({ options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `npx express-generator ${dir} --view ${options.template}`,
     {},
@@ -154,8 +154,7 @@ export async function makeProject({ options }: any) {
 }
 
 export async function makeModel({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".js");
   const replaceState = options.db == "mongoose" ? "new Schema({" : ".init({";
   const cols: string[] = options.col.split(",");
@@ -181,8 +180,7 @@ export async function makeModel({ args, options }: any) {
 }
 
 export async function makeAPI({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".js");
 
   let api = file.read(paths.data.express + `api${options.db}.js`);

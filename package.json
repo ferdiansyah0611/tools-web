@@ -6,6 +6,7 @@
   "scripts": {
     "postinstall": "node setup.js",
     "start": "node ./dist/src/multi-command.js",
+    "dev": "npx nodemon --exec \"npm run start\" -w ./dist",
     "test:express": "node ./dist/test/cli/express.test.js",
     "test:firebase": "node ./dist/test/cli/firebase.test.js",
     "test:react": "node ./dist/test/cli/react.test.js",

@@ -5,9 +5,22 @@ import {
   copyFileSync,
   readFileSync,
   rmSync,
-} from "fs";
+} from "node:fs";
 import { output } from "../lib.js";
 import { paths } from "../constraint.js";
+import config from "./config.js";
+
+/**
+ * removing fullpath namespace from output.log file
+ */
+const loggerFile = (value: string) => {
+  output.log(
+    value
+      .replace(config.pathApp[0], "")
+      .replace(config.pathApp[1], "")
+      .replaceAll("\\", "/"),
+  );
+};
 
 class File {
   constructor() {
@@ -24,7 +37,7 @@ class File {
     try {
       for (let x of dir) {
         if (!existsSync(x)) {
-          output.log("mkdir", x);
+          loggerFile("mkdir " + x);
           mkdirSync(x, {
             recursive: true,
           });
@@ -44,10 +57,12 @@ class File {
     replace: ((text: string) => string) | null = null,
   ) {
     try {
+      if (!this.isExists(filepath))
+        throw Error('Append failed, file not exists "' + filepath + '"');
       let text = readFileSync(filepath, "utf8").toString();
       let commit = first + (replace ? replace(text) : text) + (end || "");
       writeFileSync(filepath, commit);
-      output.log(`append value from ${filepath} [${commit.length} bytes]`);
+      loggerFile(`append value from ${filepath} [${commit.length} bytes]`);
     } catch (e: any) {
       output.error(e.message);
     }
@@ -58,7 +73,7 @@ class File {
   copy(copy: string, dir: string) {
     try {
       copyFileSync(copy, dir);
-      return output.log("copied to", dir);
+      return loggerFile("copied to " + dir);
     } catch (e: any) {
       output.error(e.message);
     }
@@ -77,7 +92,7 @@ class File {
   write(dir: string, val: string) {
     try {
       writeFileSync(dir, val);
-      return output.log("write", dir);
+      return loggerFile("write " + dir);
     } catch (e: any) {
       output.error(e.message);
     }
@@ -94,7 +109,7 @@ class File {
   rm(dir: string) {
     try {
       rmSync(dir, { recursive: true, force: true });
-      return output.log("rm", dir);
+      return loggerFile("rm " + dir);
     } catch (e: any) {
       output.error(e.message);
     }

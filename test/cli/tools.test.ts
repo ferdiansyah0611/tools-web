@@ -10,8 +10,8 @@ test("tools cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
 
   test.before(async () => {
     file.rm(dir);
@@ -23,10 +23,10 @@ test("tools cli test", async (t) => {
     });
   });
 
-  await t.test("do change app active", async (t) => {
+  await t.test("do change app active", async () => {
     prettierAll();
   });
-  await t.test("do change app root", async (t) => {
+  await t.test("do change app root", async () => {
     gitAutomate({ args: { remote: "origin", branch: "main" } });
   });
 });

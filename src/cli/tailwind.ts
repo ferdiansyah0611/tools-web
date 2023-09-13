@@ -18,8 +18,8 @@ program
   .action(addFlowbite);
 
 export async function addTailwind(): Promise<any> {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npm install -D tailwindcss postcss autoprefixer sass --save && npx tailwindcss init -p`,
     {},
@@ -42,8 +42,8 @@ export async function addTailwind(): Promise<any> {
 }
 
 export async function addDaisyUI(): Promise<any> {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm i -D daisyui@latest`, {});
 
   sub.changeEcho(value);
@@ -60,8 +60,8 @@ export async function addDaisyUI(): Promise<any> {
 }
 
 export async function addHeadlessUI(): Promise<any> {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir}`, {});
   const packageJson = readPackageJson(dir);
 
@@ -79,8 +79,8 @@ export async function addHeadlessUI(): Promise<any> {
 }
 
 export async function addFlowbite(): Promise<any> {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm install flowbite`, {});
 
   sub.changeEcho(value);

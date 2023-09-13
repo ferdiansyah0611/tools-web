@@ -30,6 +30,9 @@ program
   .command("vue add:element-plus", "Project integration with Element Plus")
   .action(addElementPlus)
 
+  .command("vue add:route", "Project integration with Vue Router")
+  .action(addRoute)
+
   .command("vue make:component", "Generate component")
   .argument("<name>", "component name")
   .option("--no-hook", "without hook")
@@ -41,13 +44,14 @@ program
   .option("--no-hook", "without hook")
   .action(makeRoute)
 
-  .command("vue make:store", "Generate store")
-  .argument("<name>", "store name")
-  .action(makeStore);
+  .command("vue make:vuex", "Generate vuex state")
+  .argument("<name>", "state name")
+  .action(makeVuex);
 
 export async function addQuasar() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const fw = "@quasar";
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npm i quasar @quasar/extras --save && npm i -D @quasar/vite-plugin sass@1.32.12`,
     {},
@@ -60,20 +64,16 @@ export async function addQuasar() {
   code += "import { Quasar } from 'quasar';\n";
   code += "import '@quasar/extras/material-icons/material-icons.css';\n";
   code += "import 'quasar/src/css/index.sass';";
-  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) =>
-    text
-      .replace('from "vue";', 'from "vue";\n' + code)
-      .replace(
-        "createApp(App);",
-        "createApp(App);\n" + "app.use(Quasar, {plugins: {}});",
-      ),
-  );
+
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\n" + code)
+    .replace(/(createApp\(App\))/, "$1.use(Quasar, {plugins: {}})")
+  )
   file.append(dir + "/vite.config.js", "", null, (text: string) =>
     text
       .replace(
-        'from "path";',
-        'from "path";\n' +
-          "import { quasar, transformAssetUrls } from '@quasar/vite-plugin';",
+        /(from "path";)/,
+        "$1\nimport { quasar, transformAssetUrls } from '@quasar/vite-plugin';",
       )
       .replace(
         "vue(),",
@@ -81,15 +81,15 @@ export async function addQuasar() {
       ),
   );
   file.copy(
-    paths.data.vue + "quasar-variables.sass",
+    paths.data.vue + fw + "quasar-variables.sass",
     paths.directory.src(["quasar-variables.sass"], dir),
   );
   prettierFormatted(dir);
 }
 
 export async function addVuetify({ options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(`cd ${dir} && npm i vuetify@^3.3.15`, {});
   const vuetifyCode = code(
     `const vuetify = createVuetify({ components, directives, icons: { defaultSet: 'mdi', aliases, sets: { mdi }}});`,
@@ -107,10 +107,7 @@ export async function addVuetify({ options }: any) {
       importCode.next("import '@mdi/font/css/materialdesignicons.css';");
     case "mdi-cdn":
       file.append(dir + "/index.html", "", "", (text: string) =>
-        text.replace(
-          "</title>",
-          "</title>\n" +
-            `<link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">`,
+        text.replace(/(\<\/title>)/, "$1\n<link href=\"https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css\" rel=\"stylesheet\">",
         ),
       );
     case "material-icon-npm":
@@ -124,9 +121,8 @@ export async function addVuetify({ options }: any) {
     case "material-icon-cdn":
       file.append(dir + "/index.html", "", "", (text: string) =>
         text.replace(
-          "</title>",
-          "</title>\n" +
-            `<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp"/>`,
+          /(\<\/title>)/,
+          "$1\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp\"/>",
         ),
       );
     case "fontawesome-npm":
@@ -138,9 +134,8 @@ export async function addVuetify({ options }: any) {
     case "fontawesome-cdn":
       file.append(dir + "/index.html", "", "", (text: string) =>
         text.replace(
-          "</title>",
-          "</title>\n" +
-            `<link href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" rel="stylesheet">`,
+          /(\<\/title>)/,
+          "$1\n<link href=\"https://use.fontawesome.com/releases/v5.0.13/css/all.css\" rel=\"stylesheet\">",
         ),
       );
   }
@@ -156,19 +151,18 @@ export async function addVuetify({ options }: any) {
   sub.changeEcho(value);
   sub.doSync();
 
-  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) =>
-    text
-      .replace('from "vue";', 'from "vue";\n' + importCode.v)
-      .replace("const app", vuetifyCode.v + "\nconst app")
-      .replace("createApp(App);", "createApp(App);\n" + "app.use(vuetify);"),
-  );
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\n" + importCode.v)
+    .replace("const app", vuetifyCode.v + "\nconst app")
+    .replace(/(createApp\(App\))/, "$1.use(vuetify)")
+  )
   prettier(dir, "index.html");
   prettier(paths.directory.src([], dir), "main.js");
 }
 
 export async function addAntd() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npm i --save ant-design-vue@4.x && npm install unplugin-vue-components -D`,
     {},
@@ -186,11 +180,10 @@ export async function addAntd() {
   sub.changeEcho(value);
   sub.doSync();
 
-  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) =>
-    text
-      .replace('from "vue";', 'from "vue";\n' + antCode.v)
-      .replace("createApp(App);", "createApp(App);\n" + "app.use(Antd);"),
-  );
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\n" + antCode.v)
+    .replace(/(createApp\(App\))/, "$1.use(Antd)")
+  )
   viteAddImportAndPlugin(
     dir,
     viteCode.v,
@@ -200,8 +193,8 @@ export async function addAntd() {
 }
 
 export async function addElementPlus() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npm install element-plus --save && npm install -D unplugin-vue-components unplugin-auto-import`,
     {},
@@ -220,14 +213,10 @@ export async function addElementPlus() {
   sub.changeEcho(value);
   sub.doSync();
 
-  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) =>
-    text
-      .replace('from "vue";', 'from "vue";\n' + elementPlusCode.v)
-      .replace(
-        "createApp(App);",
-        "createApp(App);\n" + "app.use(ElementPlus);",
-      ),
-  );
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\n" + elementPlusCode.v)
+    .replace(/(createApp\(App\))/, "$1.use(ElementPlus)")
+  )
   viteAddImportAndPlugin(
     dir,
     viteCode.v,
@@ -236,9 +225,54 @@ export async function addElementPlus() {
   prettierFormatted(dir);
 }
 
+export async function addRoute() {
+  const value = config.value;
+  const dir = config.pathApp[0];
+  const fw = "@vue-router"
+  const sub = execute(
+    `cd ${value.app_path} && npm i vue-router`,
+    {},
+  );
+  sub.changeEcho(value);
+  sub.doSync();
+
+  file.mkdir(paths.directory.route([], dir));
+  file.copyBulk(
+    [paths.data.vue + fw + "/router.js", paths.directory.route(["index.js"], dir)],
+    [paths.data.vue + fw + "/Home.vue", paths.directory.route(["Home.vue"], dir)],
+  );
+  file.append(paths.directory.src(["App.vue"], dir), "", null, (text: string) => text.replace(/(<template>)/, "$1\n\t<router-view />"))
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\nimport router from \"./route\";")
+    .replace(/(createApp\(App\))/, "$1.use(router)")
+  )
+  prettierFormatted(dir);
+}
+
+export async function addVuex() {
+  const value = config.value;
+  const dir = config.pathApp[0];
+  const fw = "@vuex";
+  const sub = execute(
+    `cd ${value.app_path} && npm i vuex`,
+    {},
+  );
+  sub.changeEcho(value);
+  sub.doSync();
+
+  file.mkdir(paths.directory.store([], dir));
+  file.copyBulk(
+    [paths.data.vue + fw + "/index.js", paths.directory.store(["index.js"], dir)],
+  );
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\nimport store from \"./store\";")
+    .replace(/(createApp\(App\))/, "$1.use(store)")
+  )
+  prettierFormatted(dir);
+}
+
 export async function makeComponent({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".vue");
 
   makeRecursiveFolder("components", dir, args.name);
@@ -257,8 +291,7 @@ export async function makeComponent({ args, options }: any) {
 }
 
 export async function makeRoute({ args, options }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".vue");
 
   makeRecursiveFolder("route", dir, args.name);
@@ -281,26 +314,27 @@ export async function makeRoute({ args, options }: any) {
     (text: string) =>
       text
         .replace(
-          "// dont remove [1]",
-          `// dont remove [1]\nimport ${compact.titleCaseWordOnly} from '@route/${compact.path}'`,
+          /(from "vue-router";)/,
+          `$1\nimport ${compact.titleCaseWordOnly} from '@route/${compact.path}'`,
         )
         .replace(
-          "// dont remove [2]",
-          `// dont remove [2]\n\t{ path: '${args.url}', name: '${compact.titleCaseWordOnly}', component: ${compact.titleCaseWordOnly} },`,
+          /(const routes = \[)/,
+          `$1\n\t{ path: '${args.url}', name: '${compact.titleCaseWordOnly}', component: ${compact.titleCaseWordOnly} },`,
         ),
   );
 }
 
-export async function makeStore({ args }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+export async function makeVuex({ args }: any) {
+  const dir = config.pathApp[0];
   const compact = compactName(args.name, ".js");
+  const fw = "@vuex";
 
   makeRecursiveFolder("store", dir, args.name);
 
   let code = file
-    .read(paths.data.vue + "store.js")
+    .read(paths.data.vue + fw + "/store.js")
     .replaceAll("$name", args.name);
+
   file.append(
     paths.directory.store(["index.js"], dir),
     "",
@@ -336,7 +370,7 @@ function viteAddImportAndPlugin(
 ) {
   file.append(dir + "/vite.config.js", "", null, (text: string) =>
     text
-      .replace('from "path";', 'from "path";\n' + importCode)
-      .replace("plugins: [", "plugins: [" + pluginCode),
+      .replace(/(from "path";)/, '$1\n' + importCode)
+      .replace(/(plugins: \[)/, "$1" + pluginCode),
   );
 }

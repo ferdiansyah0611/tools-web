@@ -9,7 +9,9 @@ import {
   addElementPlus,
   makeComponent,
   makeRoute,
-  makeStore,
+  makeVuex,
+  addRoute,
+  addVuex,
 } from "../../src/cli/vue.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { paths } from "../../src/constraint.js";
@@ -20,11 +22,10 @@ test("vue cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
 
-  await t.test("do make project with vite", async (t) => {
-    file.rm(dir);
+  await t.test("do make project with vite", async () => {
+    file.rm(config.pathApp[0]);
     await makeProject({
       args: { name: value.app_active },
       options: {
@@ -33,30 +34,40 @@ test("vue cli test", async (t) => {
     });
   });
 
-  await t.test("do add quasar", async (t) => {
+  await t.test("do add quasar", async () => {
     await addQuasar();
     assert.strictEqual(
-      file.isExists(paths.directory.src(["quasar-variables.sass"], dir)),
+      file.isExists(
+        paths.directory.src(["quasar-variables.sass"], config.pathApp[0]),
+      ),
       true,
     );
   });
 
-  await t.test("do add vuetify", async (t) => {
+  await t.test("do add vuetify", async () => {
     await addVuetify({
       options: {
         icon: "mdi-cdn",
       },
     });
   });
-  await t.test("do add ant design", async (t) => {
+  await t.test("do add ant design", async () => {
     await addAntd();
   });
 
-  await t.test("do add element plus", async (t) => {
+  await t.test("do add element plus", async () => {
     await addElementPlus();
   });
 
-  await t.test("do make component", async (t) => {
+  await t.test("do add vue-router", async () => {
+    await addRoute();
+  });
+
+  await t.test("do add vuex", async () => {
+    await addVuex();
+  });
+
+  await t.test("do make component", async () => {
     const samples = {
       data: ["layout/navbar", "layout/sidebar", "button", "card", "list"],
     };
@@ -70,14 +81,16 @@ test("vue cli test", async (t) => {
       sample += ".vue";
       await t.test(`exists ${sample}`, () =>
         assert.strictEqual(
-          file.isExists(paths.directory.components([sample], dir)),
+          file.isExists(
+            paths.directory.components([sample], config.pathApp[0]),
+          ),
           true,
         ),
       );
     }
   });
 
-  await t.test("do make store", async (t) => {
+  await t.test("do make vuex", async (t) => {
     const samples = {
       data: [
         "api/user",
@@ -89,12 +102,12 @@ test("vue cli test", async (t) => {
         "auth",
       ],
     };
-    for (let sample of samples.data) makeStore({ args: { name: sample } });
+    for (let sample of samples.data) makeVuex({ args: { name: sample } });
     for (let sample of samples.data) {
       sample += ".js";
       await t.test(`exists ${sample}`, () =>
         assert.strictEqual(
-          file.isExists(paths.directory.store([sample], dir)),
+          file.isExists(paths.directory.store([sample], config.pathApp[0])),
           true,
         ),
       );
@@ -120,7 +133,7 @@ test("vue cli test", async (t) => {
       sample[0] += ".vue";
       await t.test(`exists ${sample[0]}`, () =>
         assert.strictEqual(
-          file.isExists(paths.directory.route([sample[0]], dir)),
+          file.isExists(paths.directory.route([sample[0]], config.pathApp[0])),
           true,
         ),
       );

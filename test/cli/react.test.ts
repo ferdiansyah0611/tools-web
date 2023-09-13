@@ -21,12 +21,12 @@ test("react cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
 
   file.rm(dir);
 
-  await t.test("do make project with vite", async (t) => {
+  await t.test("do make project with vite", async () => {
     await makeProject({
       args: { name: value.app_active },
       options: {
@@ -35,7 +35,7 @@ test("react cli test", async (t) => {
     });
   });
 
-  await t.test("do add mui", async (t) => {
+  await t.test("do add mui", async () => {
     await addMUI();
     assert.strictEqual(
       file.isExists(paths.directory.src(["mui.jsx"], dir)),
@@ -47,19 +47,19 @@ test("react cli test", async (t) => {
     );
   });
 
-  await t.test("do add antd", async (t) => {
+  await t.test("do add antd", async () => {
     await addAntd();
   });
 
-  await t.test("do add recoil", async (t) => {
+  await t.test("do add recoil", async () => {
     await addRecoil();
   });
 
-  await t.test("do add redux-toolkit", async (t) => {
+  await t.test("do add redux-toolkit", async () => {
     await addReduxToolkit();
   });
 
-  await t.test("do add react-router", async (t) => {
+  await t.test("do add react-router", async () => {
     await addReactRouter();
   });
 

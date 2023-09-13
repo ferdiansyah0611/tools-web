@@ -18,35 +18,35 @@ test("system cli test", async (t) => {
     input.close();
   });
 
-  const value = config.read();
+  const value = config.value;
 
-  await t.test("do change app active", async (t) => {
+  await t.test("do change app active", async () => {
     changeAppActive({ args: { path: "./test" } });
     assert.strictEqual(config.read().app_active, "./test");
   });
-  await t.test("do change app root", async (t) => {
+  await t.test("do change app root", async () => {
     changeAppRoot({ args: { path: "C:/User/ferdi/test" } });
     assert.strictEqual(config.read().app_path, "C:/User/ferdi/test");
   });
-  await t.test("do change app mode", async (t) => {
-    changeAppMode({ args: { mode: "1" } });
+  await t.test("do change app mode", async () => {
+    changeAppMode({ args: { mode: "p" } });
     assert.strictEqual(config.read().mode, 1);
-    changeAppMode({ args: { mode: "0" } });
+    changeAppMode({ args: { mode: "d" } });
   });
-  await t.test("do update tools-web", async (t) => {
+  await t.test("do update tools-web", async () => {
     appUpdate();
   });
-  await t.test("do off package", async (t) => {
+  await t.test("do off package", async () => {
     packageOff({ args: { name: "react" } });
   });
-  await t.test("do on package", async (t) => {
+  await t.test("do on package", async () => {
     packageOn({ args: { name: "react" } });
     assert.deepStrictEqual(config.read().library, value.library);
   });
-  await t.test("do install package", async (t) => {
+  await t.test("do install package", async () => {
     packageInstall({ args: { name: "maybe-error" } });
   });
-  await t.test("do uninstall package", async (t) => {
+  await t.test("do uninstall package", async () => {
     packageUninstall({ args: { name: "maybe-error" } });
   });
 

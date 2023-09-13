@@ -14,8 +14,7 @@ program
   .hide();
 
 export async function prettierAll() {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && npx prettier --write . --log-level silent`,
     {},
@@ -25,8 +24,8 @@ export async function prettierAll() {
   output.log("Completed");
 }
 export async function gitAutomate({ args }: any) {
-  const value = config.read();
-  const dir = config.getFullPathApp(value);
+  const value = config.value;
+  const dir = config.pathApp[0];
   const sub = execute(
     `cd ${dir} && git add . && git commit -m "automate push" && git push ${args.remote} ${args.branch}`,
     {},
