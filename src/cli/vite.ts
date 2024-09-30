@@ -32,7 +32,7 @@ program
 export async function makeProject({ args, options }: any) {
   const value = config.value;
   const sub = execute(
-    `cd ${value.app_path} && npm create vite@latest ${args.name} --template ${options.template}`,
+    `cd ${value.app_path} && npx create-vite@latest ${args.name} --template ${options.template}`,
     {},
   );
 

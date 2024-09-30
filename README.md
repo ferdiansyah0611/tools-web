@@ -65,7 +65,7 @@ If you want run a testing, do this:
 npm run test:express
 npm run test:firebase
 npm run test:react
-npm run test:system
+npm run test:sys
 npm run test:tools
 npm run test:tailwind
 npm run test:vite

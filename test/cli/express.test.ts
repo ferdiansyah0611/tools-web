@@ -4,14 +4,16 @@ import config from "../../src/utils/config.js";
 import { makeProject, makeModel, makeAPI } from "../../src/cli/express.js";
 import { file } from "../../src/utils/file.js";
 import { paths } from "../../src/constraint.js";
-import { input } from "../../src/lib.js";
+import { input, output } from "../../src/lib.js";
 
 test("express cli test", async (t) => {
   afterEach(() => {
     input.close();
   });
-
+  
   const dir = config.pathApp[0];
+  output.isHidden = true;
+  file.rm(dir);
 
   await t.test("do make project", async () => {
     await makeProject({

@@ -57,7 +57,7 @@ export async function makeProject({ options }: any) {
   const value = config.value;
   const dir = config.pathApp[0];
   const sub = execute(
-    `npx express-generator ${dir} --view ${options.template}`,
+    `cd ${value.app_path} && npx express-generator ${value.app_active} --view ${options.template}`,
     {},
   );
 

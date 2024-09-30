@@ -46,6 +46,14 @@ class Config implements ConfigInterface {
   pathApp: string[] = [];
 
   constructor() {
+    if(!file.isExists(this.path)) {
+      this.update({
+        app_path: "./app",
+        app_active: "my_app",
+        library: [],
+        mode: 1
+      })
+    }
     const listener = (curr?: any) => {
       this.value = this.read();
 

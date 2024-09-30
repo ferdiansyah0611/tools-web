@@ -81,7 +81,7 @@ export async function addQuasar() {
       ),
   );
   file.copy(
-    paths.data.vue + fw + "quasar-variables.sass",
+    paths.data.vue + fw + "/quasar-variables.sass",
     paths.directory.src(["quasar-variables.sass"], dir),
   );
   prettierFormatted(dir);

@@ -11,14 +11,15 @@ import {
   packageInstall,
   packageUninstall,
 } from "../../src/cli/sys.js";
-import { input } from "../../src/lib.js";
+import { input, output } from "../../src/lib.js";
 
 test("system cli test", async (t) => {
   afterEach(() => {
     input.close();
   });
 
-  const value = config.value;
+  const value = {...config.value};
+  output.isHidden = true;
 
   await t.test("do change app active", async () => {
     changeAppActive({ args: { path: "./test" } });

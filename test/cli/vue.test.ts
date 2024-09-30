@@ -15,7 +15,7 @@ import {
 } from "../../src/cli/vue.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { paths } from "../../src/constraint.js";
-import { input } from "../../src/lib.js";
+import { input, output } from "../../src/lib.js";
 
 test("vue cli test", async (t) => {
   afterEach(() => {
@@ -23,9 +23,12 @@ test("vue cli test", async (t) => {
   });
 
   const value = config.value;
+  const dir = config.pathApp[0];
+  
+  output.isHidden = true;
+  file.rm(dir);
 
   await t.test("do make project with vite", async () => {
-    file.rm(config.pathApp[0]);
     await makeProject({
       args: { name: value.app_active },
       options: {

@@ -14,7 +14,7 @@ import {
 } from "../../src/cli/react.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { paths } from "../../src/constraint.js";
-import { input } from "../../src/lib.js";
+import { input, output } from "../../src/lib.js";
 
 test("react cli test", async (t) => {
   afterEach(() => {
@@ -24,6 +24,7 @@ test("react cli test", async (t) => {
   const value = config.value;
   const dir = config.pathApp[0];
 
+  output.isHidden = true;
   file.rm(dir);
 
   await t.test("do make project with vite", async () => {
@@ -34,7 +35,7 @@ test("react cli test", async (t) => {
       },
     });
   });
-
+  
   await t.test("do add mui", async () => {
     await addMUI();
     assert.strictEqual(

@@ -3,7 +3,7 @@ import config from "../../src/utils/config.js";
 import { prettierAll, gitAutomate } from "../../src/cli/tools.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { file } from "../../src/utils/file.js";
-import { input } from "../../src/lib.js";
+import { input, output } from "../../src/lib.js";
 
 test("tools cli test", async (t) => {
   afterEach(() => {
@@ -12,6 +12,7 @@ test("tools cli test", async (t) => {
 
   const value = config.value;
   const dir = config.pathApp[0];
+  output.isHidden = true;
 
   test.before(async () => {
     file.rm(dir);

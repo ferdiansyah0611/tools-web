@@ -6,7 +6,8 @@
   "scripts": {
     "postinstall": "node setup.js",
     "start": "node ./dist/src/multi-command.js",
-    "dev": "npx nodemon --exec \"npm run start\" -w ./dist",
+    "build": "tsc --build",
+    "build:watch": "tsc --build --watch",
     "test:express": "node ./dist/test/cli/express.test.js",
     "test:firebase": "node ./dist/test/cli/firebase.test.js",
     "test:react": "node ./dist/test/cli/react.test.js",
@@ -14,8 +15,7 @@
     "test:tools": "node ./dist/test/cli/tools.test.js",
     "test:tailwind": "node ./dist/test/cli/tailwind.test.js",
     "test:vite": "node ./dist/test/cli/vite.test.js",
-    "test:vue": "node ./dist/test/cli/vue.test.js",
-    "test:all": "npm run test:express && npm run test:firebase && npm run test:react && npm run test:sys && npm run test:tools && npm run test:tailwind && npm run test:vite && npm run test:vue"
+    "test:vue": "node ./dist/test/cli/vue.test.js"
   },
   "type": "module",
   "keywords": [
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@tsconfig/node-lts": "^18.12.5",
-    "@types/node": "^20.5.7"
+    "@types/node": "^20.16.5"
   },
   "dependencies": {
     "@caporal/core": "^2.0.7",

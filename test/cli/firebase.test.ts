@@ -4,7 +4,7 @@ import config from "../../src/utils/config.js";
 import { init, makeModel, storage, gcs } from "../../src/cli/firebase.js";
 import { file } from "../../src/utils/file.js";
 import { paths } from "../../src/constraint.js";
-import { input } from "../../src/lib.js";
+import { input, output } from "../../src/lib.js";
 
 test("firebase cli test", async (t) => {
   afterEach(() => {
@@ -12,6 +12,7 @@ test("firebase cli test", async (t) => {
   });
 
   const dir = config.pathApp[0];
+  output.isHidden = true;
 
   await t.test("do init", async () => {
     init();
