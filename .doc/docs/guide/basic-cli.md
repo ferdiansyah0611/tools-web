@@ -45,6 +45,8 @@ twx off name # disable package
 twx on name # enable package
 twx install name # install package
 twx uninstall name # uninstall package
+twp install name # install repository
+twp uninstall name # uninstall repository
 ```
 
 ## Tools Command

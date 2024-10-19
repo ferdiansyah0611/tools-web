@@ -17,16 +17,18 @@ program
   .description("Tools to speed up developing a website using the cli").version("1.2.00");
 
 const configValue = config.read();
-// load library
+// load library & repository
 await new Promise((resolve) => {
-  if (!configValue.library.length) return resolve(true);
-  configValue.library.forEach(async (library, index, arr) => {
+  const loadLibrary = async (library: any, index: number, arr: any[]) => {
     if (!library.active) return;
     await import(library.path);
     if (index === arr.length - 1) {
       resolve(true);
     }
-  });
+  }
+  configValue.library.forEach(loadLibrary);
+  configValue.repository.forEach(loadLibrary);
+  if (!configValue.library.length || !configValue.repository.length) return resolve(true);
 });
 await completion();
 

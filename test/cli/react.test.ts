@@ -192,4 +192,8 @@ test("react cli test", async (t) => {
       );
     }
   });
+
+  test.after(() => {
+    config.endSession();
+  });
 });

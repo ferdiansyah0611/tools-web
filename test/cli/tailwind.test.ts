@@ -70,4 +70,8 @@ test("tailwindcss cli test", async (t) => {
       }, 1000);
     });
   });
+  
+  test.after(() => {
+    config.endSession();
+  });
 });

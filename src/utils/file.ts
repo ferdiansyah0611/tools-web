@@ -51,18 +51,24 @@ class File {
    * append text to file
    */
   append(
-    filepath: string,
+    filepath: string|string[],
     first: string,
     end: string | null = null,
     replace: ((text: string) => string) | null = null,
   ) {
     try {
-      if (!this.isExists(filepath))
-        throw Error('Append failed, file not exists "' + filepath + '"');
-      let text = readFileSync(filepath, "utf8").toString();
+      let currentPath = typeof filepath === 'string' ? filepath: '';
+      if(Array.isArray(filepath)) {
+        filepath.forEach((value) => {
+          if(this.isExists(value)) return currentPath = value;
+        })
+      }
+      if (!this.isExists(currentPath))
+        throw Error('Append failed, file not exists "' + currentPath + '"');
+      let text = readFileSync(currentPath, "utf8").toString();
       let commit = first + (replace ? replace(text) : text) + (end || "");
-      writeFileSync(filepath, commit);
-      loggerFile(`append value from ${filepath} [${commit.length} bytes]`);
+      writeFileSync(currentPath, commit);
+      loggerFile(`append value from ${currentPath} [${commit.length} bytes]`);
     } catch (e: any) {
       output.error(e.message);
     }

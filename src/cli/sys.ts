@@ -45,6 +45,16 @@ program
   .command("twx uninstall", "Uninstall the plugin")
   .argument("<name>", "package name")
   .action(packageUninstall)
+  .hide()
+
+  .command("twp install", "Install the repository")
+  .argument("<name>", "repository name")
+  .action(repositoryInstall)
+  .hide()
+
+  .command("twp uninstall", "Uninstall the repository")
+  .argument("<name>", "repository name")
+  .action(repositoryUninstall)
   .hide();
 
 export function exitCommand() {
@@ -131,5 +141,22 @@ export function packageUninstall({ args }: any) {
   sub.doSync();
 
   value.library = value.library.filter((lib) => lib.name !== args.name);
+  config.update(value);
+}
+
+export function repositoryInstall({ args }: any) {
+  const value = config.value;
+
+  value.repository.push({
+    name: args.name,
+    active: true,
+    path: "./src/repository/" + args.name + "/index.js",
+  });
+  config.update(value);
+}
+export function repositoryUninstall({ args }: any) {
+  const value = config.value;
+
+  value.repository = value.library.filter((lib) => lib.name !== args.name);
   config.update(value);
 }

@@ -8,6 +8,9 @@
     "start": "node ./dist/src/multi-command.js",
     "build": "tsc --build",
     "build:watch": "tsc --build --watch",
+    "docs:dev": "cd ./.doc && npm run dev",
+    "docs:build": "cd ./.doc && npm run build",
+    "docs:serve": "cd ./.doc && npm run serve",
     "test:express": "node ./dist/test/cli/express.test.js",
     "test:firebase": "node ./dist/test/cli/firebase.test.js",
     "test:react": "node ./dist/test/cli/react.test.js",
@@ -15,7 +18,8 @@
     "test:tools": "node ./dist/test/cli/tools.test.js",
     "test:tailwind": "node ./dist/test/cli/tailwind.test.js",
     "test:vite": "node ./dist/test/cli/vite.test.js",
-    "test:vue": "node ./dist/test/cli/vue.test.js"
+    "test:vue": "node ./dist/test/cli/vue.test.js",
+    "test:all": "npm run test:firebase && npm run test:react && npm run test:sys && npm run test:tools && npm run test:tailwind && npm run test:vite && npm run test:vue"
   },
   "type": "module",
   "keywords": [

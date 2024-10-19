@@ -64,7 +64,7 @@ export async function makeProject({ options }: any) {
   file.rm(dir);
 
   sub.changeOnProduction(value, (current) => {
-    current += ` && cd ${dir}`;
+    current += ` && cd ${value.app_active}`;
     current += ` && npm i cors express-session bcrypt express-validator jsonwebtoken uuid module-alias dotenv --save`;
     current += ` && npm i mocha supertest -D`;
     return current;

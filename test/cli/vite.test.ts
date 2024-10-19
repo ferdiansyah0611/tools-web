@@ -44,4 +44,8 @@ test("vite cli test", async (t) => {
     });
     installValidation();
   });
+
+  test.after(() => {
+    config.endSession();
+  });
 });

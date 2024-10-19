@@ -83,4 +83,7 @@ test("express cli test", async (t) => {
       );
     }
   });
+  test.after(() => {
+    config.endSession();
+  });
 });

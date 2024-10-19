@@ -1,6 +1,7 @@
 import { output, program } from "../lib.js";
 import { execute } from "../utils/execute.js";
 import config from "../utils/config.js";
+import { paths } from "../constraint.js";
 
 program
   .command("tools prettier:all", "Run prettier in the current project")
@@ -26,6 +27,7 @@ export async function prettierAll() {
 export async function gitAutomate({ args }: any) {
   const value = config.value;
   const dir = config.pathApp[0];
+  console.log(paths.root)
   const sub = execute(
     `cd ${dir} && git add . && git commit -m "automate push" && git push ${args.remote} ${args.branch}`,
     {},

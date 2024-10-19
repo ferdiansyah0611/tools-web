@@ -24,10 +24,14 @@ test("tools cli test", async (t) => {
     });
   });
 
-  await t.test("do change app active", async () => {
+  await t.test("do prettier app", async () => {
     prettierAll();
   });
-  await t.test("do change app root", async () => {
+  await t.test("do git automate app", async () => {
     gitAutomate({ args: { remote: "origin", branch: "main" } });
+  });
+
+  test.after(() => {
+    config.endSession();
   });
 });

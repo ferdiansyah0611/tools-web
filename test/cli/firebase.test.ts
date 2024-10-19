@@ -59,4 +59,8 @@ test("firebase cli test", async (t) => {
     gcs();
     assert.strictEqual(file.isExists(dir + "/src/service/storage.js"), true);
   });
+
+  test.after(() => {
+    config.endSession();
+  });
 });

@@ -1,6 +1,6 @@
 import { file } from "./file.js";
 import { paths } from "../constraint.js";
-import { watchFile } from "node:fs";
+import { unwatchFile, watchFile } from "node:fs";
 import input from "./input.js";
 
 export type ConfigType = {
@@ -8,6 +8,7 @@ export type ConfigType = {
   app_active: string;
   mode: number;
   library: { name: string; active: boolean; path: string }[];
+  repository: { name: string; active: boolean; path: string }[];
 };
 interface ConfigInterface {
   /**
@@ -41,9 +42,15 @@ class Config implements ConfigInterface {
     app_path: "",
     app_active: "",
     mode: 1,
-    library: []
+    library: [],
+    repository: []
   };
   pathApp: string[] = [];
+  /**
+   * end sessions for watchfile config.json
+   * @returns any
+   */
+  endSession: (() => any) = () => true;
 
   constructor() {
     if(!file.isExists(this.path)) {
@@ -51,6 +58,7 @@ class Config implements ConfigInterface {
         app_path: "./app",
         app_active: "my_app",
         library: [],
+        repository: [],
         mode: 1
       })
     }
@@ -64,6 +72,7 @@ class Config implements ConfigInterface {
 
     listener();
     watchFile(paths.root + "/config.json", listener);
+    this.endSession = () => unwatchFile(paths.root + "/config.json", listener);
   }
   /**
    * read config.json
