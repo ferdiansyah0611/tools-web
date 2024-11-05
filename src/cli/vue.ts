@@ -33,6 +33,9 @@ program
   .command("vue add:route", "Project integration with Vue Router")
   .action(addRoute)
 
+  .command("vue add:pinia", "Project integration with Pinia")
+  .action(addPinia)
+
   .command("vue make:component", "Generate component")
   .argument("<name>", "component name")
   .option("--no-hook", "without hook")
@@ -192,6 +195,25 @@ export async function addAntd() {
   prettierFormatted(dir);
 }
 
+export async function addPinia() {
+  const dir = config.pathApp[0];
+  const sub = execute(
+    `cd ${dir} && npm install pinia`,
+    {},
+  );
+  sub.changeEcho(config.value);
+  sub.doSync();
+  // code
+  const piniaCode = code(
+    "import { createPinia } from 'pinia';",
+  );
+  file.append(paths.directory.src(["main.js"], dir), "", null, (text: string) => text
+    .replace(/(from "vue";)/, "$1\n" + piniaCode.v)
+    .replace(/const app/, 'const pinia = createPinia();\nconst app')
+    .replace(/(createApp\(App\))/, "$1.use(pinia)")
+  )
+}
+
 export async function addElementPlus() {
   const value = config.value;
   const dir = config.pathApp[0];
@@ -210,6 +232,7 @@ export async function addElementPlus() {
     "import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';",
   );
 
+  file.mkdir(paths.directory.route([], dir));
   sub.changeEcho(value);
   sub.doSync();
 

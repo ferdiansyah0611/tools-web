@@ -18,8 +18,9 @@ function getGuideSidebar() {
 			makeLink("Firebase", "/library/firebase"),
 		]),
 		makeSub("Repository", [
+			makeLink("Starter", "/repository/starter"),
 			makeLink("React Fully", "/repository/react-fully"),
-			makeLink("Starter", "/repository/starter")
+			makeLink("Laravel", "/repository/laravel"),
 		]),
 		makeSub("Developer", [
 			makeLink("Test", "/dev/test"),
