@@ -3,6 +3,8 @@ import { program, output } from "../lib.js";
 import { file, readPackageJson } from "../utils/file.js";
 import { execute } from "../utils/execute.js";
 import config from "../utils/config.js";
+import { addProvider } from "./react.js";
+import detector from "../utils/detector.js";
 
 program
   .command("tailwind create", "Add tailwindcss to project")
@@ -15,7 +17,10 @@ program
   .action(addHeadlessUI)
 
   .command("tailwind add:flowbite", "Project integration with Flowbite")
-  .action(addFlowbite);
+  .action(addFlowbite)
+  
+  .command("tailwind add:material", "Project integration with Material")
+  .action(addMaterial);
 
 export async function addTailwind(): Promise<any> {
   const value = config.value;
@@ -98,4 +103,46 @@ export async function addFlowbite(): Promise<any> {
   output.log(
     "Don`t forget to add code on the <body> '<script src=\"../path/to/flowbite/dist/flowbite.min.js\"></script>'",
   );
+}
+
+export async function addMaterial() {
+  const value = config.value;
+  const dir = config.pathApp[0];
+  const sub = execute(`cd ${dir} && npm i @material-tailwind/react`, {});
+  
+  sub.changeEcho(value);
+  sub.doSync();
+  
+  if (!detector.vite()) {
+    output.error('just work for vite in current version')
+    output.error('please configuration manually.')
+  }
+
+  let tailwindConfig = dir + "/tailwind.config.cjs";
+  if (!file.isExists(tailwindConfig))
+    return output.error(tailwindConfig + " not exists");
+
+  let code = file
+    .read(tailwindConfig)
+    .replace("module.exports = {", 'module.exports = withMT({')
+    .replace("content: [", 'content: [ "./node_modules/flowbite/**/*.js", ');
+
+  let last = -1;
+  for (let index = 0; index < code.length; index++) {
+    const element = code[index];
+    if (element === '}') {
+      last = index;
+    }
+  }
+  code = code.slice(0, last + 1) + ')' + code.slice(last + 1);
+  code = 'const withMT = require("@material-tailwind/react/utils/withMT");\n' + code;
+  file.write(tailwindConfig, code);
+
+  if (detector.react()) {
+    addProvider(
+      'import { ThemeProvider } from "@material-tailwind/react";',
+      'ThemeProvider',
+      dir
+    )
+  }
 }

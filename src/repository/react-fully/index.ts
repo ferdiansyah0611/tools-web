@@ -4,6 +4,7 @@ import config from "../../utils/config.js";
 import { file } from "../../utils/file.js";
 import { paths } from "../../constraint.js";
 import { join } from "path";
+import { addProvider } from "../../cli/react.js";
 
 type StatePackageNodeType = {
   path: string;
@@ -184,41 +185,4 @@ export function addReactAdmin() {
     "",
     (value) => value.replace('</title>', '</title>\n\t\t<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"/>')
   )
-}
-
-/**
- * add provider in main file vite
- * @param importCode 
- * @param name 
- * @param dir 
- */
-function addProvider(importCode: string, name: string, dir: string) {
-  let mainFile = 'main.tsx'
-  let mainFormat = ['main.tsx', 'main.jsx', 'main.js']
-
-  mainFormat.forEach(value => {
-    if (file.isExists(paths.directory.src([value], dir))) mainFile = value;
-  });
-
-  file.append(
-    paths.directory.src([mainFile], dir),
-    "",
-    "",
-    (text: string) => {
-      let strictNode = text.includes("React.StrictMode")
-        ? "React.StrictMode"
-        : "StrictMode";
-      return text
-        .replace(
-          '"react";',
-          '"react";\n' + importCode,
-        )
-        .replace(`<${strictNode}>`, `<${strictNode}>\n\t\t<${name}>`)
-        .replace(
-          `</${strictNode}>`,
-          `\t</${name}>\n\t</${strictNode}>`,
-        );
-    },
-  );
-  prettier(dir, "src/" + mainFile);
 }

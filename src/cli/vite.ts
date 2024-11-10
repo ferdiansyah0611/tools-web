@@ -33,7 +33,7 @@ export async function makeProject({ args, options }: any) {
   const value = config.value;
   const dir = config.pathApp[0];
   const sub = execute(
-    `cd ${value.app_path} && npx create-vite@latest ${args.name} --template ${options.template}`,
+    `cd "${value.app_path}" && npx create-vite@latest ${args.name} --template ${options.template}`,
     {},
   );
 
@@ -47,7 +47,7 @@ export async function makeProject({ args, options }: any) {
   }
   // installing
   sub.changeOnProduction(value, (current) => {
-    current += ` && cd ${args.name} && npm i axios`;
+    current += ` && cd ${args.name}`;
     // react
     if (options.template === "react") {
       current += " && npm i axios";

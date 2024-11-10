@@ -64,12 +64,12 @@ export function exitCommand() {
 }
 export function changeAppActive({ args }: any) {
   let value = config.value;
-  value.app_active = args.path;
+  value.app_active = args.path.replace('%', ' ');
   config.update(value);
 }
 export function changeAppRoot({ args }: any) {
   let value = config.value;
-  value.app_path = args.path;
+  value.app_path = args.path.replace('%', ' ');
   config.update(value);
 }
 export function changeAppMode({ args }: any) {

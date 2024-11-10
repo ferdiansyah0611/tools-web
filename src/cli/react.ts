@@ -297,3 +297,37 @@ export async function makeReduxToolkit({ args, options }: any) {
   file.mkdir(paths.directory.store([compact.folder], dir));
   file.write(paths.directory.store([compact.path], dir), code);
 }
+
+
+/**
+ * add provider in main file vite
+ * @param importCode 
+ * @param name 
+ * @param dir 
+ */
+export function addProvider(importCode: string, name: string, dir: string) {
+  let mainFile = 'main.tsx'
+  let mainFormat = ['main.tsx', 'main.jsx', 'main.js']
+
+  mainFormat.forEach(value => {
+    if (file.isExists(paths.directory.src([value], dir))) mainFile = value;
+  });
+
+  file.append(
+    paths.directory.src([mainFile], dir),
+    "",
+    "",
+    (text: string) => {
+      let strictNode = text.includes("React.StrictMode")
+        ? "React.StrictMode"
+        : "StrictMode";
+      return importCode + "\n" + text
+        .replace(`<${strictNode}>`, `<${strictNode}>\n\t\t<${name}>`)
+        .replace(
+          `</${strictNode}>`,
+          `\t</${name}>\n\t</${strictNode}>`,
+        );
+    },
+  );
+  prettier(dir, "src/" + mainFile);
+}

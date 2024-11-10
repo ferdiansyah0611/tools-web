@@ -6,6 +6,7 @@ import {
   addDaisyUI,
   addHeadlessUI,
   addFlowbite,
+  addMaterial,
 } from "../../src/cli/tailwind.js";
 import { makeProject } from "../../src/cli/vite.js";
 import { file } from "../../src/utils/file.js";
@@ -33,6 +34,9 @@ test("tailwindcss cli test", async (t) => {
   await t.test("do add tailwindcss", async () => {
     await addTailwind();
   });
+  await t.test("do add material", async () => {
+    await addMaterial();
+  })
   await t.test("do add daisy ui", async () => {
     await addDaisyUI();
     await new Promise((resolve) => {
